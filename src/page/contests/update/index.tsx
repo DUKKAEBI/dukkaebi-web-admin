@@ -13,7 +13,7 @@ interface FormData {
   image?: string;
 }
 
-const ContestCreate = () => {
+const ContestUpdate = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -59,8 +59,8 @@ const ContestCreate = () => {
       <Header />
       <S.Main>
         <S.FormContainer>
-          <S.Title>대회 생성</S.Title>
-          <S.Subtitle>새로운 알고리즘 대회를 생성합니다.</S.Subtitle>
+          <S.Title>대회 수정</S.Title>
+          <S.Subtitle>대회 정보를 수정합니다.</S.Subtitle>
 
           <S.Form onSubmit={handleSubmit}>
             <S.FormGroup>
@@ -131,4 +131,4 @@ const ContestCreate = () => {
   );
 };
 
-export default ContestCreate;
+export default ContestUpdate;
