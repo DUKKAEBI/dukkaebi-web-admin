@@ -1,0 +1,61 @@
+/* Pretendard font import */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+
+/* CSS Variables for Design Tokens */
+:root {
+  /* Brand Colors */
+  --primary: #00b4b7;
+  --primary-20: rgba(0, 180, 183, 0.2);
+  --primary-40: rgba(0, 180, 183, 0.4);
+  --primary-60: rgba(0, 180, 183, 0.6);
+
+  /* Black Colors */
+  --black: #1d1d1d;
+  --white: white;
+
+  /* Gray Colors */
+  --gray-1: #828282;
+  --gray-2: #bdbdbd;
+  --gray-3: #e0e0e0;
+  --gray-4: #ededed;
+  --gray-5: #f6f6f6;
+
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light;
+  color: var(--black);
+  background-color: var(--white);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+}
