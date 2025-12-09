@@ -17,10 +17,16 @@ export const Header = () => {
           </S.Logo>
           <S.Nav>
             <S.NavLink as={Link} to="/problems">
-              문제풀기
+              문제 관리
             </S.NavLink>
             <S.NavLink as={Link} to="/contests">
-              알고리즘 대회
+              대회 관리
+            </S.NavLink>
+            <S.NavLink as={Link} to="/courses">
+              코스 관리
+            </S.NavLink>
+            <S.NavLink as={Link} to="/users">
+              유저 관리
             </S.NavLink>
           </S.Nav>
         </S.HeaderLeft>
