@@ -259,3 +259,52 @@ export const PageNumber = styled.button<{ $active: boolean }>`
   font-size: 16px;
   color: ${(p) => (p.$active ? "#828282" : "#BDBDBD")};
 `;
+
+export const PaginationContainer = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const PaginationButton = styled.button`
+  width: 24px;
+  height: 24px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const ArrowIcon = styled.img`
+  width: 12px;
+  height: 12px;
+`;
+
+export const PaginationNumbers = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+interface PaginationNumberProps {
+  isActive?: boolean;
+}
+
+export const PaginationNumber = styled.button<PaginationNumberProps>`
+  width: auto;
+  min-width: 24px;
+  height: 24px;
+  border: none;
+  background-color: transparent;
+  font-family: "Pretendard", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: ${(props) => (props.isActive ? COLORS.grayText : COLORS.grayText2)};
+  cursor: pointer;
+
+  &:hover {
+    color: ${COLORS.grayText};
+  }
+`;
