@@ -1,185 +1,154 @@
 import styled from "styled-components";
 
+// Shared tokens (align with contests/page styles)
+const COLORS = {
+  primary: "#00b4b7",
+  black: "#1d1d1d",
+  white: "#ffffff",
+  gray1: "#828282", // label text
+  gray2: "#bdbdbd", // placeholder
+  gray3: "#e0e0e0", // light border
+  gray4: "#ededed", // default border
+  gray5: "#f6f6f6", // input bg
+};
+
 export const Container = styled.div`
+  width: 100vw;
+  min-height: 100vh;
+  background: ${COLORS.white};
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background-color: #ffffff;
 `;
 
 export const Main = styled.main`
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 60px 20px;
   width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 export const FormContainer = styled.div`
   width: 100%;
-  max-width: 800px;
+  max-width: 794px;
   display: flex;
   flex-direction: column;
+  gap: 60px;
 `;
 
 export const Title = styled.h1`
   font-family: "Pretendard", sans-serif;
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 600;
   line-height: 1;
-  color: #444444;
-  margin: 0 0 20px 0;
-`;
-
-export const Subtitle = styled.p`
-  font-family: "Pretendard", sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1;
-  color: #828282;
-  margin: 0 0 40px 0;
+  color: #000000;
+  margin: 0;
 `;
 
 export const Form = styled.form`
   display: flex;
   flex-direction: column;
+  gap: 50px;
 `;
 
-export const FormGroup = styled.div`
-  width: 100%;
-  margin-bottom: 30px;
-
-  &:last-of-type {
-    margin-bottom: 0;
-  }
+export const Group = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 `;
 
 export const Label = styled.label`
   font-family: "Pretendard", sans-serif;
-  font-size: 15px;
-  font-weight: 300;
-  color: #888888;
-  display: block;
-  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: ${COLORS.gray1};
 `;
 
 export const Input = styled.input`
   width: 100%;
-  height: 67px;
+  height: 40px;
   padding: 0 16px;
-  border: 1px solid #d9d9d9;
+  border: 1px solid ${COLORS.gray4};
   border-radius: 8px;
+  background: ${COLORS.gray5};
   font-family: "Pretendard", sans-serif;
-  font-size: 14px;
-  background-color: #ffffff;
-  transition: all 0.3s ease;
-  color: #000000;
+  font-size: 16px;
+  color: ${COLORS.black};
   box-sizing: border-box;
 
-  &:focus {
-    outline: none;
-    border-color: #00b4b7;
-    box-shadow: 0 0 0 3px rgba(0, 180, 183, 0.1);
-  }
-
   &::placeholder {
-    color: #bdbdbd;
-  }
-
-  &[type="datetime-local"] {
-    color-scheme: light;
+    color: ${COLORS.gray2};
   }
 `;
 
 export const TextArea = styled.textarea`
   width: 100%;
-  padding: 16px;
-  border: 1px solid #d9d9d9;
+  min-height: 100px;
+  padding: 12px 16px;
+  border: 1px solid ${COLORS.gray4};
   border-radius: 8px;
+  background: ${COLORS.gray5};
   font-family: "Pretendard", sans-serif;
-  font-size: 14px;
-  background-color: #ffffff;
-  transition: all 0.3s ease;
-  color: #000000;
+  font-size: 16px;
+  color: ${COLORS.black};
   resize: vertical;
   box-sizing: border-box;
 
-  &:focus {
-    outline: none;
-    border-color: #00b4b7;
-    box-shadow: 0 0 0 3px rgba(0, 180, 183, 0.1);
+  &::placeholder {
+    color: ${COLORS.gray2};
   }
+`;
+
+// Date input looks white with slightly darker border in the design
+export const DateInput = styled.input`
+  width: 100%;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid ${COLORS.gray3};
+  border-radius: 8px;
+  background: ${COLORS.white};
+  font-family: "Pretendard", sans-serif;
+  font-size: 16px;
+  color: ${COLORS.black};
+  box-sizing: border-box;
 
   &::placeholder {
-    color: #bdbdbd;
+    color: ${COLORS.gray2};
   }
 `;
 
-export const Row = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-export const ButtonGroup = styled.div`
+export const Actions = styled.div`
   display: flex;
-  gap: 16px;
-  margin-top: 40px;
-  justify-content: flex-end;
-`;
-
-export const SubmitButton = styled.button`
-  min-width: 150px;
-  height: 66px;
-  background-color: #00b4b7;
-  border: none;
-  border-radius: 8px;
-  font-family: "Pretendard", sans-serif;
-  font-size: 18px;
-  font-weight: 500;
-  color: #ffffff;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background-color: #009093;
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-
-  &:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-    transform: none;
-  }
+  gap: 12px;
 `;
 
 export const CancelButton = styled.button`
-  min-width: 150px;
-  height: 66px;
-  background-color: #ffffff;
-  border: 1px solid #d9d9d9;
+  padding: 8px 24px;
   border-radius: 8px;
+  border: none;
+  background: #bdbdbd;
+  color: #ffffff;
   font-family: "Pretendard", sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
-  color: #828282;
   cursor: pointer;
-  transition: all 0.3s ease;
+`;
 
-  &:hover {
-    background-color: #f5f5f5;
-    border-color: #bdbdbd;
-  }
+export const SubmitButton = styled.button`
+  padding: 8px 24px;
+  border-radius: 8px;
+  border: none;
+  background: ${COLORS.primary};
+  color: #ffffff;
+  font-family: "Pretendard", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
 
-  &:active {
-    transform: scale(0.98);
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 `;
