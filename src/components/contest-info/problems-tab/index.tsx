@@ -1,5 +1,6 @@
 import { useState } from "react";
 import * as S from "./styles";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface Problem {
   id: string;
@@ -20,16 +21,13 @@ const MOCK_PROBLEMS: Problem[] = [
 
 export const ProblemsTab = ({ contestId }: ProblemsTabProps) => {
   const [problems] = useState<Problem[]>(MOCK_PROBLEMS);
-
-  const handleAddProblem = () => {
-    // TODO: 문제 추가 로직
-    console.log("문제 추가");
-  };
+  const { contestsId } = useParams();
 
   const handleMoreClick = (problemId: string) => {
     // TODO: 문제 메뉴 로직
     console.log("문제 메뉴", problemId);
   };
+  const navigate = useNavigate();
 
   return (
     <S.Container>
@@ -66,8 +64,11 @@ export const ProblemsTab = ({ contestId }: ProblemsTabProps) => {
           ))}
         </S.TableBody>
       </S.Table>
-      <S.AddButton onClick={handleAddProblem}>문제 추가</S.AddButton>
+      <S.AddButton
+        onClick={() => navigate(`/contests/problems/create/${contestsId}`)}
+      >
+        문제 추가
+      </S.AddButton>
     </S.Container>
   );
 };
-
