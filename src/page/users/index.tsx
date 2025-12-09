@@ -1,7 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Header } from "../../components/header";
 import { Footer } from "../../components/footer";
+
 import * as S from "./styles";
+import SearchIcon from "../../assets/image/problems/search.png";
+import ArrowDownIcon from "../../assets/image/problems/arrow-down.png";
+import { useNavigate } from "react-router-dom";
 
 interface UserRow {
   id: string;
@@ -45,58 +49,168 @@ const gradeColor = (g: UserRow["grade"]) => {
   }
 };
 
+const gradeOrder: Record<UserRow["grade"], number> = {
+  신깨비: 1,
+  옥깨비: 2,
+  금깨비: 3,
+  은깨비: 4,
+  철깨비: 5,
+  동깨비: 6,
+};
+
+type SortOption = "none" | "name" | "id" | "grade";
+
 const UsersPage = () => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState<number | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>("none");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const filtered = useMemo(
-    () =>
-      MOCK_USERS.filter(
-        (u) =>
-          u.id.toLowerCase().includes(query.toLowerCase()) ||
-          u.name.includes(query)
-      ),
-    [query]
-  );
+  const menuRef = useRef<HTMLDivElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  const filtered = useMemo(() => {
+    let result = MOCK_USERS.filter(
+      (u) =>
+        u.id.toLowerCase().includes(query.toLowerCase()) ||
+        u.name.includes(query)
+    );
+
+    // 정렬 적용
+    if (sortBy === "name") {
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === "id") {
+      result = [...result].sort((a, b) => a.id.localeCompare(b.id));
+    } else if (sortBy === "grade") {
+      result = [...result].sort(
+        (a, b) => gradeOrder[a.grade] - gradeOrder[b.grade]
+      );
+    }
+
+    return result;
+  }, [query, sortBy]);
 
   const [page, setPage] = useState(1);
   const PER_PAGE = 14;
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const pageItems = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(null);
+      }
+    };
+
+    if (menuOpen !== null) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        filterRef.current &&
+        !filterRef.current.contains(event.target as Node)
+      ) {
+        setFilterOpen(false);
+      }
+    };
+
+    if (filterOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [filterOpen]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    // if (value.trim()) { // api 연결시 구현
+    //   fetchSearchProblems(value);
+    // } else {
+    //   fetchProblems();
+    // }
+  };
+
+  const getSortLabel = () => {
+    switch (sortBy) {
+      case "name":
+        return "이름 순";
+      case "id":
+        return "아이디 순";
+      case "grade":
+        return "등급 순";
+      default:
+        return "선택 안함";
+    }
+  };
+
+  const handleSortSelect = (option: SortOption) => {
+    setSortBy(option);
+    setFilterOpen(false);
+    setPage(1);
+  };
+
   return (
     <S.Container>
       <Header />
 
       <S.Main>
-        <S.SearchBar>
+        <S.SearchBox>
           <S.SearchInput
-            placeholder="사용자를 검색하세요.."
-            value={query}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setQuery(e.target.value);
-              setPage(1);
-            }}
+            type="text"
+            placeholder="문제 이름을 검색하세요"
+            value={searchTerm}
+            onChange={handleSearch}
           />
-          <S.SearchIcon aria-hidden>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M11 4a7 7 0 105.292 11.708l3 3"
-                stroke="#828282"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          </S.SearchIcon>
-        </S.SearchBar>
+          <S.SearchIconContainer>
+            <img src={SearchIcon} alt="검색" />
+          </S.SearchIconContainer>
+        </S.SearchBox>
 
-        <S.Filters>
-          <S.FilterButton>
-            선택 안함
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-              <path d="M6 9l6 6 6-6" stroke="#828282" strokeWidth="2" />
-            </svg>
+        <S.Filters ref={filterRef}>
+          <S.FilterButton onClick={() => setFilterOpen(!filterOpen)}>
+            {getSortLabel()}
+            <img src={ArrowDownIcon} alt="검색" />
           </S.FilterButton>
+          {filterOpen && (
+            <S.FilterMenu>
+              <S.FilterMenuItem
+                $active={sortBy === "none"}
+                onClick={() => handleSortSelect("none")}
+              >
+                선택 안함
+              </S.FilterMenuItem>
+              <S.FilterMenuItem
+                $active={sortBy === "name"}
+                onClick={() => handleSortSelect("name")}
+              >
+                이름 순
+              </S.FilterMenuItem>
+              <S.FilterMenuItem
+                $active={sortBy === "id"}
+                onClick={() => handleSortSelect("id")}
+              >
+                아이디 순
+              </S.FilterMenuItem>
+              <S.FilterMenuItem
+                $active={sortBy === "grade"}
+                onClick={() => handleSortSelect("grade")}
+              >
+                등급 순
+              </S.FilterMenuItem>
+            </S.FilterMenu>
+          )}
         </S.Filters>
 
         <S.Table>
@@ -113,17 +227,18 @@ const UsersPage = () => {
             {pageItems.map((u, i) => (
               <S.Row key={`${u.id}-${i}`}>
                 <S.Cell style={{ width: 200 }}>{u.id}</S.Cell>
-                <S.Cell style={{ width: 200 }}>{u.name}</S.Cell>
+                <S.Cell style={{ width: 100 }}>{u.name}</S.Cell>
                 <S.Cell
                   style={{
-                    flex: 1,
                     textAlign: "right",
                     color: gradeColor(u.grade),
+                    width: 415,
+                    marginRight: 38,
                   }}
                 >
                   {u.grade}
                 </S.Cell>
-                <S.MoreWrapper>
+                <S.MoreWrapper ref={menuOpen === i ? menuRef : null}>
                   <S.MoreButton
                     aria-label="more"
                     onClick={() => setMenuOpen(menuOpen === i ? null : i)}
@@ -136,7 +251,12 @@ const UsersPage = () => {
                   </S.MoreButton>
                   {menuOpen === i && (
                     <S.ContextMenu role="menu">
-                      <S.MenuItem role="menuitem">유저 정보 조회</S.MenuItem>
+                      <S.MenuItem
+                        role="menuitem"
+                        onClick={() => navigate(`/user/${u.id}`)}
+                      >
+                        유저 정보 조회
+                      </S.MenuItem>
                       <S.MenuItem role="menuitem" $danger>
                         유저 삭제
                       </S.MenuItem>

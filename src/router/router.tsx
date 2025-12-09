@@ -11,9 +11,9 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<Main />} />
-      <Route path="/profile" element={<Profile />} />
       <Route path="/problems" element={<Problems />} />
       <Route path="/users" element={<UsersPage />} />
+      <Route path="/user/:userId" element={<Profile />} />
       <Route path="/contests" element={<ContestPage />} />
     </Routes>
   );

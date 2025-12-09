@@ -1,5 +1,18 @@
 import styled from "styled-components";
 
+// Colors
+const COLORS = {
+  primary: "#00b4b7",
+  primaryLight: "rgba(0, 180, 183, 0.2)",
+  black: "#1d1d1d",
+  white: "#ffffff",
+  grayLight: "#f6f6f6",
+  grayBorder: "#ededed",
+  grayText: "#828282",
+  grayText2: "#bdbdbd",
+  grayText3: "#e0e0e0",
+};
+
 export const Container = styled.div`
   width: 100vw;
   min-height: 100vh;
@@ -9,7 +22,6 @@ export const Container = styled.div`
 `;
 
 export const Main = styled.main`
-  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   padding: 40px 20px 60px;
@@ -17,15 +29,15 @@ export const Main = styled.main`
   flex-direction: column;
   align-items: center;
   gap: 32px;
+  min-height: 150vh;
 `;
 
-export const SearchBar = styled.div`
+export const SearchBox = styled.div`
   width: 100%;
-  max-width: 795px;
-  background: #ffffff;
-  border: 1px solid var(--gray-4);
-  border-radius: 8px;
   height: 46px;
+  background-color: ${COLORS.white};
+  border: 1px solid ${COLORS.white};
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -33,7 +45,6 @@ export const SearchBar = styled.div`
 `;
 
 export const SearchInput = styled.input`
-  flex: 1;
   border: none;
   outline: none;
   background: transparent;
@@ -47,6 +58,15 @@ export const SearchInput = styled.input`
   }
 `;
 
+export const SearchIconContainer = styled.div`
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+`;
+
 export const SearchIcon = styled.div`
   width: 24px;
   height: 24px;
@@ -55,16 +75,10 @@ export const SearchIcon = styled.div`
   justify-content: center;
 `;
 
-export const Filters = styled.div`
-  width: 100%;
-  max-width: 795px;
-  display: flex;
-  align-items: center;
-`;
-
 export const FilterButton = styled.button`
   display: inline-flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   padding: 8px 16px;
   border-radius: 6px;
@@ -74,6 +88,47 @@ export const FilterButton = styled.button`
   font-weight: 500;
   font-size: 14px;
   color: var(--black);
+  min-width: 120px;
+  width: 115px;
+  cursor: pointer;
+`;
+
+export const Filters = styled.div`
+  position: relative;
+  width: 100%;
+  max-width: 795px;
+  display: flex;
+  align-items: center;
+  margin-bottom: -16px;
+`;
+
+export const FilterMenu = styled.div`
+  width: 15%;
+  position: absolute;
+  top: 42px;
+  left: 0;
+  background: #ffffff;
+  border: 1px solid var(--gray-4);
+  border-radius: 8px;
+  padding: 12px 0;
+  z-index: 10;
+`;
+
+export const FilterMenuItem = styled.button<{ $active?: boolean }>`
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 8px 20px;
+  font-family: "Pretendard", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: ${(p) => (p.$active ? "#00B4B7" : "var(--black)")};
+  cursor: pointer;
+
+  &:hover {
+    background: var(--gray-5);
+  }
 `;
 
 export const Table = styled.div`
@@ -111,7 +166,7 @@ export const Row = styled.div`
   display: flex;
   align-items: center;
   height: 60px;
-  padding: 0 20px;
+  padding: 16px 20px;
   border-top: 1px solid var(--gray-4);
 
   &:first-child {
