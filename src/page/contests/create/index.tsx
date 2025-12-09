@@ -35,7 +35,7 @@ const ContestCreate = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log("api 요청 준비중")
+    console.log("api 요청 준비중");
     // e.preventDefault();
     // setIsLoading(true);
 

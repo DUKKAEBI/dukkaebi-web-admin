@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { AdminHeader } from "../../../components/admin-header";
+import { Header } from "../../../components/header/index";
 import { ProblemsTab } from "../../../components/contest-info/problems-tab";
 import { ParticipantsTab } from "../../../components/contest-info/participants-tab";
 import { SettingsTab } from "../../../components/contest-info/settings-tab";
