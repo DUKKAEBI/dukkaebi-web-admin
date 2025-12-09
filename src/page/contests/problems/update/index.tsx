@@ -26,7 +26,7 @@ const ProblemUpdate = () => {
 
       <S.Main>
         <S.Content>
-          <S.PageTitle>문제 추가</S.PageTitle>
+          <S.PageTitle>문제 수정</S.PageTitle>
 
           <S.Field>
             <S.Label>문제 제목</S.Label>
@@ -123,8 +123,8 @@ const ProblemUpdate = () => {
           </S.Field>
 
           <S.Actions>
-            <S.SecondaryButton>문제 추가 취소하기</S.SecondaryButton>
-            <S.PrimaryButton>문제 추가하기</S.PrimaryButton>
+            <S.SecondaryButton>문제 수정 취소하기</S.SecondaryButton>
+            <S.PrimaryButton>문제 수정하기</S.PrimaryButton>
           </S.Actions>
         </S.Content>
       </S.Main>
