@@ -6,6 +6,10 @@ import * as S from "./styles";
 import SearchIcon from "../../assets/image/problems/search.png";
 import ArrowDownIcon from "../../assets/image/problems/arrow-down.png";
 import { useNavigate } from "react-router-dom";
+//왼쪽
+import ArrowLeftIcon from "../../assets/image/problems/arrow-left.png";
+//오른쪽
+import ArrowRightIcon from "../../assets/image/problems/arrow-right.png";
 
 interface UserRow {
   id: string;
@@ -269,35 +273,21 @@ const UsersPage = () => {
         </S.Table>
 
         <S.Pagination>
-          <S.PageArrow
-            disabled={page === 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M14 7l-5 5 5 5" stroke="#BDBDBD" strokeLinecap="round" />
-            </svg>
-          </S.PageArrow>
-          <S.PageNumbers>
-            {Array.from({ length: totalPages }, (_, idx) => idx + 1)
-              .slice(Math.max(0, page - 3), Math.max(0, page - 3) + 5)
-              .map((n) => (
-                <S.PageNumber
-                  key={n}
-                  $active={n === page}
-                  onClick={() => setPage(n)}
-                >
-                  {n}
-                </S.PageNumber>
-              ))}
-          </S.PageNumbers>
-          <S.PageArrow
-            disabled={page === totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M10 17l5-5-5-5" stroke="#BDBDBD" strokeLinecap="round" />
-            </svg>
-          </S.PageArrow>
+          <S.PaginationContainer>
+            <S.PaginationButton>
+              <S.ArrowIcon src={ArrowLeftIcon} alt="이전" />
+            </S.PaginationButton>
+            <S.PaginationNumbers>
+              <S.PaginationNumber data-is-active={true}>1</S.PaginationNumber>
+              <S.PaginationNumber>2</S.PaginationNumber>
+              <S.PaginationNumber>3</S.PaginationNumber>
+              <S.PaginationNumber>4</S.PaginationNumber>
+              <S.PaginationNumber>5</S.PaginationNumber>
+            </S.PaginationNumbers>
+            <S.PaginationButton>
+              <S.ArrowIcon src={ArrowRightIcon} alt="다음" />
+            </S.PaginationButton>
+          </S.PaginationContainer>
         </S.Pagination>
       </S.Main>
 
