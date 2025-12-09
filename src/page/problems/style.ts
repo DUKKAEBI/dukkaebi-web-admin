@@ -99,15 +99,10 @@ export const UserIcon = styled.div`
 `;
 
 // Main Content
-export const MainContent = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 60px 40px 60px;
-  width: 100%;
-  max-width: 1280px;
+export const MainContent = styled.main`
   margin: 0 auto;
+  min-height: 150vh;
+  padding: 26px 40px 60px;
 `;
 
 // Search Box
