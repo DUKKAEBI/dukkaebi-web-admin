@@ -2,6 +2,9 @@ import { Routes, Route } from "react-router-dom";
 import Login from "../page/login";
 import Main from "../page/main";
 import ContestsPage from "../page/contests/index";
+import CoursePage from "../page/course/index";
+import CourseCreatePage from "../page/course/create/index";
+import CourseUpdatePage from "../page/course/update/index";
 import Profile from "../page/profile";
 import Problems from "../page/problems";
 import UsersPage from "../page/users";
@@ -27,6 +30,9 @@ export default function AppRoutes() {
       <Route path="/contests/:contestsId" element={<ContestInfo />} />
       <Route path="/contests/create" element={<ContestCreate />} />
       <Route path="/contests/update/:contestsId" element={<ContestUpdate />} />
+      <Route path="/course" element={<CoursePage />} />
+      <Route path="/course/create" element={<CourseCreatePage />} />
+      <Route path="/course/update/:courseId" element={<CourseUpdatePage />} />
       <Route
         path="/contests/problems/create/:contestsId"
         element={<ProblemCreate />}

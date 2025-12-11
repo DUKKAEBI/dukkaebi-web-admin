@@ -22,7 +22,7 @@ export const Header = () => {
             <S.NavLink as={Link} to="/contests">
               대회 관리
             </S.NavLink>
-            <S.NavLink as={Link} to="/courses">
+            <S.NavLink as={Link} to="/course">
               코스 관리
             </S.NavLink>
             <S.NavLink as={Link} to="/users">
