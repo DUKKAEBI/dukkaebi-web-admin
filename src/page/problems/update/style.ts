@@ -43,7 +43,7 @@ export const Content = styled.div`
 export const PageTitle = styled.h2`
   font-family: "Pretendard", sans-serif;
   font-weight: 600;
-  font-size: 20px;
+  font-size: 26px;
   color: #000;
 `;
 
