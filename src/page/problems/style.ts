@@ -102,7 +102,7 @@ export const UserIcon = styled.div`
 export const MainContent = styled.main`
   margin: 0 auto;
   min-height: 150vh;
-  padding: 26px 40px 60px;
+  padding: 40px 20px 80px;
 `;
 
 // Top Bar with Create Button
@@ -115,7 +115,7 @@ export const TopBar = styled.div`
 
 // Search Box
 export const SearchBox = styled.div`
-  width: 960px;
+  width: 795px;
   height: 46px;
   background-color: ${COLORS.white};
   border: 1px solid ${COLORS.white};
@@ -134,11 +134,11 @@ export const SearchInput = styled.input`
   font-family: "Pretendard", sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: ${COLORS.grayText};
+  color: ${COLORS.black};
   background: transparent !important;
 
   &::placeholder {
-    color: ${COLORS.grayText};
+    color: ${COLORS.grayText3};
   }
 `;
 
@@ -153,7 +153,7 @@ export const SearchIconContainer = styled.div`
 
 // Filter Section
 export const FilterSection = styled.div`
-  width: 960px;
+  width: 795px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -238,7 +238,7 @@ export const DropdownItem = styled.div<DropdownItemProps>`
 
 // Table Container
 export const TableContainer = styled.div`
-  width: 960px;
+  width: 795px;
   position: relative;
   background-color: ${COLORS.white};
   border: 1px solid ${COLORS.grayBorder};
@@ -256,6 +256,8 @@ export const TableHeader = styled.div`
   background-color: ${COLORS.white};
   border-bottom: 1px solid ${COLORS.grayBorder};
   gap: 24px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 `;
 
 export const TableHeaderCell = styled.div`
@@ -395,7 +397,7 @@ export const CreateButton = styled.button`
   font-weight: 600;
   /* positioned to the right of pagination inside FooterControls */
   position: absolute;
-  right: 16px;
+  right: 84px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 30;

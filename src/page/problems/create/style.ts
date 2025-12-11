@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 // Shared tokens (align with contests/page styles)
 const COLORS = {
@@ -16,7 +16,7 @@ const COLORS = {
 export const Container = styled.div`
   width: 100vw;
   min-height: 100vh;
-  background: ${COLORS.white};
+  background: #fff;
   display: flex;
   flex-direction: column;
 `;
@@ -25,36 +25,29 @@ export const Main = styled.main`
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 40px 20px 80px;
+  padding: 0 20px 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
 `;
 
-export const FormContainer = styled.div`
+export const Content = styled.div`
   width: 100%;
   max-width: 794px;
   display: flex;
   flex-direction: column;
-  gap: 60px;
+  gap: 40px;
+  margin-top: 40px;
 `;
 
-export const Title = styled.h1`
+export const PageTitle = styled.h2`
   font-family: "Pretendard", sans-serif;
-  font-size: 26px;
   font-weight: 600;
-  line-height: 1;
-  color: #000000;
-  margin: 0;
+  font-size: 20px;
+  color: #000;
 `;
 
-export const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 50px;
-`;
-
-export const Group = styled.div`
+export const Field = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -62,197 +55,161 @@ export const Group = styled.div`
 
 export const Label = styled.label`
   font-family: "Pretendard", sans-serif;
-  font-size: 14px;
   font-weight: 500;
-  color: ${COLORS.gray1};
+  font-size: 14px;
+  color: var(--gray-1);
 `;
 
-export const Input = styled.input`
+const baseBox = css`
   width: 100%;
-  height: 40px;
-  padding: 0 16px;
-  border: 1px solid ${COLORS.gray4};
   border-radius: 8px;
-  background: ${COLORS.gray5};
+  border: 1px solid var(--gray-4);
+  background: var(--gray-5);
   font-family: "Pretendard", sans-serif;
+  font-weight: 500;
   font-size: 16px;
-  color: ${COLORS.black};
-  box-sizing: border-box;
-  transition: border-color 0.2s;
+  color: var(--black);
+`;
 
-  &::placeholder {
-    color: ${COLORS.gray2};
-  }
-
-  &:focus {
-    outline: none;
-    border-color: ${COLORS.primary};
-  }
+export const Input = styled.input<{ $primaryBorder?: boolean }>`
+  ${baseBox};
+  height: 40px;
+  padding: 0 20px;
+  outline: none;
+  border-color: ${(p) =>
+    p.$primaryBorder ? "var(--primary)" : "var(--gray-4)"};
+  background: ${(p) => (p.$primaryBorder ? "#fff" : "var(--gray-5)")};
 `;
 
 export const TextArea = styled.textarea`
+  ${baseBox};
+  padding: 20px;
+  outline: none;
+  background: #f7f7f7;
+`;
+
+export const TestCaseTable = styled.div`
   width: 100%;
-  min-height: 100px;
-  padding: 12px 16px;
-  border: 1px solid ${COLORS.gray4};
-  border-radius: 8px;
-  background: ${COLORS.gray5};
+  display: flex;
+  flex-direction: column;
+`;
+
+export const TestCaseHead = styled.div`
+  display: flex;
+`;
+
+export const HeadCell = styled.div<{ $right?: boolean }>`
+  flex: 1;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
   font-family: "Pretendard", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--gray-1);
+  background: var(--gray-5);
+  border: 1px solid var(--gray-3);
+  border-bottom: none;
+  border-right: ${(p) => (p.$right ? "1px solid var(--gray-3)" : "0")};
+  border-left: 1px solid var(--gray-3);
+  border-top-left-radius: 8px;
+  border-top-right-radius: ${(p) => (p.$right ? "8px" : "0")};
+`;
+
+export const TestCaseRow = styled.div`
+  display: flex;
+`;
+
+export const CaseInput = styled.input`
+  flex: 1;
+  height: 40px;
+  padding: 0 20px;
+  border: 1px solid var(--gray-3);
+  background: #fff;
+  font-family: "Pretendard", sans-serif;
+  font-weight: 500;
   font-size: 16px;
-  color: ${COLORS.black};
-  resize: vertical;
-  box-sizing: border-box;
-  transition: border-color 0.2s;
-
-  &::placeholder {
-    color: ${COLORS.gray2};
+  color: var(--black);
+  &:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
   }
-
-  &:focus {
-    outline: none;
-    border-color: ${COLORS.primary};
+  &:last-child {
+    border-left: 1px solid var(--gray-3);
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
   }
 `;
 
-export const RangeContainer = styled.div`
+export const AddRow = styled.button`
+  height: 40px;
+  width: 100%;
+  border: 1px solid var(--gray-3);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const Actions = styled.div`
   display: flex;
   gap: 12px;
 `;
 
-export const RangeInput = styled.input`
-  width: 100%;
-  height: 40px;
-  padding: 0 16px;
-  border: 1px solid ${COLORS.gray4};
+export const SecondaryButton = styled.button`
+  padding: 8px 24px;
   border-radius: 8px;
-  background: ${COLORS.gray5};
+  border: none;
+  background: var(--gray-2);
+  color: #fff;
   font-family: "Pretendard", sans-serif;
+  font-weight: 500;
   font-size: 16px;
-  color: ${COLORS.black};
-  box-sizing: border-box;
-  transition: border-color 0.2s;
-
-  &::placeholder {
-    color: ${COLORS.gray2};
-  }
-
-  &:focus {
-    outline: none;
-    border-color: ${COLORS.primary};
-  }
 `;
 
-export const TestCaseSection = styled.div`
-  border: 1px solid ${COLORS.gray3};
+export const PrimaryButton = styled.button`
+  padding: 8px 24px;
   border-radius: 8px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-family: "Pretendard", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+`;
+
+export const DifficultyDropdownMenu = styled.div`
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: max-content;
+  min-width: 120px;
+  background-color: ${COLORS.white};
+  border: 1px solid ${COLORS.gray4};
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
   overflow: hidden;
 `;
 
-export const TestCaseHeader = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  padding: 0;
-  background-color: ${COLORS.gray5};
-  border-bottom: 1px solid ${COLORS.gray3};
-  font-family: "Pretendard", sans-serif;
-`;
-
-export const TestCaseLabel = styled.div`
-  font-family: "Pretendard", sans-serif;
-  font-size: 14px;
-  font-weight: 600;
+export const DifficultyDropdownArrow = styled.span`
+  margin-left: auto;
+  font-size: 10px;
   color: ${COLORS.gray1};
-  padding: 12px 16px;
-  border-right: 1px solid ${COLORS.gray3};
-
-  &:last-child {
-    border-right: none;
-  }
-`;
-
-export const TestCaseRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  padding: 0;
-  border-bottom: 1px solid ${COLORS.gray3};
-  background-color: ${COLORS.white};
-
-  &:last-of-type {
-    border-bottom: 1px solid ${COLORS.gray3};
-  }
-`;
-
-export const TestCaseCell = styled.div`
-  padding: 12px 16px;
-  background-color: ${COLORS.white};
-  border-right: 1px solid ${COLORS.gray3};
-
-  &:last-child {
-    border-right: none;
-  }
-`;
-
-export const TestCaseInput = styled.input`
-  width: 100%;
-  height: 40px;
-  padding: 0 16px;
-  border: none;
-  border-radius: 0;
-  background: transparent;
-  font-family: "Pretendard", sans-serif;
-  font-size: 16px;
-  color: ${COLORS.black};
-  box-sizing: border-box;
-  transition: background-color 0.2s;
-
-  &::placeholder {
-    color: ${COLORS.gray2};
-  }
-
-  &:focus {
-    outline: none;
-    background-color: rgba(0, 180, 183, 0.05);
-  }
-`;
-
-export const AddTestCaseButton = styled.button`
-  height: 40px;
-  border: none;
-  border-top: 1px solid ${COLORS.gray3};
-  background: ${COLORS.white};
-  color: ${COLORS.gray2};
-  font-family: "Pretendard", sans-serif;
-  font-size: 20px;
-  font-weight: 300;
-  cursor: pointer;
-  display: block;
-  width: 100%;
+  font-family: "simple-line-icons" !important;
+  font-style: normal;
+  font-weight: normal;
+  display: inline-block;
+  text-decoration: inherit;
   text-align: center;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: ${COLORS.gray5};
-  }
-`;
-
-export const DifficultyGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-export const DifficultyLabel = styled.label`
-  font-family: "Pretendard", sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: ${COLORS.gray1};
-  margin-bottom: 8px;
-`;
-
-export const DifficultyDropdownContainer = styled.div`
-  position: relative;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 `;
 
 export const DifficultyDropdownButton = styled.button`
@@ -283,42 +240,6 @@ export const DifficultyDropdownButton = styled.button`
   }
 `;
 
-export const DifficultyIconSmall = styled.img`
-  width: 16px;
-  height: 16px;
-`;
-
-export const DifficultyDropdownArrow = styled.span`
-  margin-left: auto;
-  font-size: 10px;
-  color: ${COLORS.gray1};
-  font-family: 'simple-line-icons' !important;
-  font-style: normal;
-  font-weight: normal;
-  display: inline-block;
-  text-decoration: inherit;
-  text-align: center;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-`;
-
-export const DifficultyDropdownMenu = styled.div`
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  width: max-content;
-  min-width: 120px;
-  background-color: ${COLORS.white};
-  border: 1px solid ${COLORS.gray4};
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  overflow: hidden;
-`;
-
 export const DifficultyDropdownItem = styled.div<{ isSelected?: boolean }>`
   padding: 12px 16px;
   display: flex;
@@ -342,88 +263,25 @@ export const DifficultyDropdownItem = styled.div<{ isSelected?: boolean }>`
   }
 `;
 
-export const DifficultyOptions = styled.div`
-  display: flex;
-  gap: 12px;
-  align-items: center;
+export const DifficultyIconSmall = styled.img`
+  width: 16px;
+  height: 16px;
 `;
 
-export const DifficultyOption = styled.div<{ isSelected?: boolean }>`
+export const DifficultyDropdownContainer = styled.div`
+  position: relative;
+`;
+
+export const Group = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 8px;
-  cursor: pointer;
-
-  input {
-    display: none;
-  }
-
-  label {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border: 2px solid ${(props) => (props.isSelected ? COLORS.primary : COLORS.gray3)};
-    border-radius: 8px;
-    background-color: ${(props) => (props.isSelected ? "rgba(0, 180, 183, 0.1)" : COLORS.white)};
-    transition: all 0.2s;
-
-    &:hover {
-      border-color: ${COLORS.primary};
-    }
-  }
 `;
 
-export const DifficultyIcon = styled.img`
-  width: 28px;
-  height: 28px;
-  cursor: pointer;
-`;
-
-export const Actions = styled.div`
-  display: flex;
-  gap: 12px;
-  margin-top: 20px;
-`;
-
-export const CancelButton = styled.button`
-  padding: 8px 24px;
-  border-radius: 8px;
-  border: none;
-  background: #bdbdbd;
-  color: #ffffff;
+export const DifficultyLabel = styled.label`
   font-family: "Pretendard", sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-
-  &:hover {
-    background: #a8a8a8;
-  }
-`;
-
-export const SubmitButton = styled.button`
-  padding: 8px 24px;
-  border-radius: 8px;
-  border: none;
-  background: ${COLORS.primary};
-  color: #ffffff;
-  font-family: "Pretendard", sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-
-  &:disabled {
-    background: ${COLORS.gray2};
-    cursor: not-allowed;
-  }
-
-  &:hover:not(:disabled) {
-    background: #00a0a3;
-  }
+  color: ${COLORS.gray1};
+  margin-bottom: 8px;
 `;
