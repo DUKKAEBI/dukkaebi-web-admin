@@ -1,6 +1,9 @@
 /* Pretendard font import */
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 
+/* Simple Line Icons */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.5.5/css/simple-line-icons.min.css');
+
 /* CSS Variables for Design Tokens */
 :root {
   /* Brand Colors */

@@ -1,0 +1,226 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Header } from "../../../components/header/index";
+import axiosInstance from "../../../api/axiosInstance";
+import * as S from "./style";
+import GoldIcon from "../../../assets/image/problems/difficulty/gold.png";
+import SilverIcon from "../../../assets/image/problems/difficulty/silver.png";
+import CopperIcon from "../../../assets/image/problems/difficulty/copper.png";
+import IronIcon from "../../../assets/image/problems/difficulty/iron.png";
+import JadeIcon from "../../../assets/image/problems/difficulty/jade.png";
+import { Footer } from "../../../components/footer";
+
+interface TestCase {
+  input: string;
+  output: string;
+}
+
+interface FormData {
+  title: string;
+  description: string;
+  inputRange: string;
+  outputRange: string;
+  difficulty: number;
+  testCases: TestCase[];
+}
+
+const ProblemCreatePage = () => {
+  const navigate = useNavigate();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [inputCond, setInputCond] = useState("");
+  const [outputCond, setOutputCond] = useState("");
+  const [openDifficultyDropdown, setOpenDifficultyDropdown] = useState(false);
+  const [form, setForm] = useState<FormData>({
+    title: "",
+    description: "",
+    inputRange: "",
+    outputRange: "",
+    difficulty: 3,
+    testCases: [{ input: "", output: "" }],
+  });
+  const [cases, setCases] = useState<TestCase[]>([
+    { input: "2 7", output: "5" },
+  ]);
+
+  const onDifficultyChange = (difficulty: number) => {
+    setForm((p) => ({ ...p, difficulty }));
+    setOpenDifficultyDropdown(false);
+  };
+
+  const onChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm((p) => ({ ...p, [name]: value }));
+  };
+
+  const addCase = () =>
+    setCases((prev) => [...prev, { input: "", output: "" }]);
+
+  return (
+    <S.Container>
+      <Header />
+
+      <S.Main>
+        <S.Content>
+          <S.PageTitle>문제 수정</S.PageTitle>
+
+          <S.Field>
+            <S.Label>문제 제목</S.Label>
+            <S.Input
+              placeholder="학교 복도 최단거리"
+              value={title}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setTitle(e.target.value)
+              }
+            />
+          </S.Field>
+
+          <S.Field>
+            <S.Label>문제 설명</S.Label>
+            <S.TextArea
+              placeholder={
+                "당신은 쉬는 시간에 친구의 과자를 뺏으러 친구에게 가려고 한다.\n하지만 복도가 너무 길어서 몇 걸음 걸어야 하는지 계산해야 한다.\n\n입력으로 현재 위치 P와 친구 위치 F가 주어질 때,\n두 값의 차이의 절댓값을 출력하시오.\n(걸음 수 = 거리)"
+              }
+              value={description}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                setDescription(e.target.value)
+              }
+              rows={6}
+            />
+          </S.Field>
+
+          <S.Field>
+            <S.Label>입력 조건</S.Label>
+            <S.Input
+              placeholder="한 줄, 두 정수 P와 F (0 ≤ P, F ≤ 10,000)"
+              value={inputCond}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setInputCond(e.target.value)
+              }
+            />
+          </S.Field>
+
+          <S.Field>
+            <S.Label>출력 조건</S.Label>
+            <S.Input
+              placeholder="한 줄, 최단 거리(걸음 수)를 출력"
+              value={outputCond}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setOutputCond(e.target.value)
+              }
+              $primaryBorder
+            />
+          </S.Field>
+
+          <S.Field>
+            <S.Label>테스트 케이스</S.Label>
+            <S.TestCaseTable>
+              <S.TestCaseHead>
+                <S.HeadCell>입력</S.HeadCell>
+                <S.HeadCell $right>출력</S.HeadCell>
+              </S.TestCaseHead>
+              {cases.map((c, idx) => (
+                <S.TestCaseRow key={idx}>
+                  <S.CaseInput
+                    placeholder="예) 2 7"
+                    value={c.input}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const v = e.target.value;
+                      setCases((prev) =>
+                        prev.map((x, i) => (i === idx ? { ...x, input: v } : x))
+                      );
+                    }}
+                  />
+                  <S.CaseInput
+                    placeholder="예) 5"
+                    value={c.output}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const v = e.target.value;
+                      setCases((prev) =>
+                        prev.map((x, i) =>
+                          i === idx ? { ...x, output: v } : x
+                        )
+                      );
+                    }}
+                  />
+                </S.TestCaseRow>
+              ))}
+              <S.AddRow onClick={addCase}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 5v14M5 12h14"
+                    stroke="#BDBDBD"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </S.AddRow>
+            </S.TestCaseTable>
+          </S.Field>
+
+          <S.Group>
+            <S.DifficultyLabel>난이도</S.DifficultyLabel>
+            <S.DifficultyDropdownContainer>
+              <S.DifficultyDropdownButton
+                type="button"
+                onClick={() =>
+                  setOpenDifficultyDropdown(!openDifficultyDropdown)
+                }
+              >
+                <S.DifficultyIconSmall
+                  src={
+                    [
+                      { value: 1, icon: GoldIcon },
+                      { value: 2, icon: SilverIcon },
+                      { value: 3, icon: CopperIcon },
+                      { value: 4, icon: IronIcon },
+                      { value: 5, icon: JadeIcon },
+                    ].find((d) => d.value === form.difficulty)?.icon ||
+                    CopperIcon
+                  }
+                  alt="난이도"
+                />
+                <S.DifficultyDropdownArrow
+                  className={
+                    openDifficultyDropdown ? "icon-arrow-up" : "icon-arrow-down"
+                  }
+                />
+              </S.DifficultyDropdownButton>
+              {openDifficultyDropdown && (
+                <S.DifficultyDropdownMenu>
+                  {[
+                    { value: 3, icon: CopperIcon, label: "구리" },
+                    { value: 4, icon: IronIcon, label: "철" },
+                    { value: 2, icon: SilverIcon, label: "은" },
+                    { value: 1, icon: GoldIcon, label: "금" },
+                    { value: 5, icon: JadeIcon, label: "옥" },
+                  ].map((item) => (
+                    <S.DifficultyDropdownItem
+                      key={item.value}
+                      isSelected={form.difficulty === item.value}
+                      onClick={() => onDifficultyChange(item.value)}
+                    >
+                      <S.DifficultyIconSmall src={item.icon} alt={item.label} />
+                      <span>{item.label}</span>
+                    </S.DifficultyDropdownItem>
+                  ))}
+                </S.DifficultyDropdownMenu>
+              )}
+            </S.DifficultyDropdownContainer>
+          </S.Group>
+
+          <S.Actions>
+            <S.SecondaryButton>문제 수정 취소하기</S.SecondaryButton>
+            <S.PrimaryButton>문제 수정하기</S.PrimaryButton>
+          </S.Actions>
+        </S.Content>
+      </S.Main>
+
+      <Footer />
+    </S.Container>
+  );
+};
+
+export default ProblemCreatePage;

@@ -1,5 +1,18 @@
 import styled, { css } from "styled-components";
 
+// Shared tokens (align with contests/page styles)
+const COLORS = {
+  primary: "#00b4b7",
+  black: "#1d1d1d",
+  white: "#ffffff",
+  gray1: "#828282", // label text
+  gray2: "#bdbdbd", // placeholder
+  gray3: "#e0e0e0", // light border
+  gray4: "#ededed", // default border
+  gray5: "#f6f6f6", // input bg
+  grayLight: "#f6f6f6",
+};
+
 export const Container = styled.div`
   width: 100vw;
   min-height: 100vh;
@@ -166,4 +179,109 @@ export const PrimaryButton = styled.button`
   font-family: "Pretendard", sans-serif;
   font-weight: 500;
   font-size: 16px;
+`;
+
+export const DifficultyDropdownMenu = styled.div`
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: max-content;
+  min-width: 120px;
+  background-color: ${COLORS.white};
+  border: 1px solid ${COLORS.gray4};
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  overflow: hidden;
+`;
+
+export const DifficultyDropdownArrow = styled.span`
+  margin-left: auto;
+  font-size: 10px;
+  color: ${COLORS.gray1};
+  font-family: "simple-line-icons" !important;
+  font-style: normal;
+  font-weight: normal;
+  display: inline-block;
+  text-decoration: inherit;
+  text-align: center;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+`;
+
+export const DifficultyDropdownButton = styled.button`
+  width: auto;
+  min-width: 60px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid ${COLORS.gray4};
+  border-radius: 6px;
+  background: ${COLORS.white};
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  color: ${COLORS.black};
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: ${COLORS.primary};
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${COLORS.primary};
+  }
+`;
+
+export const DifficultyDropdownItem = styled.div<{ isSelected?: boolean }>`
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  background-color: ${(props) =>
+    props.isSelected ? "rgba(0, 180, 183, 0.1)" : COLORS.white};
+  color: ${(props) => (props.isSelected ? COLORS.primary : COLORS.black)};
+  font-family: "Pretendard", sans-serif;
+  font-size: 16px;
+  font-weight: ${(props) => (props.isSelected ? 600 : 500)};
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ${COLORS.grayLight};
+  }
+
+  span {
+    flex: 1;
+  }
+`;
+
+export const DifficultyIconSmall = styled.img`
+  width: 16px;
+  height: 16px;
+`;
+
+export const DifficultyDropdownContainer = styled.div`
+  position: relative;
+`;
+
+export const Group = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+export const DifficultyLabel = styled.label`
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: ${COLORS.gray1};
+  margin-bottom: 8px;
 `;
