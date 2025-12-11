@@ -64,7 +64,7 @@ const ProblemCreatePage = () => {
 
       <S.Main>
         <S.Content>
-          <S.PageTitle>문제 추가</S.PageTitle>
+          <S.PageTitle>문제 생성</S.PageTitle>
 
           <S.Field>
             <S.Label>문제 제목</S.Label>
@@ -212,8 +212,8 @@ const ProblemCreatePage = () => {
           </S.Group>
 
           <S.Actions>
-            <S.SecondaryButton>문제 추가 취소하기</S.SecondaryButton>
-            <S.PrimaryButton>문제 추가하기</S.PrimaryButton>
+            <S.SecondaryButton onClick={() => navigate('/problems')}>문제 생성 취소하기</S.SecondaryButton>
+            <S.PrimaryButton>문제 생성</S.PrimaryButton>
           </S.Actions>
         </S.Content>
       </S.Main>
