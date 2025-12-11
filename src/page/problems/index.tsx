@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import * as S from "./style";
@@ -8,10 +9,7 @@ import ArrowDownIcon from "../../assets/image/problems/arrow-down.png";
 import ArrowLeftIcon from "../../assets/image/problems/arrow-left.png";
 //오른쪽
 import ArrowRightIcon from "../../assets/image/problems/arrow-right.png";
-//성공 아이콘
-import SuccessIcon from "../../assets/image/problems/success.png";
-//실패 아이콘
-import FailIcon from "../../assets/image/problems/fail.png";
+// (status icons removed from table)
 //난이도 이미지
 import GoldIcon from "../../assets/image/problems/difficulty/gold.png";
 import SilverIcon from "../../assets/image/problems/difficulty/silver.png";
@@ -31,8 +29,73 @@ interface Problem {
   failed: boolean;
 }
 
+// Sample problems to display when API is empty or unavailable
+const SAMPLE_PROBLEMS: Problem[] = [
+  {
+    id: 1,
+    title: "숫자야구",
+    difficulty: 2,
+    completedCount: 91,
+    successRate: 3,
+    solved: true,
+    failed: false,
+  },
+  {
+    id: 2,
+    title: "문자열과 알파벳 쿼리",
+    difficulty: 1,
+    completedCount: 31,
+    successRate: 0,
+    solved: false,
+    failed: false,
+  },
+  {
+    id: 3,
+    title: "정렬과 탐색 기초",
+    difficulty: 3,
+    completedCount: 12,
+    successRate: 10,
+    solved: false,
+    failed: true,
+  },
+  {
+    id: 4,
+    title: "그래프 경로 찾기",
+    difficulty: 4,
+    completedCount: 5,
+    successRate: 2,
+    solved: false,
+    failed: false,
+  },
+  {
+    id: 5,
+    title: "동적 계획법 연습",
+    difficulty: 5,
+    completedCount: 2,
+    successRate: 1,
+    solved: false,
+    failed: false,
+  },
+];
+
 export default function Problems() {
   const navigate = useNavigate();
+  // Close action menu when clicking outside
+  useEffect(() => {
+    const handleDocClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // If click is outside both the inline action container and the portal menu, close
+      if (
+        !target.closest("[data-action-container]") &&
+        !target.closest("[data-portal-action-menu]")
+      ) {
+        setOpenActionId(null);
+      }
+    };
+
+    document.addEventListener("click", handleDocClick);
+    return () => document.removeEventListener("click", handleDocClick);
+  }, []);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -45,6 +108,8 @@ export default function Problems() {
   const [problems, setProblems] = useState<Problem[]>([]);
   const [timeLabel, setTimeLabel] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [openActionId, setOpenActionId] = useState<number | null>(null);
+  const buttonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
   useEffect(() => {
     if (difficultyFilter !== null || successRateFilter || sortBy) {
@@ -94,6 +159,8 @@ export default function Problems() {
       mapProblems(list);
     } catch (error) {
       console.error("Failed to fetch problems:", error);
+      // fallback to sample data for demo/testing
+      setProblems(SAMPLE_PROBLEMS);
     } finally {
       setIsLoading(false);
     }
@@ -118,6 +185,7 @@ export default function Problems() {
       mapProblems(list);
     } catch (error) {
       console.error("Failed to fetch filtered problems:", error);
+      setProblems(SAMPLE_PROBLEMS);
     } finally {
       setIsLoading(false);
     }
@@ -133,14 +201,16 @@ export default function Problems() {
       mapProblems(list);
     } catch (error) {
       console.error("Failed to search problems:", error);
+      setProblems(SAMPLE_PROBLEMS);
     } finally {
       setIsLoading(false);
     }
   };
 
   const mapProblems = (apiProblems: any[]) => {
-    if (!Array.isArray(apiProblems)) {
-      setProblems([]);
+    if (!Array.isArray(apiProblems) || apiProblems.length === 0) {
+      // show sample problems when API returns nothing
+      setProblems(SAMPLE_PROBLEMS);
       return;
     }
     const mapped = apiProblems.map((p) => ({
@@ -151,7 +221,7 @@ export default function Problems() {
       successRate: p.correctRate,
       ...solvedStatusMap[p.solvedResult],
     }));
-    setProblems(mapped);
+    setProblems(mapped.length ? mapped : SAMPLE_PROBLEMS);
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,6 +241,30 @@ export default function Problems() {
     setDifficultyFilter(level);
     setDifficultyLabel(label);
     setOpenDropdown(null);
+  };
+
+  const handleActionToggle = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    setOpenActionId((prev) => (prev === id ? null : id));
+  };
+
+  const handleEdit = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    navigate(`/problems/update/${id}`);
+  };
+
+  const handleDelete = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    if (!window.confirm("정말로 이 문제를 삭제하시겠습니까?")) return;
+    try {
+      await axiosInstance.delete(`/problems/${id}`);
+      // remove locally
+      setProblems((prev) => prev.filter((p) => p.id !== id));
+      setOpenActionId(null);
+    } catch (error) {
+      console.error("Failed to delete problem:", error);
+      alert("문제 삭제에 실패했습니다.");
+    }
   };
 
   const handleTimeSelect = (time: string | null, label: string | null) => {
@@ -235,7 +329,7 @@ export default function Problems() {
         <S.SearchBox>
           <S.SearchInput
             type="text"
-            placeholder="문제 이름을 검색하세요"
+            placeholder="문제 이름을 검색하세요."
             value={searchTerm}
             onChange={handleSearch}
           />
@@ -249,7 +343,7 @@ export default function Problems() {
           <S.FilterButtonsWrapper>
             <S.FilterButtonGroup>
               <S.FilterButton
-                data-is-active={openDropdown === "difficulty"}
+                isActive={openDropdown === "difficulty" || difficultyFilter !== null}
                 onClick={() =>
                   setOpenDropdown(
                     openDropdown === "difficulty" ? null : "difficulty"
@@ -264,37 +358,37 @@ export default function Problems() {
               {openDropdown === "difficulty" && (
                 <S.DropdownMenu>
                   <S.DropdownItem
-                    data-is-selected={difficultyFilter === null}
+                    isSelected={difficultyFilter === null}
                     onClick={() => handleDifficultySelect(null, null)}
                   >
                     선택 안함
                   </S.DropdownItem>
                   <S.DropdownItem
-                    data-is-selected={difficultyFilter === 1}
+                    isSelected={difficultyFilter === 1}
                     onClick={() => handleDifficultySelect(1, "금")}
                   >
                     금
                   </S.DropdownItem>
                   <S.DropdownItem
-                    data-is-selected={difficultyFilter === 2}
+                    isSelected={difficultyFilter === 2}
                     onClick={() => handleDifficultySelect(2, "은")}
                   >
                     은
                   </S.DropdownItem>
                   <S.DropdownItem
-                    data-is-selected={difficultyFilter === 3}
+                    isSelected={difficultyFilter === 3}
                     onClick={() => handleDifficultySelect(3, "동")}
                   >
                     동
                   </S.DropdownItem>
                   <S.DropdownItem
-                    data-is-selected={difficultyFilter === 4}
+                    isSelected={difficultyFilter === 4}
                     onClick={() => handleDifficultySelect(4, "철")}
                   >
                     철
                   </S.DropdownItem>
                   <S.DropdownItem
-                    data-is-selected={difficultyFilter === 5}
+                    isSelected={difficultyFilter === 5}
                     onClick={() => handleDifficultySelect(5, "옥")}
                   >
                     옥
@@ -305,7 +399,7 @@ export default function Problems() {
 
             <S.FilterButtonGroup>
               <S.FilterButton
-                data-is-active={openDropdown === "time"}
+                isActive={openDropdown === "time" || sortBy !== null}
                 onClick={() =>
                   setOpenDropdown(openDropdown === "time" ? null : "time")
                 }
@@ -318,19 +412,19 @@ export default function Problems() {
               {openDropdown === "time" && (
                 <S.DropdownMenu>
                   <S.DropdownItem
-                    data-is-selected={sortBy === null}
+                    isSelected={sortBy === null}
                     onClick={() => handleTimeSelect(null, null)}
                   >
                     선택 안함
                   </S.DropdownItem>
                   <S.DropdownItem
-                    data-is-selected={sortBy === "recent"}
+                    isSelected={sortBy === "recent"}
                     onClick={() => handleTimeSelect("recent", "최신순")}
                   >
                     최신순
                   </S.DropdownItem>
                   <S.DropdownItem
-                    data-is-selected={sortBy === "old"}
+                    isSelected={sortBy === "old"}
                     onClick={() => handleTimeSelect("old", "오래된순")}
                   >
                     오래된순
@@ -341,7 +435,7 @@ export default function Problems() {
 
             <S.FilterButtonGroup>
               <S.FilterButton
-                data-is-active={openDropdown === "successRate"}
+                isActive={openDropdown === "successRate" || successRateFilter !== null}
                 onClick={() =>
                   setOpenDropdown(
                     openDropdown === "successRate" ? null : "successRate"
@@ -356,13 +450,13 @@ export default function Problems() {
               {openDropdown === "successRate" && (
                 <S.DropdownMenu>
                   <S.DropdownItem
-                    data-is-selected={successRateFilter === null}
+                    isSelected={successRateFilter === null}
                     onClick={() => handleSuccessRateSelect(null, null)}
                   >
                     선택 안함
                   </S.DropdownItem>
                   <S.DropdownItem
-                    data-is-selected={successRateFilter === "asc"}
+                    isSelected={successRateFilter === "asc"}
                     onClick={() =>
                       handleSuccessRateSelect("asc", "정답률 낮은 순")
                     }
@@ -370,7 +464,7 @@ export default function Problems() {
                     정답률 낮은 순
                   </S.DropdownItem>
                   <S.DropdownItem
-                    data-is-selected={successRateFilter === "desc"}
+                    isSelected={successRateFilter === "desc"}
                     onClick={() =>
                       handleSuccessRateSelect("desc", "정답률 높은 순")
                     }
@@ -387,59 +481,124 @@ export default function Problems() {
         <S.TableContainer>
           {/* Table Header */}
           <S.TableHeader>
-            <S.TableHeaderCell>상태</S.TableHeaderCell>
             <S.TableHeaderCell>제목</S.TableHeaderCell>
-            <S.TableHeaderCellRight>난이도</S.TableHeaderCellRight>
+            <S.TableHeaderCellCenter>난이도</S.TableHeaderCellCenter>
             <S.TableHeaderCellRight>완료한 사람</S.TableHeaderCellRight>
             <S.TableHeaderCellRight>정답률</S.TableHeaderCellRight>
+            <S.TableHeaderCellRight />
           </S.TableHeader>
 
-          {/* Table Body */}
-          <S.TableBody>
-            {filteredProblems.map((problem, index) => (
-              <S.TableRow
-                key={problem.id}
-                onClick={() => navigate(`/solve/${problem.id}`)}
-                data-is-last={index === filteredProblems.length - 1}
-              >
-                <S.TableCell>
-                  {(problem.solved && (
-                    <S.StatusIcon src={SuccessIcon} alt="해결됨" />
-                  )) ||
-                    (problem.failed && (
-                      <S.StatusIcon src={FailIcon} alt="실패" />
-                    ))}
-                </S.TableCell>
-                <S.TableCell>{problem.title}</S.TableCell>
-                <S.TableCellRight>
-                  <S.DifficultyImage
-                    src={difficultyImages[problem.difficulty]}
-                    alt={difficultyLabels[problem.difficulty]}
-                  />
-                </S.TableCellRight>
-                <S.TableCellRight>{problem.completedCount}명</S.TableCellRight>
-                <S.TableCellRight>{problem.successRate}%</S.TableCellRight>
-              </S.TableRow>
-            ))}
-          </S.TableBody>
+            {/* Table Body */}
+            <S.TableBody>
+              {filteredProblems.map((problem, index) => (
+                <S.TableRow
+                  key={problem.id}
+                  onClick={() => navigate(`/solve/${problem.id}`)}
+                  isLast={index === filteredProblems.length - 1}
+                >
+                  <S.TableCell>{problem.title}</S.TableCell>
+                  <S.TableCellCenter>
+                    <S.DifficultyImage
+                      src={difficultyImages[problem.difficulty]}
+                      alt={difficultyLabels[problem.difficulty]}
+                    />
+                  </S.TableCellCenter>
+                  <S.TableCellRight>{problem.completedCount}명</S.TableCellRight>
+                  <S.TableCellRight>{problem.successRate}%</S.TableCellRight>
+                  <S.TableCellRight>
+                    <S.ActionContainer data-action-container>
+                      <S.ActionButton
+                        ref={(el) => { buttonRefs.current[problem.id] = el; }}
+                        onClick={(e) => handleActionToggle(e, problem.id)}
+                        aria-haspopup="true"
+                        aria-expanded={openActionId === problem.id}
+                        aria-label="액션 메뉴"
+                      >
+                        ⋮
+                      </S.ActionButton>
+
+                      {/* Render menu via portal to avoid clipping/overflow issues */}
+                      {openActionId === problem.id &&
+                        buttonRefs.current[problem.id] &&
+                        createPortal(
+                          <div data-portal-action-menu>
+                            <S.ActionMenu
+                              style={(() => {
+                                try {
+                                  const btn = buttonRefs.current[problem.id];
+                                  if (!btn) return {};
+                                  const rect = btn.getBoundingClientRect();
+                                  const menuWidth = 96; // matches ActionMenu min-width
+                                  // compute left so menu's right edge aligns with button's right, with an 8px gap
+                                  const computedLeft = rect.right + window.scrollX - menuWidth - 8;
+                                  const left = Math.max(
+                                    16,
+                                    Math.min(computedLeft, window.innerWidth - menuWidth - 16)
+                                  );
+                                  // slightly lower than center to match design
+                                  const top = rect.top + window.scrollY + rect.height / 2 + 6;
+                                  return {
+                                    position: "absolute",
+                                    top: `${top}px`,
+                                    left: `${left}px`,
+                                    transform: "translateY(-50%)",
+                                    zIndex: 1000,
+                                  } as React.CSSProperties;
+                                } catch (err) {
+                                  return {};
+                                }
+                              })()}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <S.ActionMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEdit(e, problem.id);
+                                }}
+                              >
+                                문제 수정
+                              </S.ActionMenuItem>
+                              <S.ActionMenuItemDanger
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(e, problem.id);
+                                }}
+                              >
+                                문제 삭제
+                              </S.ActionMenuItemDanger>
+                            </S.ActionMenu>
+                          </div>,
+                          document.body
+                        )}
+                    </S.ActionContainer>
+                  </S.TableCellRight>
+                </S.TableRow>
+              ))}
+            </S.TableBody>
+
         </S.TableContainer>
 
         {/* Pagination */}
-        <S.PaginationContainer>
-          <S.PaginationButton>
-            <S.ArrowIcon src={ArrowLeftIcon} alt="이전" />
-          </S.PaginationButton>
-          <S.PaginationNumbers>
-            <S.PaginationNumber data-is-active={true}>1</S.PaginationNumber>
-            <S.PaginationNumber>2</S.PaginationNumber>
-            <S.PaginationNumber>3</S.PaginationNumber>
-            <S.PaginationNumber>4</S.PaginationNumber>
-            <S.PaginationNumber>5</S.PaginationNumber>
-          </S.PaginationNumbers>
-          <S.PaginationButton>
-            <S.ArrowIcon src={ArrowRightIcon} alt="다음" />
-          </S.PaginationButton>
-        </S.PaginationContainer>
+        <S.FooterControls>
+          <S.PaginationContainer>
+            <S.PaginationButton>
+              <S.ArrowIcon src={ArrowLeftIcon} alt="이전" />
+            </S.PaginationButton>
+            <S.PaginationNumbers>
+              <S.PaginationNumber isActive={true}>1</S.PaginationNumber>
+              <S.PaginationNumber>2</S.PaginationNumber>
+              <S.PaginationNumber>3</S.PaginationNumber>
+              <S.PaginationNumber>4</S.PaginationNumber>
+              <S.PaginationNumber>5</S.PaginationNumber>
+            </S.PaginationNumbers>
+            <S.PaginationButton>
+              <S.ArrowIcon src={ArrowRightIcon} alt="다음" />
+            </S.PaginationButton>
+          </S.PaginationContainer>
+          <S.CreateButton onClick={() => navigate(`/problems/create`)}>
+            문제 생성
+          </S.CreateButton>
+        </S.FooterControls>
       </S.MainContent>
 
       {/* Footer */}

@@ -55,7 +55,7 @@ export const Nav = styled.nav`
 export const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 24px;
 `;
 
 export const LogoSection = styled.div`
@@ -105,9 +105,17 @@ export const MainContent = styled.main`
   padding: 26px 40px 60px;
 `;
 
+// Top Bar with Create Button
+export const TopBar = styled.div`
+  width: 960px;
+  margin: 40px auto 20px;
+  display: flex;
+  justify-content: flex-end;
+`;
+
 // Search Box
 export const SearchBox = styled.div`
-  width: 840px;
+  width: 960px;
   height: 46px;
   background-color: ${COLORS.white};
   border: 1px solid ${COLORS.white};
@@ -116,7 +124,7 @@ export const SearchBox = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  margin-bottom: 30px;
+  margin: 0 auto 30px; /* center and separate from header/menu */
 `;
 
 export const SearchInput = styled.input`
@@ -126,11 +134,11 @@ export const SearchInput = styled.input`
   font-family: "Pretendard", sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: ${COLORS.black};
+  color: ${COLORS.grayText};
   background: transparent !important;
 
   &::placeholder {
-    color: ${COLORS.black};
+    color: ${COLORS.grayText};
   }
 `;
 
@@ -145,14 +153,14 @@ export const SearchIconContainer = styled.div`
 
 // Filter Section
 export const FilterSection = styled.div`
-  width: 840px;
+  width: 960px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   position: relative;
   overflow: visible;
   z-index: 10;
-  margin-bottom: 20px;
+  margin: 0 auto 20px;
 `;
 
 export const FilterButtonsWrapper = styled.div`
@@ -230,23 +238,24 @@ export const DropdownItem = styled.div<DropdownItemProps>`
 
 // Table Container
 export const TableContainer = styled.div`
-  width: 840px;
+  width: 960px;
+  position: relative;
   background-color: ${COLORS.white};
   border: 1px solid ${COLORS.grayBorder};
   border-radius: 8px;
   z-index: 8;
-  margin-bottom: 40px;
+  margin: 0 auto 40px;
 `;
 
 // Table Header
 export const TableHeader = styled.div`
   display: grid;
-  grid-template-columns: 50px 1fr 100px 120px 80px;
+  grid-template-columns: 1fr 72px 120px 80px 32px; /* title, difficulty, completed, successRate, action */
   align-items: center;
   padding: 16px 20px;
   background-color: ${COLORS.white};
   border-bottom: 1px solid ${COLORS.grayBorder};
-  gap: 40px;
+  gap: 24px;
 `;
 
 export const TableHeaderCell = styled.div`
@@ -258,6 +267,10 @@ export const TableHeaderCell = styled.div`
 
 export const TableHeaderCellRight = styled(TableHeaderCell)`
   text-align: right;
+`;
+
+export const TableHeaderCellCenter = styled(TableHeaderCell)`
+  text-align: center;
 `;
 
 // Table Body
@@ -272,14 +285,15 @@ interface TableRowProps {
 
 export const TableRow = styled.div<TableRowProps>`
   display: grid;
-  grid-template-columns: 50px 1fr 100px 120px 80px;
+  grid-template-columns: 1fr 72px 120px 80px 32px;
   align-items: center;
   padding: 16px 20px;
   border-bottom: ${(props) =>
     props.isLast ? "none" : `1px solid ${COLORS.grayBorder}`};
   background-color: ${COLORS.white};
   height: 60px;
-  gap: 40px;
+  gap: 24px;
+  position: relative;
 
   &:hover {
     background-color: ${COLORS.grayLight};
@@ -293,7 +307,6 @@ export const TableCell = styled.div`
   font-family: "Pretendard", sans-serif;
   font-size: 16px;
   font-weight: 500;
-  color: ${COLORS.black};
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -303,6 +316,98 @@ export const TableCell = styled.div`
 
 export const TableCellRight = styled(TableCell)`
   justify-content: flex-end;
+`;
+
+export const TableCellCenter = styled(TableCell)`
+  justify-content: center;
+`;
+
+export const ActionContainer = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+`;
+
+// Action (three-dots) button and menu
+export const ActionButton = styled.button`
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: ${COLORS.grayText2};
+  padding: 0;
+`;
+
+export const ActionMenu = styled.div`
+  position: absolute;
+  top: 36px; /* appear below the button inside ActionContainer */
+  right: 0; /* align under the vertical dots within ActionContainer */
+  background-color: ${COLORS.white};
+  border: 1px solid ${COLORS.grayBorder};
+  border-radius: 6px;
+  width: 96px;
+  box-sizing: border-box;
+  padding: 6px 0;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  z-index: 1000;
+`;
+
+export const ActionMenuItem = styled.div`
+  padding: 8px 12px;
+  font-family: "Pretendard", sans-serif;
+  font-size: 13px;
+  color: ${COLORS.black};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${COLORS.grayLight};
+  }
+`;
+
+export const ActionMenuItemDanger = styled(ActionMenuItem)`
+  color: #ff5b5b;
+  font-weight: 600;
+  &:hover {
+    background-color: rgba(255, 91, 91, 0.04);
+  }
+`;
+
+// Create Button
+export const CreateButton = styled.button`
+  background-color: ${COLORS.primary};
+  color: ${COLORS.white};
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  /* positioned to the right of pagination inside FooterControls */
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+`;
+
+export const FooterControls = styled.div`
+  width: 960px;
+  margin: 0 auto 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
 `;
 
 export const StatusIcon = styled.img`
@@ -403,7 +508,7 @@ export const PaginationNumber = styled.button<PaginationNumberProps>`
 
 export const Footer = styled.footer`
   width: 100%;
-  background: #f6f6f6;
+  background: ${COLORS.white};
   border-top: 1px solid #ededed;
   padding: 49px 40px;
   margin-top: auto;
