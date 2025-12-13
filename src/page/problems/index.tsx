@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
@@ -81,34 +80,6 @@ const SAMPLE_PROBLEMS: Problem[] = [
 
 export default function Problems() {
   const navigate = useNavigate();
-  const location = useLocation();
-  // detect picker mode via query param or state
-  const qs = new URLSearchParams(location.search);
-  const pickerFor = qs.get("pickerFor") || (location.state && (location.state as any).pickerFor);
-  const returnTo = qs.get("returnTo") || (location.state && (location.state as any).returnTo);
-  const pickerMode = Boolean(pickerFor);
-  const [pickerSelected, setPickerSelected] = useState<number[]>([]);
-  // Close action menu when clicking outside
-  useEffect(() => {
-    const handleDocClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      // close action menu when clicking outside action containers / portal menus
-      if (
-        !target.closest("[data-action-container]") &&
-        !target.closest("[data-portal-action-menu]")
-      ) {
-        setOpenActionId(null);
-      }
-
-      // close filter dropdowns when clicking outside the filter section
-      if (!target.closest("[data-filter-container]")) {
-        setOpenDropdown(null);
-      }
-    };
-
-    document.addEventListener("click", handleDocClick);
-    return () => document.removeEventListener("click", handleDocClick);
-  }, []);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -123,6 +94,41 @@ export default function Problems() {
   const [isLoading, setIsLoading] = useState(false);
   const [openActionId, setOpenActionId] = useState<number | null>(null);
   const buttonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close action menu when clicking outside
+  useEffect(() => {
+    const handleDocClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // If click is outside both the inline action container and the portal menu, close
+      if (
+        !target.closest("[data-action-container]") &&
+        !target.closest("[data-portal-action-menu]")
+      ) {
+        setOpenActionId(null);
+      }
+    };
+
+    document.addEventListener("click", handleDocClick);
+    return () => document.removeEventListener("click", handleDocClick);
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (difficultyFilter !== null || successRateFilter || sortBy) {
@@ -280,18 +286,6 @@ export default function Problems() {
     }
   };
 
-  const handlePickerConfirm = () => {
-    // collect selected problem objects
-    const selected = problems.filter((p) => pickerSelected.includes(p.id)).map((p) => ({ id: p.id, title: p.title }));
-    // navigate back to returnTo with selected problems in state
-    if (returnTo) {
-      navigate(returnTo, { state: { selectedProblems: selected } });
-    } else {
-      // fallback: navigate to root with state
-      navigate("/", { state: { selectedProblems: selected } });
-    }
-  };
-
   const handleTimeSelect = (time: string | null, label: string | null) => {
     setSortBy(time);
     setTimeLabel(label); // 추가
@@ -364,7 +358,7 @@ export default function Problems() {
         </S.SearchBox>
 
         {/* Filter Section */}
-        <S.FilterSection data-filter-container>
+        <S.FilterSection ref={dropdownRef}>
           <S.FilterButtonsWrapper>
             <S.FilterButtonGroup>
               <S.FilterButton
@@ -509,8 +503,7 @@ export default function Problems() {
         {/* Problems Table */}
         <S.TableContainer>
           {/* Table Header */}
-          <S.TableHeader $picker={pickerMode}>
-            {pickerMode && <S.TableHeaderCell />}
+          <S.TableHeader>
             <S.TableHeaderCell>제목</S.TableHeaderCell>
             <S.TableHeaderCellCenter>난이도</S.TableHeaderCellCenter>
             <S.TableHeaderCellRight>완료한 사람</S.TableHeaderCellRight>
@@ -524,27 +517,7 @@ export default function Problems() {
               <S.TableRow
                 key={problem.id}
                 isLast={index === filteredProblems.length - 1}
-                $picker={pickerMode}
-                onClick={() => {
-                  if (!pickerMode) return;
-                  setPickerSelected((s) =>
-                    s.includes(problem.id) ? s.filter((id) => id !== problem.id) : [...s, problem.id]
-                  );
-                }}
               >
-                {pickerMode && (
-                  <div>
-                    <input
-                      type="checkbox"
-                      checked={pickerSelected.includes(problem.id)}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        if (e.target.checked) setPickerSelected((s) => [...s, problem.id]);
-                        else setPickerSelected((s) => s.filter((id) => id !== problem.id));
-                      }}
-                    />
-                  </div>
-                )}
                 <S.TableCell>{problem.title}</S.TableCell>
                 <S.TableCellCenter>
                   <S.DifficultyImage
@@ -653,22 +626,9 @@ export default function Problems() {
               <S.ArrowIcon src={ArrowRightIcon} alt="다음" />
             </S.PaginationButton>
           </S.PaginationContainer>
-          {pickerMode ? (
-            <div style={{ display: "flex", gap: 8 }}>
-              <S.CreateButton onClick={() => navigate(-1)}>취소</S.CreateButton>
-              <S.CreateButton
-                onClick={() => {
-                  handlePickerConfirm();
-                }}
-              >
-                선택완료
-              </S.CreateButton>
-            </div>
-          ) : (
-            <S.CreateButton onClick={() => navigate(`/problems/create`)}>
-              문제 생성
-            </S.CreateButton>
-          )}
+          <S.CreateButton onClick={() => navigate(`/problems/create`)}>
+            문제 생성
+          </S.CreateButton>
         </S.FooterControls>
       </S.MainContent>
 
