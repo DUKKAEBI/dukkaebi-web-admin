@@ -80,6 +80,22 @@ const SAMPLE_PROBLEMS: Problem[] = [
 
 export default function Problems() {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [difficultyFilter, setDifficultyFilter] = useState<number | null>(null);
+  const [difficultyLabel, setDifficultyLabel] = useState<string | null>(null);
+  const [successRateFilter, setSuccessRateFilter] = useState<
+    "asc" | "desc" | null
+  >(null);
+  const [successRateLabel, setSuccessRateLabel] = useState<string | null>(null);
+  const [problems, setProblems] = useState<Problem[]>([]);
+  const [timeLabel, setTimeLabel] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [openActionId, setOpenActionId] = useState<number | null>(null);
+  const buttonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   // Close action menu when clicking outside
   useEffect(() => {
     const handleDocClick = (e: MouseEvent) => {
@@ -96,20 +112,23 @@ export default function Problems() {
     document.addEventListener("click", handleDocClick);
     return () => document.removeEventListener("click", handleDocClick);
   }, []);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState<string | null>(null);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [difficultyFilter, setDifficultyFilter] = useState<number | null>(null);
-  const [difficultyLabel, setDifficultyLabel] = useState<string | null>(null);
-  const [successRateFilter, setSuccessRateFilter] = useState<
-    "asc" | "desc" | null
-  >(null);
-  const [successRateLabel, setSuccessRateLabel] = useState<string | null>(null);
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [timeLabel, setTimeLabel] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [openActionId, setOpenActionId] = useState<number | null>(null);
-  const buttonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (difficultyFilter !== null || successRateFilter || sortBy) {
@@ -339,11 +358,13 @@ export default function Problems() {
         </S.SearchBox>
 
         {/* Filter Section */}
-        <S.FilterSection>
+        <S.FilterSection ref={dropdownRef}>
           <S.FilterButtonsWrapper>
             <S.FilterButtonGroup>
               <S.FilterButton
-                isActive={openDropdown === "difficulty" || difficultyFilter !== null}
+                isActive={
+                  openDropdown === "difficulty" || difficultyFilter !== null
+                }
                 onClick={() =>
                   setOpenDropdown(
                     openDropdown === "difficulty" ? null : "difficulty"
@@ -435,7 +456,9 @@ export default function Problems() {
 
             <S.FilterButtonGroup>
               <S.FilterButton
-                isActive={openDropdown === "successRate" || successRateFilter !== null}
+                isActive={
+                  openDropdown === "successRate" || successRateFilter !== null
+                }
                 onClick={() =>
                   setOpenDropdown(
                     openDropdown === "successRate" ? null : "successRate"
@@ -488,94 +511,102 @@ export default function Problems() {
             <S.TableHeaderCellRight />
           </S.TableHeader>
 
-            {/* Table Body */}
-            <S.TableBody>
-              {filteredProblems.map((problem, index) => (
-                <S.TableRow
-                  key={problem.id}
-                  onClick={() => navigate(`/solve/${problem.id}`)}
-                  isLast={index === filteredProblems.length - 1}
-                >
-                  <S.TableCell>{problem.title}</S.TableCell>
-                  <S.TableCellCenter>
-                    <S.DifficultyImage
-                      src={difficultyImages[problem.difficulty]}
-                      alt={difficultyLabels[problem.difficulty]}
-                    />
-                  </S.TableCellCenter>
-                  <S.TableCellRight>{problem.completedCount}명</S.TableCellRight>
-                  <S.TableCellRight>{problem.successRate}%</S.TableCellRight>
-                  <S.TableCellRight>
-                    <S.ActionContainer data-action-container>
-                      <S.ActionButton
-                        ref={(el) => { buttonRefs.current[problem.id] = el; }}
-                        onClick={(e) => handleActionToggle(e, problem.id)}
-                        aria-haspopup="true"
-                        aria-expanded={openActionId === problem.id}
-                        aria-label="액션 메뉴"
-                      >
-                        ⋮
-                      </S.ActionButton>
+          {/* Table Body */}
+          <S.TableBody>
+            {filteredProblems.map((problem, index) => (
+              <S.TableRow
+                key={problem.id}
+                isLast={index === filteredProblems.length - 1}
+              >
+                <S.TableCell>{problem.title}</S.TableCell>
+                <S.TableCellCenter>
+                  <S.DifficultyImage
+                    src={difficultyImages[problem.difficulty]}
+                    alt={difficultyLabels[problem.difficulty]}
+                  />
+                </S.TableCellCenter>
+                <S.TableCellRight>{problem.completedCount}명</S.TableCellRight>
+                <S.TableCellRight>{problem.successRate}%</S.TableCellRight>
+                <S.TableCellRight>
+                  <S.ActionContainer data-action-container>
+                    <S.ActionButton
+                      ref={(el) => {
+                        buttonRefs.current[problem.id] = el;
+                      }}
+                      onClick={(e) => handleActionToggle(e, problem.id)}
+                      aria-haspopup="true"
+                      aria-expanded={openActionId === problem.id}
+                      aria-label="액션 메뉴"
+                    >
+                      ⋮
+                    </S.ActionButton>
 
-                      {/* Render menu via portal to avoid clipping/overflow issues */}
-                      {openActionId === problem.id &&
-                        buttonRefs.current[problem.id] &&
-                        createPortal(
-                          <div data-portal-action-menu>
-                            <S.ActionMenu
-                              style={(() => {
-                                try {
-                                  const btn = buttonRefs.current[problem.id];
-                                  if (!btn) return {};
-                                  const rect = btn.getBoundingClientRect();
-                                  const menuWidth = 96; // matches ActionMenu min-width
-                                  // compute left so menu's right edge aligns with button's right, with an 8px gap
-                                  const computedLeft = rect.right + window.scrollX - menuWidth - 8;
-                                  const left = Math.max(
-                                    16,
-                                    Math.min(computedLeft, window.innerWidth - menuWidth - 16)
-                                  );
-                                  // slightly lower than center to match design
-                                  const top = rect.top + window.scrollY + rect.height / 2 + 6;
-                                  return {
-                                    position: "absolute",
-                                    top: `${top}px`,
-                                    left: `${left}px`,
-                                    transform: "translateY(-50%)",
-                                    zIndex: 1000,
-                                  } as React.CSSProperties;
-                                } catch (err) {
-                                  return {};
-                                }
-                              })()}
-                              onClick={(e) => e.stopPropagation()}
+                    {/* Render menu via portal to avoid clipping/overflow issues */}
+                    {openActionId === problem.id &&
+                      buttonRefs.current[problem.id] &&
+                      createPortal(
+                        <div data-portal-action-menu>
+                          <S.ActionMenu
+                            style={(() => {
+                              try {
+                                const btn = buttonRefs.current[problem.id];
+                                if (!btn) return {};
+                                const rect = btn.getBoundingClientRect();
+                                const menuWidth = 96; // matches ActionMenu min-width
+                                // compute left so menu's right edge aligns with button's right, with an 8px gap
+                                const computedLeft =
+                                  rect.right + window.scrollX - menuWidth - 8;
+                                const left = Math.max(
+                                  16,
+                                  Math.min(
+                                    computedLeft,
+                                    window.innerWidth - menuWidth - 16
+                                  )
+                                );
+                                // slightly lower than center to match design
+                                const top =
+                                  rect.top +
+                                  window.scrollY +
+                                  rect.height / 2 +
+                                  6;
+                                return {
+                                  position: "absolute",
+                                  top: `${top}px`,
+                                  left: `${left}px`,
+                                  transform: "translateY(-50%)",
+                                  zIndex: 1000,
+                                } as React.CSSProperties;
+                              } catch (err) {
+                                return {};
+                              }
+                            })()}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <S.ActionMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEdit(e, problem.id);
+                              }}
                             >
-                              <S.ActionMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEdit(e, problem.id);
-                                }}
-                              >
-                                문제 수정
-                              </S.ActionMenuItem>
-                              <S.ActionMenuItemDanger
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDelete(e, problem.id);
-                                }}
-                              >
-                                문제 삭제
-                              </S.ActionMenuItemDanger>
-                            </S.ActionMenu>
-                          </div>,
-                          document.body
-                        )}
-                    </S.ActionContainer>
-                  </S.TableCellRight>
-                </S.TableRow>
-              ))}
-            </S.TableBody>
-
+                              문제 수정
+                            </S.ActionMenuItem>
+                            <S.ActionMenuItemDanger
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(e, problem.id);
+                              }}
+                            >
+                              문제 삭제
+                            </S.ActionMenuItemDanger>
+                          </S.ActionMenu>
+                        </div>,
+                        document.body
+                      )}
+                  </S.ActionContainer>
+                </S.TableCellRight>
+              </S.TableRow>
+            ))}
+          </S.TableBody>
         </S.TableContainer>
 
         {/* Pagination */}
