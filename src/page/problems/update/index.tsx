@@ -212,7 +212,7 @@ const ProblemCreatePage = () => {
           </S.Group>
 
           <S.Actions>
-            <S.SecondaryButton>문제 수정 취소하기</S.SecondaryButton>
+            <S.SecondaryButton onClick={() => navigate('/problems')}>문제 수정 취소하기</S.SecondaryButton>
             <S.PrimaryButton>문제 수정하기</S.PrimaryButton>
           </S.Actions>
         </S.Content>

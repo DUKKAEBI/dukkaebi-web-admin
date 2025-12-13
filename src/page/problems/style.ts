@@ -248,9 +248,9 @@ export const TableContainer = styled.div`
 `;
 
 // Table Header
-export const TableHeader = styled.div`
+export const TableHeader = styled.div<{ $picker?: boolean }>`
   display: grid;
-  grid-template-columns: 1fr 72px 120px 80px 32px; /* title, difficulty, completed, successRate, action */
+  grid-template-columns: ${(p) => (p.$picker ? "48px 1fr 72px 120px 80px 32px" : "1fr 72px 120px 80px 32px")};
   align-items: center;
   padding: 16px 20px;
   background-color: ${COLORS.white};
@@ -285,9 +285,9 @@ interface TableRowProps {
   isLast?: boolean;
 }
 
-export const TableRow = styled.div<TableRowProps>`
+export const TableRow = styled.div<TableRowProps & { $picker?: boolean }>`
   display: grid;
-  grid-template-columns: 1fr 72px 120px 80px 32px;
+  grid-template-columns: ${(p) => (p.$picker ? "48px 1fr 72px 120px 80px 32px" : "1fr 72px 120px 80px 32px")};
   align-items: center;
   padding: 16px 20px;
   border-bottom: ${(props) =>
@@ -303,6 +303,18 @@ export const TableRow = styled.div<TableRowProps>`
   }
 
   ${(props) => props.isLast && `border-radius: 0 0 8px 8px;`}
+
+  /* picker 모드에서 체크박스 색상을 primary로 지정 */
+  ${(p) =>
+    p.$picker &&
+    `
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: ${COLORS.primary};
+      cursor: pointer;
+    }
+  `}
 `;
 
 export const TableCell = styled.div`
