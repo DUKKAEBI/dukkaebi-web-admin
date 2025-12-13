@@ -28,7 +28,6 @@ export const Main = styled.main`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
   min-height: 150vh;
 `;
 
@@ -42,6 +41,7 @@ export const SearchBox = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
+  margin-bottom: 30px;
 `;
 
 export const SearchInput = styled.input`
@@ -75,23 +75,23 @@ export const SearchIcon = styled.div`
   justify-content: center;
 `;
 
-export const FilterButton = styled.button`
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 6px;
-  background: #ffffff;
-  border: 1px solid var(--gray-4);
-  font-family: "Pretendard", sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  color: var(--black);
-  min-width: 120px;
-  width: 115px;
-  cursor: pointer;
-`;
+// export const FilterButton = styled.button`
+//   display: inline-flex;
+//   align-items: center;
+//   justify-content: space-between;
+//   gap: 8px;
+//   padding: 8px 16px;
+//   border-radius: 6px;
+//   background: #ffffff;
+//   border: 1px solid var(--gray-4);
+//   font-family: "Pretendard", sans-serif;
+//   font-weight: 500;
+//   font-size: 14px;
+//   color: var(--black);
+//   min-width: 120px;
+//   width: 115px;
+//   cursor: pointer;
+// `;
 
 export const Filters = styled.div`
   position: relative;
@@ -131,9 +131,89 @@ export const FilterMenuItem = styled.button<{ $active?: boolean }>`
   }
 `;
 
+// Filter Section
+export const FilterSection = styled.div`
+  width: 795px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: visible;
+  z-index: 10;
+  margin-bottom: 20px;
+`;
+
 export const Table = styled.div`
   width: 100%;
   max-width: 795px;
+`;
+
+export const FilterButtonsWrapper = styled.div`
+  display: flex;
+  gap: 4px;
+`;
+
+export const FilterButtonGroup = styled.div`
+  position: relative;
+`;
+
+interface FilterButtonProps {
+  isActive?: boolean;
+}
+
+export const FilterButton = styled.button<FilterButtonProps>`
+  background-color: ${(props) =>
+    props.isActive ? COLORS.primaryLight : COLORS.white};
+  border: 1px solid
+    ${(props) => (props.isActive ? COLORS.primary : COLORS.grayBorder)};
+  border-radius: 6px;
+  padding: 8px 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  font-weight: ${(props) => (props.isActive ? 600 : 500)};
+  color: ${(props) => (props.isActive ? COLORS.primary : COLORS.black)};
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+// Dropdown Menu
+export const DropdownMenu = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: ${COLORS.white};
+  border: 1px solid ${COLORS.grayBorder};
+  border-radius: 6px;
+  overflow: hidden;
+  z-index: 100;
+  min-width: 150px;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+`;
+
+interface DropdownItemProps {
+  isSelected?: boolean;
+}
+
+export const DropdownItem = styled.div<DropdownItemProps>`
+  padding: 12px 16px;
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: ${(props) => (props.isSelected ? COLORS.primary : COLORS.black)};
+  cursor: pointer;
+  background-color: ${(props) =>
+    props.isSelected ? COLORS.primaryLight : "transparent"};
+
+  &:hover {
+    background-color: ${COLORS.grayLight};
+  }
 `;
 
 export const TableHead = styled.div`

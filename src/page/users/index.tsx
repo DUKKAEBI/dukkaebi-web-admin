@@ -69,11 +69,12 @@ const UsersPage = () => {
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("none");
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [sortLabel, setSortLabel] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const menuRef = useRef<HTMLDivElement>(null);
-  const filterRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(() => {
     let result = MOCK_USERS.filter(
@@ -120,48 +121,29 @@ const UsersPage = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        filterRef.current &&
-        !filterRef.current.contains(event.target as Node)
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
       ) {
-        setFilterOpen(false);
+        setOpenDropdown(null);
       }
     };
 
-    if (filterOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [filterOpen]);
+  }, []);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
-    // if (value.trim()) { // api 연결시 구현
-    //   fetchSearchProblems(value);
-    // } else {
-    //   fetchProblems();
-    // }
+    setQuery(value);
   };
 
-  const getSortLabel = () => {
-    switch (sortBy) {
-      case "name":
-        return "이름 순";
-      case "id":
-        return "아이디 순";
-      case "grade":
-        return "등급 순";
-      default:
-        return "선택 안함";
-    }
-  };
-
-  const handleSortSelect = (option: SortOption) => {
+  const handleSortSelect = (option: SortOption, label: string | null) => {
     setSortBy(option);
-    setFilterOpen(false);
+    setSortLabel(label);
+    setOpenDropdown(null);
     setPage(1);
   };
 
@@ -182,40 +164,52 @@ const UsersPage = () => {
           </S.SearchIconContainer>
         </S.SearchBox>
 
-        <S.Filters ref={filterRef}>
-          <S.FilterButton onClick={() => setFilterOpen(!filterOpen)}>
-            {getSortLabel()}
-            <img src={ArrowDownIcon} alt="검색" />
-          </S.FilterButton>
-          {filterOpen && (
-            <S.FilterMenu>
-              <S.FilterMenuItem
-                $active={sortBy === "none"}
-                onClick={() => handleSortSelect("none")}
+        {/* Filter Section */}
+        <S.FilterSection ref={dropdownRef}>
+          <S.FilterButtonsWrapper>
+            <S.FilterButtonGroup>
+              <S.FilterButton
+                isActive={openDropdown === "sort" || sortBy !== "none"}
+                onClick={() =>
+                  setOpenDropdown(openDropdown === "sort" ? null : "sort")
+                }
               >
-                선택 안함
-              </S.FilterMenuItem>
-              <S.FilterMenuItem
-                $active={sortBy === "name"}
-                onClick={() => handleSortSelect("name")}
-              >
-                이름 순
-              </S.FilterMenuItem>
-              <S.FilterMenuItem
-                $active={sortBy === "id"}
-                onClick={() => handleSortSelect("id")}
-              >
-                아이디 순
-              </S.FilterMenuItem>
-              <S.FilterMenuItem
-                $active={sortBy === "grade"}
-                onClick={() => handleSortSelect("grade")}
-              >
-                등급 순
-              </S.FilterMenuItem>
-            </S.FilterMenu>
-          )}
-        </S.Filters>
+                {sortLabel || "정렬"}
+                <S.ArrowIcon src={ArrowDownIcon} alt="드롭다운" />
+              </S.FilterButton>
+
+              {/* Dropdown Menu - Sort */}
+              {openDropdown === "sort" && (
+                <S.DropdownMenu>
+                  <S.DropdownItem
+                    isSelected={sortBy === "none"}
+                    onClick={() => handleSortSelect("none", null)}
+                  >
+                    선택 안함
+                  </S.DropdownItem>
+                  <S.DropdownItem
+                    isSelected={sortBy === "name"}
+                    onClick={() => handleSortSelect("name", "이름 순")}
+                  >
+                    이름 순
+                  </S.DropdownItem>
+                  <S.DropdownItem
+                    isSelected={sortBy === "id"}
+                    onClick={() => handleSortSelect("id", "아이디 순")}
+                  >
+                    아이디 순
+                  </S.DropdownItem>
+                  <S.DropdownItem
+                    isSelected={sortBy === "grade"}
+                    onClick={() => handleSortSelect("grade", "등급 순")}
+                  >
+                    등급 순
+                  </S.DropdownItem>
+                </S.DropdownMenu>
+              )}
+            </S.FilterButtonGroup>
+          </S.FilterButtonsWrapper>
+        </S.FilterSection>
 
         <S.Table>
           <S.TableHead>

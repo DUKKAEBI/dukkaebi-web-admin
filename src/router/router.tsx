@@ -5,7 +5,7 @@ import ContestsPage from "../page/contests/index";
 import CoursePage from "../page/course/index";
 import CourseCreatePage from "../page/course/create/index";
 import CourseUpdatePage from "../page/course/update/index";
-import Profile from "../page/profile";
+import Profile from "../page/users/info/index";
 import Problems from "../page/problems";
 import UsersPage from "../page/users";
 import ContestCreate from "../page/contests/create/index";

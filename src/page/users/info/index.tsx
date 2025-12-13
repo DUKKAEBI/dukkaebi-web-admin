@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import * as S from "./styles";
-import copperDubi from "../../assets/image/profile/dubi-rank/copper-dubi.png";
-import silverDubi from "../../assets/image/profile/dubi-rank/silver-dubi.png";
-import ironDubi from "../../assets/image/profile/dubi-rank/iron-dubi.png";
-import goldDubi from "../../assets/image/profile/dubi-rank/gold-dubi.png";
-import godDubi from "../../assets/image/profile/dubi-rank/god-dubi.png";
-import jadeDubi from "../../assets/image/profile/dubi-rank/jade-dubi.png";
-import wispDubi from "../../assets/image/profile/dubi-rank/wisp.png";
+import copperDubi from "../../../assets/image/profile/dubi-rank/copper-dubi.png";
+import silverDubi from "../../../assets/image/profile/dubi-rank/silver-dubi.png";
+import ironDubi from "../../../assets/image/profile/dubi-rank/iron-dubi.png";
+import goldDubi from "../../../assets/image/profile/dubi-rank/gold-dubi.png";
+import godDubi from "../../../assets/image/profile/dubi-rank/god-dubi.png";
+import jadeDubi from "../../../assets/image/profile/dubi-rank/jade-dubi.png";
+import wispDubi from "../../../assets/image/profile/dubi-rank/wisp.png";
 
-import profileImage from "../../assets/image/profile/profile_image.svg";
-import fireIcon from "../../assets/image/profile/solar_fire-bold-duotone.svg";
-import { Header } from "../../components/header";
-import { Footer } from "../../components/footer";
-import axiosInstance from "../../api/axiosInstance";
+import profileImage from "../../../assets/image/profile/profile_image.svg";
+import fireIcon from "../../../assets/image/profile/solar_fire-bold-duotone.svg";
+import { Header } from "../../../components/header";
+import { Footer } from "../../../components/footer";
+import axiosInstance from "../../../api/axiosInstance";
 
 interface UserData {
   id?: number;
