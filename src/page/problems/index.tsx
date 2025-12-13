@@ -80,6 +80,22 @@ const SAMPLE_PROBLEMS: Problem[] = [
 
 export default function Problems() {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [difficultyFilter, setDifficultyFilter] = useState<number | null>(null);
+  const [difficultyLabel, setDifficultyLabel] = useState<string | null>(null);
+  const [successRateFilter, setSuccessRateFilter] = useState<
+    "asc" | "desc" | null
+  >(null);
+  const [successRateLabel, setSuccessRateLabel] = useState<string | null>(null);
+  const [problems, setProblems] = useState<Problem[]>([]);
+  const [timeLabel, setTimeLabel] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [openActionId, setOpenActionId] = useState<number | null>(null);
+  const buttonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   // Close action menu when clicking outside
   useEffect(() => {
     const handleDocClick = (e: MouseEvent) => {
@@ -96,20 +112,23 @@ export default function Problems() {
     document.addEventListener("click", handleDocClick);
     return () => document.removeEventListener("click", handleDocClick);
   }, []);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState<string | null>(null);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [difficultyFilter, setDifficultyFilter] = useState<number | null>(null);
-  const [difficultyLabel, setDifficultyLabel] = useState<string | null>(null);
-  const [successRateFilter, setSuccessRateFilter] = useState<
-    "asc" | "desc" | null
-  >(null);
-  const [successRateLabel, setSuccessRateLabel] = useState<string | null>(null);
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [timeLabel, setTimeLabel] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [openActionId, setOpenActionId] = useState<number | null>(null);
-  const buttonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (difficultyFilter !== null || successRateFilter || sortBy) {
@@ -339,7 +358,7 @@ export default function Problems() {
         </S.SearchBox>
 
         {/* Filter Section */}
-        <S.FilterSection>
+        <S.FilterSection ref={dropdownRef}>
           <S.FilterButtonsWrapper>
             <S.FilterButtonGroup>
               <S.FilterButton
