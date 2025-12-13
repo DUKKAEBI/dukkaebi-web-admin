@@ -30,13 +30,6 @@ export const Header = () => {
             </S.NavLink>
           </S.Nav>
         </S.HeaderLeft>
-        <S.UserIcon as={Link} to="/profile">
-          <img
-            src={tablerUserIcon}
-            alt="user"
-            style={{ width: "100%", height: "100%" }}
-          />
-        </S.UserIcon>
       </S.HeaderContent>
     </S.Header>
   );
