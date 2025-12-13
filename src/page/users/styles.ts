@@ -146,6 +146,7 @@ export const FilterSection = styled.div`
 export const Table = styled.div`
   width: 100%;
   max-width: 795px;
+  margin: 0 auto 40px;
 `;
 
 export const FilterButtonsWrapper = styled.div`
