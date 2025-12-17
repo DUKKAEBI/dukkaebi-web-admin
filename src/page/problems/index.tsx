@@ -35,55 +35,6 @@ interface Problem {
   failed: boolean;
 }
 
-// Sample problems to display when API is empty or unavailable
-const SAMPLE_PROBLEMS: Problem[] = [
-  {
-    id: 1,
-    title: "숫자야구",
-    difficulty: 2,
-    completedCount: 91,
-    successRate: 3,
-    solved: true,
-    failed: false,
-  },
-  {
-    id: 2,
-    title: "문자열과 알파벳 쿼리",
-    difficulty: 1,
-    completedCount: 31,
-    successRate: 0,
-    solved: false,
-    failed: false,
-  },
-  {
-    id: 3,
-    title: "정렬과 탐색 기초",
-    difficulty: 3,
-    completedCount: 12,
-    successRate: 10,
-    solved: false,
-    failed: true,
-  },
-  {
-    id: 4,
-    title: "그래프 경로 찾기",
-    difficulty: 4,
-    completedCount: 5,
-    successRate: 2,
-    solved: false,
-    failed: false,
-  },
-  {
-    id: 5,
-    title: "동적 계획법 연습",
-    difficulty: 5,
-    completedCount: 2,
-    successRate: 1,
-    solved: false,
-    failed: false,
-  },
-];
-
 export default function Problems() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -171,7 +122,7 @@ export default function Problems() {
 
   const difficultyMap: Record<string, number> = {
     GOLD: 1,
-    SLIVER: 2,
+    SILVER: 2,
     COPPER: 3,
     IRON: 4,
     JADE: 5,
@@ -179,7 +130,7 @@ export default function Problems() {
 
   const difficultyReverseMap: Record<number, string> = {
     1: "GOLD",
-    2: "SLIVER",
+    2: "SILVER",
     3: "COPPER",
     4: "IRON",
     5: "JADE",
@@ -211,7 +162,6 @@ export default function Problems() {
       mapProblems(list);
     } catch (error) {
       console.error("Failed to fetch problems:", error);
-      setProblems(SAMPLE_PROBLEMS);
     } finally {
       setIsLoading(false);
     }
@@ -236,7 +186,6 @@ export default function Problems() {
       mapProblems(list);
     } catch (error) {
       console.error("Failed to fetch filtered problems:", error);
-      setProblems(SAMPLE_PROBLEMS);
     } finally {
       setIsLoading(false);
     }
@@ -250,7 +199,6 @@ export default function Problems() {
       mapProblems(list);
     } catch (error) {
       console.error("Failed to search problems:", error);
-      setProblems(SAMPLE_PROBLEMS);
     } finally {
       setIsLoading(false);
     }
@@ -258,8 +206,8 @@ export default function Problems() {
 
   const mapProblems = (apiProblems: any[]) => {
     if (!Array.isArray(apiProblems) || apiProblems.length === 0) {
-      // show sample problems when API returns nothing
-      setProblems(SAMPLE_PROBLEMS);
+      console.log(apiProblems);
+      setProblems(apiProblems);
       return;
     }
     const mapped = apiProblems.map((p) => ({
@@ -268,9 +216,9 @@ export default function Problems() {
       difficulty: difficultyMap[p.difficulty],
       completedCount: p.solvedCount,
       successRate: p.correctRate,
-      ...solvedStatusMap[p.solvedResult],
+      ...solvedStatusMap[p.solvedResult || "NOT_SOLVED"],
     }));
-    setProblems(mapped.length ? mapped : SAMPLE_PROBLEMS);
+    setProblems(mapped.length ? mapped : []);
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

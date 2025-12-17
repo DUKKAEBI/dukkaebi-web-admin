@@ -23,8 +23,9 @@ export interface ProblemCreatePayload {
   testCases: TestCase[];
 }
 
-export const getProblems = (params?: Record<string, unknown>) =>
-  axiosInstance.get<ProblemItem[]>(`/problems`, { params });
+export const getProblems = (params?: Record<string, unknown>) => {
+  return axiosInstance.get<ProblemItem[]>(`/problems`, { params });
+};
 
 export const getProblem = (id: number) =>
   axiosInstance.get<ProblemItem>(`/problems/${id}`);
@@ -38,8 +39,10 @@ export const filterProblems = (params: Record<string, unknown>) =>
 export const createProblem = (payload: ProblemCreatePayload) =>
   axiosInstance.post(`/admin/problems/create`, payload);
 
-export const updateProblem = (id: number, payload: Partial<ProblemCreatePayload>) =>
-  axiosInstance.put(`/admin/problems/update/${id}`, payload);
+export const updateProblem = (
+  id: number,
+  payload: Partial<ProblemCreatePayload>
+) => axiosInstance.put(`/admin/problems/update/${id}`, payload);
 
 export const deleteProblem = (id: number) =>
   axiosInstance.delete(`/admin/problems/delete/${id}`);
