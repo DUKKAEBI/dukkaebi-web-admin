@@ -4,6 +4,7 @@ import { Header } from "../../../components/header/index";
 import ArrowDownIcon from "../../../assets/image/course/simple-line-icons_arrow-down.png";
 import ArrowUpIcon from "../../../assets/image/course/simple-line-icons_arrow-up.png";
 import * as S from "./style";
+import courseApi from "../../../api/courseApi";
 
 interface FormData {
   title: string;
@@ -67,13 +68,28 @@ const CourseCreatePage = () => {
     
     setLoading(true);
     try {
-      // API 호출 로직 추가 예정
-      console.log("Course data:", form);
+      if (!form.title.trim()) {
+        alert("코스 제목을 입력해주세요.");
+        setLoading(false);
+        return;
+      }
+      const levelMap: Record<string, string> = { 하: "EASY", 중: "MEDIUM", 상: "HARD" };
+      const payload = {
+        title: form.title,
+        description: form.description,
+        keywords: form.keywords,
+        level: levelMap[form.difficulty] ?? form.difficulty,
+      };
+      console.debug("Creating course payload:", payload);
+      await courseApi.createCourse(payload);
       alert("코스가 생성되었습니다.");
       navigate("/course");
     } catch (error) {
       console.error("Failed to create course:", error);
-      alert("코스 생성에 실패했습니다.");
+      const resp = (error as any)?.response;
+      const status = resp?.status;
+      const respBody = resp?.data ?? resp;
+      alert(`코스 생성 실패: status=${status}\n${JSON.stringify(respBody)}`);
     } finally {
       setLoading(false);
     }

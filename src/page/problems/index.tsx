@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../../api/axiosInstance";
+import { getProblems, filterProblems, searchProblems, deleteProblem } from "../../api/problemApi";
 import * as S from "./style";
 import SearchIcon from "../../assets/image/problems/search.png";
 import ArrowDownIcon from "../../assets/image/problems/arrow-down.png";
@@ -173,12 +173,11 @@ export default function Problems() {
   const fetchProblems = async () => {
     setIsLoading(true);
     try {
-      const response = await axiosInstance.get(`/problems`);
+      const response = await getProblems();
       const list = extractProblemList(response.data);
       mapProblems(list);
     } catch (error) {
       console.error("Failed to fetch problems:", error);
-      // fallback to sample data for demo/testing
       setProblems(SAMPLE_PROBLEMS);
     } finally {
       setIsLoading(false);
@@ -199,7 +198,7 @@ export default function Problems() {
         params.time = sortBy;
       }
 
-      const response = await axiosInstance.get(`/problems/filter`, { params });
+      const response = await filterProblems(params);
       const list = extractProblemList(response.data);
       mapProblems(list);
     } catch (error) {
@@ -213,9 +212,7 @@ export default function Problems() {
   const fetchSearchProblems = async (query: string) => {
     setIsLoading(true);
     try {
-      const response = await axiosInstance.get(`/problems/search`, {
-        params: { name: query },
-      });
+      const response = await searchProblems(query);
       const list = extractProblemList(response.data);
       mapProblems(list);
     } catch (error) {
@@ -276,7 +273,7 @@ export default function Problems() {
     e.stopPropagation();
     if (!window.confirm("정말로 이 문제를 삭제하시겠습니까?")) return;
     try {
-      await axiosInstance.delete(`/problems/${id}`);
+      await deleteProblem(id);
       // remove locally
       setProblems((prev) => prev.filter((p) => p.id !== id));
       setOpenActionId(null);

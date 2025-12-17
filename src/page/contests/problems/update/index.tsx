@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../../components/header";
 import { Footer } from "../../../../components/footer";
 import * as S from "./styles";
+import problemApi from "../../../../api/problemApi";
 
 interface TestCase {
   input: string;
@@ -17,8 +19,53 @@ const ProblemUpdate = () => {
     { input: "2 7", output: "5" },
   ]);
 
-  const addCase = () =>
-    setCases((prev) => [...prev, { input: "", output: "" }]);
+  const addCase = () => setCases((prev) => [...prev, { input: "", output: "" }]);
+
+  const navigate = useNavigate();
+  const { problemsId } = useParams<{ problemsId: string }>();
+
+  useEffect(() => {
+    let mounted = true;
+    const fetch = async () => {
+      if (!problemsId) return;
+      try {
+        const res = await problemApi.getProblem(Number(problemsId));
+        if (!mounted) return;
+        const data: any = (res as any)?.data ?? (res as any);
+        setTitle(data.title ?? data.name ?? "");
+        setDescription(data.description ?? "");
+        setInputCond(data.inputCond ?? data.inputRange ?? "");
+        setOutputCond(data.outputCond ?? data.outputRange ?? "");
+        if (Array.isArray(data.testCases)) setCases(data.testCases);
+      } catch (err) {
+        console.error("Failed to load problem:", err);
+      }
+    };
+
+    fetch();
+    return () => {
+      mounted = false;
+    };
+  }, [problemsId]);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (!problemsId) return;
+      const payload = {
+        title,
+        description,
+        inputCond,
+        outputCond,
+        testCases: cases,
+      };
+      await problemApi.updateProblem(Number(problemsId), payload);
+      navigate(-1);
+    } catch (err) {
+      console.error("Failed to update problem:", err);
+      alert("문제 수정 중 오류가 발생했습니다.");
+    }
+  };
 
   return (
     <S.Container>
@@ -123,8 +170,8 @@ const ProblemUpdate = () => {
           </S.Field>
 
           <S.Actions>
-            <S.SecondaryButton>문제 수정 취소하기</S.SecondaryButton>
-            <S.PrimaryButton>문제 수정하기</S.PrimaryButton>
+            <S.SecondaryButton onClick={() => navigate(-1)}>문제 수정 취소하기</S.SecondaryButton>
+            <S.PrimaryButton onClick={onSubmit}>문제 수정하기</S.PrimaryButton>
           </S.Actions>
         </S.Content>
       </S.Main>

@@ -9,12 +9,15 @@ import ArrowLeftIcon from "../../assets/image/problems/arrow-left.png";
 //오른쪽
 import ArrowRightIcon from "../../assets/image/problems/arrow-right.png";
 
+import { contestApi } from "../../api/contestApi";
+
 interface ContestItem {
-  id: number;
-  title: string;
-  dDay: number;
-  participants: number;
-  image: string;
+  id?: number | string;
+  code?: string;
+  title?: string;
+  dDay?: number;
+  participants?: number;
+  image?: string;
 }
 
 const IMAGE = "https://i.ibb.co/Rp6GC0LG/dgsw.png";
@@ -31,14 +34,49 @@ const ContestsPage = () => {
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const [contests, setContests] = useState<ContestItem[]>(MOCK);
   const [page, setPage] = useState(1);
   const PER_PAGE = 12;
   const menuRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchContests = async () => {
+      try {
+        const data = await contestApi.getContests();
+        if (!mounted) return;
+
+        // Expecting array - use fallback mapping
+        if (Array.isArray(data)) {
+          setContests(
+            data.map((item: any) => ({
+              id: item.id ?? item.code,
+              code: item.code,
+              title: item.title ?? item.name ?? item.subject,
+              dDay: item.dDay ?? item.dday ?? 0,
+              participants: item.participants ?? item.participantCount ?? 0,
+              image: item.image ?? item.thumbnail ?? IMAGE,
+            }))
+          );
+        }
+      } catch (err) {
+        // leave MOCK as fallback
+        console.error("Failed to fetch contests:", err);
+      }
+    };
+
+    fetchContests();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const filtered = useMemo(
     () =>
-      MOCK.filter((c) => c.title.toLowerCase().includes(query.toLowerCase())),
-    [query]
+      contests.filter((c) => (c.title ?? "").toLowerCase().includes(query.toLowerCase())),
+    [contests, query]
   );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
@@ -80,8 +118,10 @@ const ContestsPage = () => {
         </S.SearchBar>
 
         <S.Grid>
-          {pageItems.map((c) => (
-            <S.Card key={c.id} onClick={() => navigate(`/contests/${c.id}`)}>
+          {pageItems.map((c) => {
+            const idOrCode = c.code ?? c.id;
+            return (
+              <S.Card key={String(idOrCode)} onClick={() => navigate(`/contests/${idOrCode}`)}>
               <S.CardImageWrapper>
                 <S.CardImage src={c.image} alt={c.title} />
                 <S.MoreButtonWrapper ref={openMenuId === c.id ? menuRef : null}>
@@ -89,7 +129,7 @@ const ContestsPage = () => {
                     aria-label="more"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setOpenMenuId(openMenuId === c.id ? null : c.id);
+                      setOpenMenuId(openMenuId === c.id ? null : (c.id as number));
                     }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -103,7 +143,7 @@ const ContestsPage = () => {
                       <S.ContestMenuItem
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/contests/update/${c.id}`);
+                          navigate(`/contests/update/${idOrCode}`);
                         }}
                       >
                         대회 수정
@@ -113,7 +153,28 @@ const ContestsPage = () => {
                         onClick={(e) => {
                           e.stopPropagation();
                           if (window.confirm("정말 삭제하시겠습니까?")) {
-                            console.log("삭제:", c.id);
+                            (async () => {
+                              try {
+                                await contestApi.deleteContest(idOrCode as string | number);
+                                // refetch
+                                const data = await contestApi.getContests();
+                                if (Array.isArray(data)) {
+                                  setContests(
+                                    data.map((item: any) => ({
+                                      id: item.id ?? item.code,
+                                      code: item.code,
+                                      title: item.title ?? item.name ?? item.subject,
+                                      dDay: item.dDay ?? item.dday ?? 0,
+                                      participants: item.participants ?? item.participantCount ?? 0,
+                                      image: item.image ?? item.thumbnail ?? IMAGE,
+                                    }))
+                                  );
+                                }
+                              } catch (err) {
+                                console.error("삭제 실패:", err);
+                                alert("삭제 중 오류가 발생했습니다.");
+                              }
+                            })();
                           }
                           setOpenMenuId(null);
                         }}
@@ -130,8 +191,9 @@ const ContestsPage = () => {
                   종료까지 D-{c.dDay} ・ {c.participants}명 참여중
                 </S.CardMeta>
               </S.CardBody>
-            </S.Card>
-          ))}
+              </S.Card>
+            );
+          })}
         </S.Grid>
 
         <S.BottomBar>

@@ -14,26 +14,10 @@ import ArrowRightIcon from "../../assets/image/problems/arrow-right.png";
 interface UserRow {
   id: string;
   name: string;
-  grade: "은깨비" | "금깨비" | "옥깨비" | "신깨비" | "동깨비" | "철깨비";
+  grade: "은깨비" | "금깨비" | "옥깨비" | "신깨비" | "동깨비" | "철깨비" | "도깨비불";
 }
 
-const MOCK_USERS: UserRow[] = [
-  { id: "yoonha2017", name: "이윤하", grade: "동깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "철깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "은깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "금깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "옥깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "신깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "동깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "동깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "동깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "동깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "동깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "동깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "동깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "동깨비" },
-  { id: "yoonha2017", name: "이윤하", grade: "동깨비" },
-];
+const MOCK_USERS: UserRow[] = [];
 
 const gradeColor = (g: UserRow["grade"]) => {
   switch (g) {
@@ -48,8 +32,10 @@ const gradeColor = (g: UserRow["grade"]) => {
     case "철깨비":
       return "#58596c";
     case "동깨비":
-    default:
       return "#986b52";
+    case "도깨비불":
+    default:
+      return "#0191F8";
   }
 };
 
@@ -60,6 +46,7 @@ const gradeOrder: Record<UserRow["grade"], number> = {
   은깨비: 4,
   철깨비: 5,
   동깨비: 6,
+  도깨비불: 7,
 };
 
 type SortOption = "none" | "name" | "id" | "grade";
@@ -72,12 +59,13 @@ const UsersPage = () => {
   const [sortLabel, setSortLabel] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [users, setUsers] = useState<UserRow[]>(MOCK_USERS);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(() => {
-    let result = MOCK_USERS.filter(
+    let result = users.filter(
       (u) =>
         u.id.toLowerCase().includes(query.toLowerCase()) ||
         u.name.includes(query)
@@ -95,7 +83,7 @@ const UsersPage = () => {
     }
 
     return result;
-  }, [query, sortBy]);
+  }, [query, sortBy, users]);
 
   const [page, setPage] = useState(1);
   const PER_PAGE = 14;
@@ -117,6 +105,62 @@ const UsersPage = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [menuOpen]);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchUsers = async () => {
+      try {
+        const { default: userApi } = await import("../../api/userApi");
+        const response = await userApi.getUsers();
+        console.log('User list API response:', response);
+        if (!mounted) return;
+        
+        // 응답이 배열이거나 data 필드에 배열이 있는 경우 처리
+        const data = Array.isArray(response) ? response : (response?.data || []);
+        console.log('Processed data array:', data);
+        
+        // 영어 growth 값을 한글 등급으로 매핑
+        const growthToGrade: Record<string, UserRow["grade"]> = {
+          "WISP": "도깨비불",
+          "COPPER": "동깨비",
+          "IRON": "철깨비",
+          "SILVER": "은깨비",
+          "GOLD": "금깨비",
+          "JADE": "옥깨비",
+          "GOD": "신깨비",
+        };
+        
+        if (Array.isArray(data) && data.length > 0) {
+          const mappedUsers = data.map((it: any) => {
+            // growth 필드에서 영어 값을 읽어서 한글로 변환
+            const rawGrowth = (it.growth ?? "COPPER").toUpperCase();
+            const grade = growthToGrade[rawGrowth] ?? "동깨비";
+            
+            return {
+              id: String(it.id ?? it.loginId ?? ''),
+              name: it.nickname ?? it.name ?? it.loginId ?? '이름 없음',
+              grade,
+            };
+          });
+          console.log('Mapped users:', mappedUsers);
+          setUsers(mappedUsers);
+        } else {
+          console.log('No users data or empty array');
+          setUsers([]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch users:", err);
+        alert('사용자 목록을 불러오는데 실패했습니다.');
+        setUsers([]);
+      }
+    };
+
+    fetchUsers();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -255,7 +299,53 @@ const UsersPage = () => {
                       >
                         유저 정보 조회
                       </S.MenuItem>
-                      <S.MenuItem role="menuitem" $danger>
+                      <S.MenuItem
+                        role="menuitem"
+                        $danger
+                        onClick={async () => {
+                          if (!confirm("해당 유저를 삭제하시겠습니까?")) return;
+                          try {
+                            const { default: userApi } = await import("../../api/userApi");
+                            await userApi.deleteUser(u.id);
+                            console.log(`User ${u.id} deleted successfully`);
+                            
+                            // refetch
+                            const response = await userApi.getUsers();
+                            const data = Array.isArray(response) ? response : (response?.data || []);
+                            console.log("Refetch data after delete:", data);
+                            
+                            // 영어 growth 값을 한글 등급으로 매핑
+                            const growthToGrade: Record<string, UserRow["grade"]> = {
+                              "WISP": "도깨비불",
+                              "COPPER": "동깨비",
+                              "IRON": "철깨비",
+                              "SILVER": "은깨비",
+                              "GOLD": "금깨비",
+                              "JADE": "옥깨비",
+                              "GOD": "신깨비",
+                            };
+                            
+                            if (Array.isArray(data)) {
+                              const mappedUsers = data.map((it: any) => {
+                                const rawGrowth = (it.growth ?? "COPPER").toUpperCase();
+                                const grade = growthToGrade[rawGrowth] ?? "동깨비";
+                                
+                                return {
+                                  id: String(it.id ?? it.loginId ?? ''),
+                                  name: it.nickname ?? it.name ?? it.loginId ?? '이름 없음',
+                                  grade,
+                                };
+                              });
+                              setUsers(mappedUsers);
+                              alert("유저가 삭제되었습니다.");
+                              setMenuOpen(null);
+                            }
+                          } catch (err) {
+                            console.error("User delete failed:", err);
+                            alert("유저 삭제 중 오류가 발생했습니다.");
+                          }
+                        }}
+                      >
                         유저 삭제
                       </S.MenuItem>
                     </S.ContextMenu>

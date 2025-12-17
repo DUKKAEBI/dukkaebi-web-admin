@@ -5,6 +5,7 @@ import ContestsPage from "../page/contests/index";
 import CoursePage from "../page/course/index";
 import CourseCreatePage from "../page/course/create/index";
 import CourseUpdatePage from "../page/course/update/index";
+import CourseInfo from "../page/course/info/index";
 import Profile from "../page/users/info/index";
 import Problems from "../page/problems";
 import UsersPage from "../page/users";
@@ -31,6 +32,7 @@ export default function AppRoutes() {
       <Route path="/contests/create" element={<ContestCreate />} />
       <Route path="/contests/update/:contestsId" element={<ContestUpdate />} />
       <Route path="/course" element={<CoursePage />} />
+      <Route path="/course/:courseId" element={<CourseInfo />} />
       <Route path="/course/create" element={<CourseCreatePage />} />
       <Route path="/course/update/:courseId" element={<CourseUpdatePage />} />
       <Route
