@@ -39,7 +39,6 @@ export default function Problems() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isPicker = (searchParams.get("pickerFor") || "") === "course";
-  console.log(isPicker);
   const returnTo = searchParams.get("returnTo") || "";
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<string | null>(null);
