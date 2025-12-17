@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "../../../components/header/index";
 import axiosInstance from "../../../api/axiosInstance";
 import * as S from "./style";
+import problemApi from "../../../api/problemApi";
 import GoldIcon from "../../../assets/image/problems/difficulty/gold.png";
 import SilverIcon from "../../../assets/image/problems/difficulty/silver.png";
 import CopperIcon from "../../../assets/image/problems/difficulty/copper.png";
@@ -57,6 +58,33 @@ const ProblemCreatePage = () => {
 
   const addCase = () =>
     setCases((prev) => [...prev, { input: "", output: "" }]);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const difficultyMap: Record<number, "COPPER" | "IRON" | "SILVER" | "GOLD" | "JADE"> = {
+        3: "COPPER",  // 구리
+        4: "IRON",    // 철
+        2: "SILVER",  // 은
+        1: "GOLD",    // 금
+        5: "JADE",    // 옥
+      };
+      const payload = {
+        name: title,
+        description,
+        input: inputCond,
+        output: outputCond,
+        difficulty: difficultyMap[form.difficulty] ?? "COPPER",
+        testCases: cases,
+      };
+      console.log('Creating problem with payload:', payload);
+      await problemApi.createProblem(payload);
+      navigate("/problems");
+    } catch (err) {
+      console.error("Failed to create problem:", err);
+      alert("문제 생성 중 오류가 발생했습니다.");
+    }
+  };
 
   return (
     <S.Container>
@@ -213,7 +241,7 @@ const ProblemCreatePage = () => {
 
           <S.Actions>
             <S.SecondaryButton onClick={() => navigate('/problems')}>문제 생성 취소하기</S.SecondaryButton>
-            <S.PrimaryButton>문제 생성</S.PrimaryButton>
+            <S.PrimaryButton onClick={onSubmit}>문제 생성</S.PrimaryButton>
           </S.Actions>
         </S.Content>
       </S.Main>

@@ -10,10 +10,10 @@ import ArrowLeftIcon from "../../assets/image/problems/arrow-left.png";
 import ArrowRightIcon from "../../assets/image/problems/arrow-right.png";
 
 interface CourseItem {
-  id: number;
-  title: string;
-  level: string;
-  keywords: string[];
+  id?: number | string;
+  title?: string;
+  level?: string;
+  keywords?: string[];
 }
 
 const IMAGE = "https://i.ibb.co/Rp6GC0LG/dgsw.png";
@@ -26,17 +26,48 @@ const MOCK: CourseItem[] = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 const CoursePage = () => {
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const [courses, setCourses] = useState<CourseItem[]>(MOCK);
   const [page, setPage] = useState(1);
   const PER_PAGE = 12;
   const menuRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    let mounted = true;
+    const fetchCourses = async () => {
+      try {
+        const { default: courseApi } = await import("../../api/courseApi");
+        const data = await courseApi.getCourses();
+        if (!mounted) return;
+        if (Array.isArray(data)) {
+          console.debug("courseApi.getCourses raw:", data);
+          const mapped = data.map((it: any) => ({
+            id: it.id ?? it.code ?? it.courseId ?? it._id ?? it.identifier ?? null,
+            title: it.title ?? it.name ?? it.subject ?? "",
+            level: it.level ?? it.difficulty ?? "",
+            keywords: it.keywords ?? it.tags ?? it.labels ?? [],
+            _raw: it,
+          }));
+          console.debug("course list mapped:", mapped);
+          setCourses(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to fetch courses:", err);
+      }
+    };
+
+    fetchCourses();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const filtered = useMemo(
-    () =>
-      MOCK.filter((c) => c.title.toLowerCase().includes(query.toLowerCase())),
-    [query]
+    () => courses.filter((c) => (c.title ?? "").toLowerCase().includes(query.toLowerCase())),
+    [courses, query]
   );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
@@ -78,23 +109,25 @@ const CoursePage = () => {
         </S.SearchBar>
 
         <S.Grid>
-          {pageItems.map((c) => (
-            <S.Card key={c.id} onClick={() => navigate(`/course/${c.id}`)}>
+          {pageItems.map((c, idx) => {
+            const itemKey = `${page}-${idx}-${String(c.id ?? "")}`;
+            return (
+              <S.Card key={itemKey} onClick={() => navigate(`/course/${c.id}`)}>
               <S.CardContent>
                 <S.LevelBadge>난이도 : {c.level}</S.LevelBadge>
                 <S.CardTitle>{c.title}</S.CardTitle>
                 <S.KeywordContainer>
-                  {c.keywords.map((keyword, idx) => (
+                  {(c.keywords ?? []).map((keyword, idx) => (
                     <S.Keyword key={idx}>{keyword}</S.Keyword>
                   ))}
                 </S.KeywordContainer>
               </S.CardContent>
-              <S.MoreButtonWrapper ref={openMenuId === c.id ? menuRef : null}>
+              <S.MoreButtonWrapper ref={openMenuId === itemKey ? menuRef : null}>
                 <S.MoreButton
                   aria-label="more"
                   onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                     e.stopPropagation();
-                    setOpenMenuId(openMenuId === c.id ? null : c.id);
+                    setOpenMenuId(openMenuId === itemKey ? null : itemKey);
                   }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -103,7 +136,7 @@ const CoursePage = () => {
                     <circle cx="12" cy="19" r="1.5" fill="#BDBDBD" />
                   </svg>
                 </S.MoreButton>
-                {openMenuId === c.id && (
+                {openMenuId === itemKey && (
                   <S.CourseMenu>
                     <S.CourseMenuItem
                       onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -115,10 +148,29 @@ const CoursePage = () => {
                     </S.CourseMenuItem>
                     <S.CourseMenuItem
                       $danger
-                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                      onClick={async (e: React.MouseEvent<HTMLButtonElement>) => {
                         e.stopPropagation();
-                        if (window.confirm("정말 삭제하시겠습니까?")) {
-                          console.log("삭제:", c.id);
+                        if (!window.confirm("정말 삭제하시겠습니까?")) {
+                          setOpenMenuId(null);
+                          return;
+                        }
+                        try {
+                          const { default: courseApi } = await import("../../api/courseApi");
+                          await courseApi.deleteCourse(c.id as string | number);
+                          const data = await courseApi.getCourses();
+                          if (Array.isArray(data)) {
+                            setCourses(
+                              data.map((it: any) => ({
+                                id: it.id ?? it.code,
+                                title: it.title ?? it.name,
+                                level: it.level ?? it.difficulty ?? "",
+                                keywords: it.keywords ?? it.tags ?? [],
+                              }))
+                            );
+                          }
+                        } catch (err) {
+                          console.error("Course delete failed:", err);
+                          alert("코스 삭제 중 오류가 발생했습니다.");
                         }
                         setOpenMenuId(null);
                       }}
@@ -129,7 +181,8 @@ const CoursePage = () => {
                 )}
               </S.MoreButtonWrapper>
             </S.Card>
-          ))}
+            );
+          })}
         </S.Grid>
 
         <S.BottomBar>

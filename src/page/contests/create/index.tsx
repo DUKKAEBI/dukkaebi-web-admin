@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "../../../components/header/index";
 import * as S from "./styles";
+import contestApi from "../../../api/contestApi";
 
 interface FormData {
   title: string;
@@ -33,6 +34,14 @@ const ContestCreatePage = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      // Map form to API payload
+      const payload = {
+        title: form.title,
+        description: form.description,
+        startDate: form.startDate,
+        endDate: form.endDate,
+      };
+      await contestApi.createContest(payload);
       navigate("/contests");
     } finally {
       setLoading(false);

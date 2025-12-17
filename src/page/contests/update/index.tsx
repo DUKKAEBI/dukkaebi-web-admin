@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../components/header/index";
 import * as S from "./styles";
+import contestApi from "../../../api/contestApi";
 
 interface FormData {
   title: string;
@@ -12,6 +13,7 @@ interface FormData {
 
 const ContestCreatePage = () => {
   const navigate = useNavigate();
+  const { contestsId } = useParams<{ contestsId: string }>();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<FormData>({
     title: "",
@@ -19,6 +21,29 @@ const ContestCreatePage = () => {
     startDate: "",
     endDate: "",
   });
+
+  useEffect(() => {
+    let mounted = true;
+    const fetch = async () => {
+      if (!contestsId) return;
+      try {
+        const data = await contestApi.getContest(contestsId);
+        if (!mounted) return;
+        setForm({
+          title: data.title ?? "",
+          description: data.description ?? "",
+          startDate: data.startDate ?? "",
+          endDate: data.endDate ?? "",
+        });
+      } catch (err) {
+        console.error("Failed to load contest for edit:", err);
+      }
+    };
+    fetch();
+    return () => {
+      mounted = false;
+    };
+  }, [contestsId]);
 
   const onChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -33,8 +58,15 @@ const ContestCreatePage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // TODO: integrate API once ready
-      console.log("submit", form);
+      if (contestsId) {
+        const payload = {
+          title: form.title,
+          description: form.description,
+          startDate: form.startDate,
+          endDate: form.endDate,
+        };
+        await contestApi.updateContest(contestsId, payload);
+      }
       navigate("/contests");
     } finally {
       setLoading(false);

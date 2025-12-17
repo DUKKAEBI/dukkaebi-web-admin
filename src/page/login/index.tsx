@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { signIn } from "../../api/authApi";
 import * as S from "./style";
 import iconMessage from "../../assets/image/auth/Message.png";
 import iconChat from "../../assets/image/auth/Chat.png";
@@ -34,15 +35,19 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL;
-      const response = await axios.post(`${apiUrl}/auth/sign-in`, {
+      const response = await signIn({
         loginId: formData.id,
         password: formData.password,
       });
 
-      const { refreshToken, accessToken } = response.data;
-      localStorage.setItem("refreshToken", refreshToken);
-      localStorage.setItem("accessToken", accessToken);
+      const { refreshToken, accessToken } = response.data ?? {};
+
+      if (!accessToken) {
+        throw new Error("No access token in sign-in response");
+      }
+
+      localStorage.setItem("refreshToken", String(refreshToken));
+      localStorage.setItem("accessToken", String(accessToken));
 
       navigate("/");
     } catch (error) {

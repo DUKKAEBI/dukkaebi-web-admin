@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../../components/header";
 import { Footer } from "../../../../components/footer";
 import * as S from "./styles";
+import problemApi from "../../../../api/problemApi";
 
 interface TestCase {
   input: string;
@@ -17,8 +19,31 @@ const ProblemCreate = () => {
     { input: "2 7", output: "5" },
   ]);
 
-  const addCase = () =>
-    setCases((prev) => [...prev, { input: "", output: "" }]);
+  const addCase = () => setCases((prev) => [...prev, { input: "", output: "" }]);
+
+  const navigate = useNavigate();
+  const { contestsId } = useParams<{ contestsId: string }>();
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        name: title,
+        description,
+        input: inputCond,
+        output: outputCond,
+        difficulty: "SILVER" as const,
+        testCases: cases,
+        contestId: contestsId,
+      };
+
+      await problemApi.createProblem(payload as any);
+      navigate(`/contests/${contestsId ?? ""}`);
+    } catch (err) {
+      console.error("Failed to create problem:", err);
+      alert("문제 생성 중 오류가 발생했습니다.");
+    }
+  };
 
   return (
     <S.Container>
@@ -123,8 +148,8 @@ const ProblemCreate = () => {
           </S.Field>
 
           <S.Actions>
-            <S.SecondaryButton>문제 추가 취소하기</S.SecondaryButton>
-            <S.PrimaryButton>문제 추가하기</S.PrimaryButton>
+            <S.SecondaryButton onClick={() => navigate(`/contests/${contestsId ?? ""}`)}>문제 추가 취소하기</S.SecondaryButton>
+            <S.PrimaryButton onClick={onSubmit}>문제 추가하기</S.PrimaryButton>
           </S.Actions>
         </S.Content>
       </S.Main>

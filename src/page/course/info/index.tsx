@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../components/header/index";
 import * as S from "./style";
 import * as CourseS from "../style";
+import courseApi from "../../../api/courseApi";
 
 const initialRows = [
   { no: "1", title: "문자열과 알파벳 쿼리" },
@@ -18,6 +19,8 @@ const demoKeywords = ["#기초", "#알고리즘", "#기본문법"];
 const CourseInfo = () => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [rows, setRows] = useState(initialRows);
+  const [course, setCourse] = useState<any | null>(null);
+  const [keywords, setKeywords] = useState<string[]>(demoKeywords);
   const location = useLocation();
   const navigate = useNavigate();
   const { courseId } = useParams<{ courseId: string }>();
@@ -47,30 +50,61 @@ const CourseInfo = () => {
     }
   }, [location.state]);
 
+  useEffect(() => {
+    let mounted = true;
+    const fetch = async () => {
+      if (!courseId) return;
+      try {
+        const data = await courseApi.getCourse(courseId);
+        console.debug("courseApi.getCourse raw:", data);
+        if (!mounted) return;
+        setCourse(data);
+
+        // map problems if provided
+        if (Array.isArray(data.problems)) {
+          setRows(
+            data.problems.map((p: any, idx: number) => ({
+              no: String(idx + 1),
+              title: p.title ?? p.name ?? String(p.id),
+            }))
+          );
+        }
+
+        if (Array.isArray(data.keywords) && data.keywords.length > 0) {
+          setKeywords(data.keywords);
+        }
+      } catch (err) {
+        console.error("Failed to load course:", err);
+      }
+    };
+
+    fetch();
+    return () => {
+      mounted = false;
+    };
+  }, [courseId]);
+
   return (
     <S.Page onMouseDown={() => setOpenMenuId(null)}>
       <Header />
 
       <S.Section>
-        <S.Title>기초 100제</S.Title>
+        <S.Title>{course?.title ?? "제목 없는 코스"}</S.Title>
         <S.Description>
-          <S.DescriptionLine>
-            기초 100제 코스는 알고리즘 학습을 처음 시작하시는 분들이 기본기를
-            탄탄하게 다지실 수 있도록 구성된 입문용 문제 모음입니다.
-          </S.DescriptionLine>
-          <S.DescriptionLine>
-            이 코스에서는 변수, 조건문, 반복문과 같은 프로그래밍의 기초 문법부터
-            배열, 문자열, 정렬, 탐색 등 핵심 알고리즘 개념까지 자연스럽게 익히실
-            수 있도록 문제들이 단계별로 배치되어 있습니다.
-          </S.DescriptionLine>
-          <S.DescriptionLine>
-            총 100개의 문제를 풀어가시면서 입력을 분석하고 해결 로직을 설계하며,
-            이를 코드로 구현하는 전 과정을 반복적으로 경험하시게 되기 때문에
-            문제 해결 역량이 안정적으로 향상되실 것입니다.
-          </S.DescriptionLine>
+          {course?.description ? (
+            course.description.split("\n").map((line: string, i: number) => (
+              <S.DescriptionLine key={i}>{line}</S.DescriptionLine>
+            ))
+          ) : (
+            <>
+              <S.DescriptionLine>
+                코스 설명이 없습니다.
+              </S.DescriptionLine>
+            </>
+          )}
 
           <CourseS.KeywordContainer style={{ marginTop: 16 }}>
-            {demoKeywords.map((kw, idx) => (
+            {(keywords ?? []).map((kw, idx) => (
               <S.LocalKeyword key={idx}>{kw}</S.LocalKeyword>
             ))}
           </CourseS.KeywordContainer>

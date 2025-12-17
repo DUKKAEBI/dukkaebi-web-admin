@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import * as S from "./styles";
 import copperDubi from "../../../assets/image/profile/dubi-rank/copper-dubi.png";
 import silverDubi from "../../../assets/image/profile/dubi-rank/silver-dubi.png";
@@ -13,6 +14,7 @@ import fireIcon from "../../../assets/image/profile/solar_fire-bold-duotone.svg"
 import { Header } from "../../../components/header";
 import { Footer } from "../../../components/footer";
 import axiosInstance from "../../../api/axiosInstance";
+import userApi from "../../../api/userApi";
 
 interface UserData {
   id?: number;
@@ -157,6 +159,8 @@ const Profile = () => {
     generateHeatmapData()
   );
 
+  const { userId } = useParams<{ userId?: string }>();
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -172,25 +176,36 @@ const Profile = () => {
           1
         );
 
-        const [userResponse, contributionsResponse, streakResponse] =
-          await Promise.all([
-            axiosInstance.get<UserData>("/user"),
-            axiosInstance.get<ContributionsResponse>(
-              "/user/activity/contributions",
-              {
-                params: {
-                  start: formatDate(contributionsStart),
-                  end: formatDate(contributionsEnd),
-                },
-              }
-            ),
-            axiosInstance.get<StreakResponse>("/user/activity/streak"),
-          ]);
+        // If route contains userId, use userApi.getUser(userId), otherwise use /user
+        let userData: UserData | undefined;
+        if (userId) {
+          try {
+            const response = await userApi.getUser(userId);
+            console.log('User detail API response:', response);
+            userData = response?.data || response;
+          } catch (err) {
+            console.error("Failed to fetch user via userApi:", err);
+            alert('사용자 정보를 불러오는데 실패했습니다.');
+          }
+        }
 
-        // Handle both direct and nested response structures
-        const userData =
-          (userResponse.data as UserData & { data?: UserData })?.data ||
-          userResponse.data;
+        if (!userData) {
+          const userResponse = await axiosInstance.get<UserData>("/user");
+          userData = (userResponse.data as UserData & { data?: UserData })?.data || userResponse.data;
+        }
+
+        const [contributionsResponse, streakResponse] = await Promise.all([
+          axiosInstance.get<ContributionsResponse>(
+            "/user/activity/contributions",
+            {
+              params: {
+                start: formatDate(contributionsStart),
+                end: formatDate(contributionsEnd),
+              },
+            }
+          ),
+          axiosInstance.get<StreakResponse>("/user/activity/streak"),
+        ]);
 
         // Use nickname if name is not available
         if (userData?.name || userData?.nickname) {

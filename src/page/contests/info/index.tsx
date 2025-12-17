@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../components/header/index";
 import * as S from "./styles";
+import contestApi from "../../../api/contestApi";
 
 const rows = [
   { no: "1", title: "문자열과 알파벳 쿼리" },
@@ -25,21 +26,41 @@ const ContestInfo = () => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { contestsId } = useParams<{ contestsId: string }>();
+  const [contest, setContest] = useState<any | null>(null);
 
   useEffect(() => {
     const onDocClick = () => setOpenMenuId(null);
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetch = async () => {
+      if (!contestsId) return;
+      try {
+        const data = await contestApi.getContest(contestsId);
+        if (!mounted) return;
+        setContest(data);
+      } catch (err) {
+        console.error("Failed to load contest:", err);
+      }
+    };
+
+    fetch();
+    return () => {
+      mounted = false;
+    };
+  }, [contestsId]);
   return (
     <S.Page onMouseDown={() => setOpenMenuId(null)}>
       <Header />
 
       <S.Section>
-        <S.Title>DGSW 프로그래밍 대회</S.Title>
+        <S.Title>{contest?.title ?? "DGSW 프로그래밍 대회"}</S.Title>
         <S.Description>
-          DGSW 프로그래밍 대회는 교육봉사 동아리 ‘두카미'에서 진행하는 알고리즘
-          대회 입니다.
+          {contest?.description ??
+            `DGSW 프로그래밍 대회는 교육봉사 동아리 ‘두카미'에서 진행하는 알고리즘 대회 입니다.`}
         </S.Description>
 
         <S.Tabs>
