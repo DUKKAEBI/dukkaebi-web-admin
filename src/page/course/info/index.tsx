@@ -7,20 +7,11 @@ import * as S from "./style";
 import * as CourseS from "../style";
 import courseApi from "../../../api/courseApi";
 
-const initialRows = [
-  { no: "1", title: "문자열과 알파벳 쿼리" },
-  { no: "2", title: "문자열과 알파벳 쿼리" },
-  { no: "3", title: "문자열과 알파벳 쿼리" },
-  { no: "4", title: "문자열과 알파벳 쿼리" },
-];
-
-const demoKeywords = ["#기초", "#알고리즘", "#기본문법"];
-
 const CourseInfo = () => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [rows, setRows] = useState(initialRows);
+  const [rows, setRows] = useState<{ no: string; title: string }[]>([]);
   const [course, setCourse] = useState<any | null>(null);
-  const [keywords, setKeywords] = useState<string[]>(demoKeywords);
+  const [keywords, setKeywords] = useState<string[]>([]);
   const location = useLocation();
   const navigate = useNavigate();
   const { courseId } = useParams<{ courseId: string }>();
@@ -39,11 +30,18 @@ const CourseInfo = () => {
     if (selected && selected.length > 0) {
       setRows((prev) => [
         ...prev,
-        ...selected.map((s, i) => ({ no: String(prev.length + i + 1), title: s.title })),
+        ...selected.map((s, i) => ({
+          no: String(prev.length + i + 1),
+          title: s.title,
+        })),
       ]);
       // clear state to avoid duplicate adds on re-mount / back
       try {
-        history.replaceState({}, document.title, window.location.pathname + window.location.search);
+        history.replaceState(
+          {},
+          document.title,
+          window.location.pathname + window.location.search
+        );
       } catch (e) {
         // ignore
       }
@@ -89,16 +87,18 @@ const CourseInfo = () => {
       <Header />
 
       <S.Section>
-        <S.Title>{course?.title ?? "제목 없는 코스"}</S.Title>
+        <S.Title>{course?.title}</S.Title>
         <S.Description>
           {course?.description ? (
-            course.description.split("\n").map((line: string, i: number) => (
-              <S.DescriptionLine key={i}>{line}</S.DescriptionLine>
-            ))
+            course.description
+              .split("\n")
+              .map((line: string, i: number) => (
+                <S.DescriptionLine key={i}>{line}</S.DescriptionLine>
+              ))
           ) : (
             <>
               <S.DescriptionLine>
-                코스 설명이 없습니다.
+                코스 설명을 불러오는 중입니다.
               </S.DescriptionLine>
             </>
           )}
@@ -118,13 +118,15 @@ const CourseInfo = () => {
             <S.ColTitle>제목</S.ColTitle>
           </S.TableHead>
           {rows.length === 0 ? (
-            <S.EmptyRow>아직 문제가 없습니다.</S.EmptyRow>
+            <S.EmptyRow>문제를 불러오는 중입니다.</S.EmptyRow>
           ) : (
             rows.map((r) => (
               <S.Row key={r.no}>
                 <S.CellNo>{r.no}</S.CellNo>
                 <S.CellTitle>{r.title}</S.CellTitle>
-                <S.MoreWrapper onMouseDown={(e: MouseEvent) => e.stopPropagation()}>
+                <S.MoreWrapper
+                  onMouseDown={(e: MouseEvent) => e.stopPropagation()}
+                >
                   <S.MoreBtn
                     aria-label="more"
                     onClick={(e: MouseEvent) => {
@@ -153,7 +155,9 @@ const CourseInfo = () => {
                           setOpenMenuId(null);
                           // confirm and remove
                           if (confirm("정말로 이 문제를 삭제하시겠습니까?")) {
-                            setRows((prev) => prev.filter((p) => p.no !== r.no));
+                            setRows((prev) =>
+                              prev.filter((p) => p.no !== r.no)
+                            );
                           }
                         }}
                       >
@@ -167,13 +171,13 @@ const CourseInfo = () => {
           )}
         </S.Table>
         <S.AddButton
-          onClick={() => navigate(`/problems?pickerFor=course&returnTo=/course/${courseId}`)}
+          onClick={() =>
+            navigate(`/problems?pickerFor=course&returnTo=/course/${courseId}`)
+          }
         >
-          문제 추가
+          문제 설정
         </S.AddButton>
       </S.Content>
-      
-      
     </S.Page>
   );
 };

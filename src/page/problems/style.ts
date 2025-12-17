@@ -250,7 +250,8 @@ export const TableContainer = styled.div`
 // Table Header
 export const TableHeader = styled.div<{ $picker?: boolean }>`
   display: grid;
-  grid-template-columns: ${(p) => (p.$picker ? "48px 1fr 72px 120px 80px 32px" : "1fr 72px 120px 80px 32px")};
+  grid-template-columns: ${(p) =>
+    p.$picker ? "48px 1fr 72px 120px 80px 32px" : "1fr 72px 120px 80px 32px"};
   align-items: center;
   padding: 16px 20px;
   background-color: ${COLORS.white};
@@ -283,16 +284,19 @@ export const TableBody = styled.div`
 
 interface TableRowProps {
   isLast?: boolean;
+  $selected?: boolean;
 }
 
 export const TableRow = styled.div<TableRowProps & { $picker?: boolean }>`
   display: grid;
-  grid-template-columns: ${(p) => (p.$picker ? "48px 1fr 72px 120px 80px 32px" : "1fr 72px 120px 80px 32px")};
+  grid-template-columns: ${(p) =>
+    p.$picker ? "48px 1fr 72px 120px 80px 32px" : "1fr 72px 120px 80px 32px"};
   align-items: center;
   padding: 16px 20px;
   border-bottom: ${(props) =>
     props.isLast ? "none" : `1px solid ${COLORS.grayBorder}`};
-  background-color: ${COLORS.white};
+  background-color: ${(p) =>
+    p.$selected ? COLORS.primaryLight : COLORS.white};
   height: 60px;
   gap: 24px;
   position: relative;
