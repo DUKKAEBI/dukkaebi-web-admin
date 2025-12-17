@@ -49,12 +49,12 @@ const ProblemCreatePage = () => {
     setOpenDifficultyDropdown(false);
   };
 
-  const onChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
-  };
+  // const onChange = (
+  //   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  // ) => {
+  //   const { name, value } = e.target;
+  //   setForm((p) => ({ ...p, [name]: value }));
+  // };
 
   const addCase = () =>
     setCases((prev) => [...prev, { input: "", output: "" }]);

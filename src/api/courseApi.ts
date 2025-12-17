@@ -28,7 +28,10 @@ const courseApi = {
   },
 
   updateCourse: async (id: string | number, payload: any) => {
-    const res = await axiosInstance.patch(`/admin/course/update/${id}`, payload);
+    const res = await axiosInstance.patch(
+      `/admin/course/update/${id}`,
+      payload
+    );
     return extractBody(res);
   },
 
@@ -46,6 +49,17 @@ const courseApi = {
       e.body = body;
       throw e;
     }
+  },
+
+  addProblemsToCourse: async (
+    courseId: string | number,
+    payload: { problemIds: Array<number | string> }
+  ) => {
+    const res = await axiosInstance.post(
+      `/admin/course/${courseId}/problems`,
+      payload
+    );
+    return extractBody(res);
   },
 };
 

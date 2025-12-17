@@ -1,7 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
-import { getProblems, filterProblems, searchProblems, deleteProblem } from "../../api/problemApi";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import courseApi from "../../api/courseApi";
+import {
+  getProblems,
+  filterProblems,
+  searchProblems,
+  deleteProblem,
+} from "../../api/problemApi";
 import * as S from "./style";
 import SearchIcon from "../../assets/image/problems/search.png";
 import ArrowDownIcon from "../../assets/image/problems/arrow-down.png";
@@ -29,57 +35,12 @@ interface Problem {
   failed: boolean;
 }
 
-// Sample problems to display when API is empty or unavailable
-const SAMPLE_PROBLEMS: Problem[] = [
-  {
-    id: 1,
-    title: "숫자야구",
-    difficulty: 2,
-    completedCount: 91,
-    successRate: 3,
-    solved: true,
-    failed: false,
-  },
-  {
-    id: 2,
-    title: "문자열과 알파벳 쿼리",
-    difficulty: 1,
-    completedCount: 31,
-    successRate: 0,
-    solved: false,
-    failed: false,
-  },
-  {
-    id: 3,
-    title: "정렬과 탐색 기초",
-    difficulty: 3,
-    completedCount: 12,
-    successRate: 10,
-    solved: false,
-    failed: true,
-  },
-  {
-    id: 4,
-    title: "그래프 경로 찾기",
-    difficulty: 4,
-    completedCount: 5,
-    successRate: 2,
-    solved: false,
-    failed: false,
-  },
-  {
-    id: 5,
-    title: "동적 계획법 연습",
-    difficulty: 5,
-    completedCount: 2,
-    successRate: 1,
-    solved: false,
-    failed: false,
-  },
-];
-
 export default function Problems() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isPicker = (searchParams.get("pickerFor") || "") === "course";
+  console.log(isPicker);
+  const returnTo = searchParams.get("returnTo") || "";
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -95,6 +56,7 @@ export default function Problems() {
   const [openActionId, setOpenActionId] = useState<number | null>(null);
   const buttonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   // Close action menu when clicking outside
   useEffect(() => {
@@ -112,6 +74,28 @@ export default function Problems() {
     document.addEventListener("click", handleDocClick);
     return () => document.removeEventListener("click", handleDocClick);
   }, []);
+
+  // Preselect problems already in the course when in picker mode
+  useEffect(() => {
+    if (!isPicker) return;
+    const match = (returnTo || "").match(/\/course\/(\d+)/);
+    const courseId = match ? match[1] : null;
+    if (!courseId) return;
+
+    (async () => {
+      try {
+        const course = await courseApi.getCourse(courseId);
+        const problemIds: number[] = Array.isArray(course?.problems)
+          ? course.problems
+              .map((p: any) => p?.problemId)
+              .filter((v: any) => typeof v === "number")
+          : [];
+        setSelectedIds(new Set(problemIds));
+      } catch (err) {
+        console.error("Failed to fetch course for preselect:", err);
+      }
+    })();
+  }, [isPicker, returnTo]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -138,7 +122,7 @@ export default function Problems() {
 
   const difficultyMap: Record<string, number> = {
     GOLD: 1,
-    SLIVER: 2,
+    SILVER: 2,
     COPPER: 3,
     IRON: 4,
     JADE: 5,
@@ -146,7 +130,7 @@ export default function Problems() {
 
   const difficultyReverseMap: Record<number, string> = {
     1: "GOLD",
-    2: "SLIVER",
+    2: "SILVER",
     3: "COPPER",
     4: "IRON",
     5: "JADE",
@@ -178,7 +162,6 @@ export default function Problems() {
       mapProblems(list);
     } catch (error) {
       console.error("Failed to fetch problems:", error);
-      setProblems(SAMPLE_PROBLEMS);
     } finally {
       setIsLoading(false);
     }
@@ -203,7 +186,6 @@ export default function Problems() {
       mapProblems(list);
     } catch (error) {
       console.error("Failed to fetch filtered problems:", error);
-      setProblems(SAMPLE_PROBLEMS);
     } finally {
       setIsLoading(false);
     }
@@ -217,7 +199,6 @@ export default function Problems() {
       mapProblems(list);
     } catch (error) {
       console.error("Failed to search problems:", error);
-      setProblems(SAMPLE_PROBLEMS);
     } finally {
       setIsLoading(false);
     }
@@ -225,8 +206,8 @@ export default function Problems() {
 
   const mapProblems = (apiProblems: any[]) => {
     if (!Array.isArray(apiProblems) || apiProblems.length === 0) {
-      // show sample problems when API returns nothing
-      setProblems(SAMPLE_PROBLEMS);
+      console.log(apiProblems);
+      setProblems(apiProblems);
       return;
     }
     const mapped = apiProblems.map((p) => ({
@@ -235,9 +216,9 @@ export default function Problems() {
       difficulty: difficultyMap[p.difficulty],
       completedCount: p.solvedCount,
       successRate: p.correctRate,
-      ...solvedStatusMap[p.solvedResult],
+      ...solvedStatusMap[p.solvedResult || "NOT_SOLVED"],
     }));
-    setProblems(mapped.length ? mapped : SAMPLE_PROBLEMS);
+    setProblems(mapped.length ? mapped : []);
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -281,6 +262,15 @@ export default function Problems() {
       console.error("Failed to delete problem:", error);
       alert("문제 삭제에 실패했습니다.");
     }
+  };
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   const handleTimeSelect = (time: string | null, label: string | null) => {
@@ -500,21 +490,40 @@ export default function Problems() {
         {/* Problems Table */}
         <S.TableContainer>
           {/* Table Header */}
-          <S.TableHeader>
+
+          <S.TableHeader $picker={isPicker}>
+            {isPicker && (
+              <S.TableHeaderCell style={{ width: 48 }}>선택</S.TableHeaderCell>
+            )}
             <S.TableHeaderCell>제목</S.TableHeaderCell>
             <S.TableHeaderCellCenter>난이도</S.TableHeaderCellCenter>
             <S.TableHeaderCellRight>완료한 사람</S.TableHeaderCellRight>
             <S.TableHeaderCellRight>정답률</S.TableHeaderCellRight>
-            <S.TableHeaderCellRight />
           </S.TableHeader>
 
           {/* Table Body */}
           <S.TableBody>
             {filteredProblems.map((problem, index) => (
               <S.TableRow
+                $picker={isPicker}
+                $selected={isPicker && selectedIds.has(problem.id)}
                 key={problem.id}
                 isLast={index === filteredProblems.length - 1}
+                onClick={() => {
+                  if (isPicker) toggleSelect(problem.id);
+                }}
               >
+                {isPicker && (
+                  <S.TableCell style={{ width: 48 }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(problem.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={() => toggleSelect(problem.id)}
+                      aria-label={`문제 선택 ${problem.title}`}
+                    />
+                  </S.TableCell>
+                )}
                 <S.TableCell>{problem.title}</S.TableCell>
                 <S.TableCellCenter>
                   <S.DifficultyImage
@@ -623,8 +632,35 @@ export default function Problems() {
               <S.ArrowIcon src={ArrowRightIcon} alt="다음" />
             </S.PaginationButton>
           </S.PaginationContainer>
-          <S.CreateButton onClick={() => navigate(`/problems/create`)}>
-            문제 생성
+          <S.CreateButton
+            onClick={async () => {
+              if (isPicker) {
+                const match = (returnTo || "").match(/\/course\/(\d+)/);
+                const courseId = match ? match[1] : null;
+                if (!courseId) {
+                  alert("코스 ID를 찾을 수 없습니다.");
+                  return;
+                }
+                const ids = Array.from(selectedIds);
+                if (ids.length === 0) {
+                  alert("추가할 문제를 선택하세요.");
+                  return;
+                }
+                try {
+                  await courseApi.addProblemsToCourse(courseId, {
+                    problemIds: ids,
+                  });
+                  navigate(returnTo || "/problems");
+                } catch (err) {
+                  console.error("Failed to add problems to course:", err);
+                  alert("문제 추가 중 오류가 발생했습니다.");
+                }
+              } else {
+                navigate(`/problems/create`);
+              }
+            }}
+          >
+            {isPicker ? "문제 설정" : "문제 생성"}
           </S.CreateButton>
         </S.FooterControls>
       </S.MainContent>

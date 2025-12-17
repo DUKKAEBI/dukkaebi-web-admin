@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "../../../components/header/index";
-import axiosInstance from "../../../api/axiosInstance";
 import * as S from "./style";
 import problemApi from "../../../api/problemApi";
 import GoldIcon from "../../../assets/image/problems/difficulty/gold.png";

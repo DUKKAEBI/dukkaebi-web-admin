@@ -16,20 +16,11 @@ interface CourseItem {
   keywords?: string[];
 }
 
-const IMAGE = "https://i.ibb.co/Rp6GC0LG/dgsw.png";
-
-const MOCK: CourseItem[] = Array.from({ length: 12 }, (_, i) => ({
-  id: i + 1,
-  title: "자료구조 알고리즘",
-  level: "상",
-  keywords: ["#자료", "#구조", "#알고리즘", "#그래프"],
-}));
-
 const CoursePage = () => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [courses, setCourses] = useState<CourseItem[]>(MOCK);
+  const [courses, setCourses] = useState<CourseItem[]>([]);
   const [page, setPage] = useState(1);
   const PER_PAGE = 12;
   const menuRef = useRef<HTMLDivElement>(null);
@@ -44,7 +35,13 @@ const CoursePage = () => {
         if (Array.isArray(data)) {
           console.debug("courseApi.getCourses raw:", data);
           const mapped = data.map((it: any) => ({
-            id: it.id ?? it.code ?? it.courseId ?? it._id ?? it.identifier ?? null,
+            id:
+              it.id ??
+              it.code ??
+              it.courseId ??
+              it._id ??
+              it.identifier ??
+              null,
             title: it.title ?? it.name ?? it.subject ?? "",
             level: it.level ?? it.difficulty ?? "",
             keywords: it.keywords ?? it.tags ?? it.labels ?? [],
@@ -66,7 +63,10 @@ const CoursePage = () => {
   }, []);
 
   const filtered = useMemo(
-    () => courses.filter((c) => (c.title ?? "").toLowerCase().includes(query.toLowerCase())),
+    () =>
+      courses.filter((c) =>
+        (c.title ?? "").toLowerCase().includes(query.toLowerCase())
+      ),
     [courses, query]
   );
 
@@ -113,74 +113,82 @@ const CoursePage = () => {
             const itemKey = `${page}-${idx}-${String(c.id ?? "")}`;
             return (
               <S.Card key={itemKey} onClick={() => navigate(`/course/${c.id}`)}>
-              <S.CardContent>
-                <S.LevelBadge>난이도 : {c.level}</S.LevelBadge>
-                <S.CardTitle>{c.title}</S.CardTitle>
-                <S.KeywordContainer>
-                  {(c.keywords ?? []).map((keyword, idx) => (
-                    <S.Keyword key={idx}>{keyword}</S.Keyword>
-                  ))}
-                </S.KeywordContainer>
-              </S.CardContent>
-              <S.MoreButtonWrapper ref={openMenuId === itemKey ? menuRef : null}>
-                <S.MoreButton
-                  aria-label="more"
-                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                    e.stopPropagation();
-                    setOpenMenuId(openMenuId === itemKey ? null : itemKey);
-                  }}
+                <S.CardContent>
+                  <S.LevelBadge>난이도 : {c.level}</S.LevelBadge>
+                  <S.CardTitle>{c.title}</S.CardTitle>
+                  <S.KeywordContainer>
+                    {(c.keywords ?? []).map((keyword, idx) => (
+                      <S.Keyword key={idx}>{keyword}</S.Keyword>
+                    ))}
+                  </S.KeywordContainer>
+                </S.CardContent>
+                <S.MoreButtonWrapper
+                  ref={openMenuId === itemKey ? menuRef : null}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="5" r="1.5" fill="#BDBDBD" />
-                    <circle cx="12" cy="12" r="1.5" fill="#BDBDBD" />
-                    <circle cx="12" cy="19" r="1.5" fill="#BDBDBD" />
-                  </svg>
-                </S.MoreButton>
-                {openMenuId === itemKey && (
-                  <S.CourseMenu>
-                    <S.CourseMenuItem
-                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                        e.stopPropagation();
-                        navigate(`/course/update/${c.id}`);
-                      }}
-                    >
-                      코스 수정
-                    </S.CourseMenuItem>
-                    <S.CourseMenuItem
-                      $danger
-                      onClick={async (e: React.MouseEvent<HTMLButtonElement>) => {
-                        e.stopPropagation();
-                        if (!window.confirm("정말 삭제하시겠습니까?")) {
-                          setOpenMenuId(null);
-                          return;
-                        }
-                        try {
-                          const { default: courseApi } = await import("../../api/courseApi");
-                          await courseApi.deleteCourse(c.id as string | number);
-                          const data = await courseApi.getCourses();
-                          if (Array.isArray(data)) {
-                            setCourses(
-                              data.map((it: any) => ({
-                                id: it.id ?? it.code,
-                                title: it.title ?? it.name,
-                                level: it.level ?? it.difficulty ?? "",
-                                keywords: it.keywords ?? it.tags ?? [],
-                              }))
-                            );
+                  <S.MoreButton
+                    aria-label="more"
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                      e.stopPropagation();
+                      setOpenMenuId(openMenuId === itemKey ? null : itemKey);
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="5" r="1.5" fill="#BDBDBD" />
+                      <circle cx="12" cy="12" r="1.5" fill="#BDBDBD" />
+                      <circle cx="12" cy="19" r="1.5" fill="#BDBDBD" />
+                    </svg>
+                  </S.MoreButton>
+                  {openMenuId === itemKey && (
+                    <S.CourseMenu>
+                      <S.CourseMenuItem
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                          e.stopPropagation();
+                          navigate(`/course/update/${c.id}`);
+                        }}
+                      >
+                        코스 수정
+                      </S.CourseMenuItem>
+                      <S.CourseMenuItem
+                        $danger
+                        onClick={async (
+                          e: React.MouseEvent<HTMLButtonElement>
+                        ) => {
+                          e.stopPropagation();
+                          if (!window.confirm("정말 삭제하시겠습니까?")) {
+                            setOpenMenuId(null);
+                            return;
                           }
-                        } catch (err) {
-                          console.error("Course delete failed:", err);
-                          alert("코스 삭제 중 오류가 발생했습니다.");
-                        }
-                        setOpenMenuId(null);
-                      }}
-                    >
-                      코스 삭제
-                    </S.CourseMenuItem>
-                  </S.CourseMenu>
-                )}
-              </S.MoreButtonWrapper>
-            </S.Card>
+                          try {
+                            const { default: courseApi } = await import(
+                              "../../api/courseApi"
+                            );
+                            await courseApi.deleteCourse(
+                              c.id as string | number
+                            );
+                            const data = await courseApi.getCourses();
+                            if (Array.isArray(data)) {
+                              setCourses(
+                                data.map((it: any) => ({
+                                  id: it.id ?? it.code,
+                                  title: it.title ?? it.name,
+                                  level: it.level ?? it.difficulty ?? "",
+                                  keywords: it.keywords ?? it.tags ?? [],
+                                }))
+                              );
+                            }
+                          } catch (err) {
+                            console.error("Course delete failed:", err);
+                            alert("코스 삭제 중 오류가 발생했습니다.");
+                          }
+                          setOpenMenuId(null);
+                        }}
+                      >
+                        코스 삭제
+                      </S.CourseMenuItem>
+                    </S.CourseMenu>
+                  )}
+                </S.MoreButtonWrapper>
+              </S.Card>
             );
           })}
         </S.Grid>
