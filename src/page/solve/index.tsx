@@ -348,23 +348,6 @@ export default function SolvePage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isChatOpen]);
 
-  const openChat = () => setIsChatOpen(true);
-  const closeChat = () => setIsChatOpen(false);
-
-  const handleChatInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setChatInput(event.target.value);
-  };
-
-  const handleChatInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      if (event.nativeEvent.isComposing) {
-        return;
-      }
-      event.preventDefault();
-      handleChatSubmit();
-    }
-  };
-
   const getNextMessageId = () => {
     messageIdRef.current += 1;
     return messageIdRef.current;
@@ -383,16 +366,6 @@ export default function SolvePage() {
     const id = getNextMessageId();
     appendMessage({ id, sender: "bot", text });
     return id;
-  };
-
-  const handleChatSubmit = () => {
-    if (!chatInput.trim() || isChatLoading) return;
-    const trimmed = chatInput.trim();
-    appendUserMessage(trimmed);
-    setChatInput("");
-
-    // AI 기능이 제거되었음을 알리는 메시지
-    appendBotMessage("죄송합니다. AI 챗봇 기능은 현재 사용할 수 없습니다.");
   };
 
   const problemSections = problem
