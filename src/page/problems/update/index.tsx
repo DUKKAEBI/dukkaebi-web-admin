@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../components/header/index";
-import axiosInstance from "../../../api/axiosInstance";
 import * as S from "./style";
 import problemApi from "../../../api/problemApi";
-import GoldIcon from "../../../assets/image/problems/difficulty/gold.png";
-import SilverIcon from "../../../assets/image/problems/difficulty/silver.png";
-import CopperIcon from "../../../assets/image/problems/difficulty/copper.png";
-import IronIcon from "../../../assets/image/problems/difficulty/iron.png";
-import JadeIcon from "../../../assets/image/problems/difficulty/jade.png";
+import GoldIcon from "../../../assets/image/problems/difficulty/gold.svg";
+import SilverIcon from "../../../assets/image/problems/difficulty/silver.svg";
+import CopperIcon from "../../../assets/image/problems/difficulty/copper.svg";
+import IronIcon from "../../../assets/image/problems/difficulty/iron.svg";
+import JadeIcon from "../../../assets/image/problems/difficulty/jade.svg";
 import { Footer } from "../../../components/footer";
 
 interface TestCase {
@@ -67,33 +66,33 @@ const ProblemCreatePage = () => {
       try {
         const res = await problemApi.getProblem(Number(id));
         const data: any = (res as any)?.data ?? (res as any);
-        console.log('Loaded problem data:', data);
+        console.log("Loaded problem data:", data);
         if (!mounted) return;
-        
+
         // 제목, 설명 설정
         setTitle(data.title ?? data.name ?? "");
         setDescription(data.description ?? "");
-        
+
         // 입력/출력 조건 설정 (API는 input, output 필드 사용)
         setInputCond(data.input ?? data.inputRange ?? data.inputCond ?? "");
         setOutputCond(data.output ?? data.outputRange ?? data.outputCond ?? "");
-        
+
         // 테스트 케이스 설정
         if (Array.isArray(data.testCases) && data.testCases.length > 0) {
           setCases(data.testCases);
         }
-        
+
         // 난이도 설정 (문자열 -> 숫자로 역매핑)
         const reverseDifficultyMap: Record<string, number> = {
-          "COPPER": 3,
-          "IRON": 4,
-          "SILVER": 2,
-          "GOLD": 1,
-          "JADE": 5,
+          COPPER: 3,
+          IRON: 4,
+          SILVER: 2,
+          GOLD: 1,
+          JADE: 5,
         };
         if (data.difficulty) {
           const difficultyValue = reverseDifficultyMap[data.difficulty] ?? 3;
-          setForm(prev => ({ ...prev, difficulty: difficultyValue }));
+          setForm((prev) => ({ ...prev, difficulty: difficultyValue }));
         }
       } catch (err) {
         console.error("Failed to load problem:", err);
@@ -109,12 +108,15 @@ const ProblemCreatePage = () => {
     e.preventDefault();
     try {
       if (!id) return;
-      const difficultyMap: Record<number, "COPPER" | "IRON" | "SILVER" | "GOLD" | "JADE"> = {
-        3: "COPPER",  // 구리
-        4: "IRON",    // 철
-        2: "SILVER",  // 은
-        1: "GOLD",    // 금
-        5: "JADE",    // 옥
+      const difficultyMap: Record<
+        number,
+        "COPPER" | "IRON" | "SILVER" | "GOLD" | "JADE"
+      > = {
+        3: "COPPER", // 구리
+        4: "IRON", // 철
+        2: "SILVER", // 은
+        1: "GOLD", // 금
+        5: "JADE", // 옥
       };
       const payload = {
         name: title,
@@ -124,12 +126,12 @@ const ProblemCreatePage = () => {
         difficulty: difficultyMap[form.difficulty] ?? "COPPER",
         testCases: cases,
       };
-      console.log('Updating problem with payload:', payload);
+      console.log("Updating problem with payload:", payload);
       await problemApi.updateProblem(Number(id), payload);
-      navigate('/problems');
+      navigate("/problems");
     } catch (err) {
-      console.error('Failed to update problem:', err);
-      alert('문제 수정 중 오류가 발생했습니다.');
+      console.error("Failed to update problem:", err);
+      alert("문제 수정 중 오류가 발생했습니다.");
     }
   };
 
@@ -287,7 +289,9 @@ const ProblemCreatePage = () => {
           </S.Group>
 
           <S.Actions>
-            <S.SecondaryButton onClick={() => navigate('/problems')}>문제 수정 취소하기</S.SecondaryButton>
+            <S.SecondaryButton onClick={() => navigate("/problems")}>
+              문제 수정 취소하기
+            </S.SecondaryButton>
             <S.PrimaryButton onClick={onSubmit}>문제 수정하기</S.PrimaryButton>
           </S.Actions>
         </S.Content>

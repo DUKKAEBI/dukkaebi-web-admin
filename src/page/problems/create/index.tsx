@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "../../../components/header/index";
 import * as S from "./style";
 import problemApi from "../../../api/problemApi";
-import GoldIcon from "../../../assets/image/problems/difficulty/gold.png";
-import SilverIcon from "../../../assets/image/problems/difficulty/silver.png";
-import CopperIcon from "../../../assets/image/problems/difficulty/copper.png";
-import IronIcon from "../../../assets/image/problems/difficulty/iron.png";
-import JadeIcon from "../../../assets/image/problems/difficulty/jade.png";
+import GoldIcon from "../../../assets/image/problems/difficulty/gold.svg";
+import SilverIcon from "../../../assets/image/problems/difficulty/silver.svg";
+import CopperIcon from "../../../assets/image/problems/difficulty/copper.svg";
+import IronIcon from "../../../assets/image/problems/difficulty/iron.svg";
+import JadeIcon from "../../../assets/image/problems/difficulty/jade.svg";
 import { Footer } from "../../../components/footer";
 
 interface TestCase {

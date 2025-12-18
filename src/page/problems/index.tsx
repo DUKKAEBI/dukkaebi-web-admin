@@ -17,11 +17,11 @@ import ArrowLeftIcon from "../../assets/image/problems/arrow-left.png";
 import ArrowRightIcon from "../../assets/image/problems/arrow-right.png";
 // (status icons removed from table)
 //난이도 이미지
-import GoldIcon from "../../assets/image/problems/difficulty/gold.png";
-import SilverIcon from "../../assets/image/problems/difficulty/silver.png";
-import CopperIcon from "../../assets/image/problems/difficulty/copper.png";
-import JadeIcon from "../../assets/image/problems/difficulty/jade.png";
-import IronIcon from "../../assets/image/problems/difficulty/iron.png";
+import GoldIcon from "../../assets/image/problems/difficulty/gold.svg";
+import SilverIcon from "../../assets/image/problems/difficulty/silver.svg";
+import CopperIcon from "../../assets/image/problems/difficulty/copper.svg";
+import JadeIcon from "../../assets/image/problems/difficulty/jade.svg";
+import IronIcon from "../../assets/image/problems/difficulty/iron.svg";
 import { Header } from "../../components/header";
 import { Footer } from "../../components/footer";
 
