@@ -5,22 +5,6 @@ import * as S from "./styles";
 import contestApi from "../../../api/contestApi";
 
 type Tab = "problems" | "participants" | "settings";
-//  "problemId": 4,
-//             "name": "Hello World",
-//             "difficulty": "COPPER",
-//             "solvedCount": 12,
-//             "correctRate": 48.0,
-//             "solvedResult": "SOLVED",
-//             "addedAt": "2025-11-20"
-type problem = {
-  problemId: number;
-  name: string;
-  difficulty: string;
-  solvedCount: number;
-  correctRate: number;
-  solvedResult: string;
-  addedAt: string;
-};
 
 type problem = {
   problemId: number;
@@ -36,9 +20,8 @@ const ContestInfo = () => {
   const [activeTab, setActiveTab] = useState<Tab>("problems");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { contestsId, contestCode } = useParams<{
+  const { contestsId } = useParams<{
     contestsId: string;
-    contestCode: string;
   }>();
   const [contest, setContest] = useState<any | null>(null);
 
@@ -174,13 +157,56 @@ const ContestInfo = () => {
         </S.ParticipantsWrapper>
       ) : (
         <S.SettingsWrapper>
-          <S.SettingsActionButton $variant="primary">
+          <div
+            style={{ marginBottom: "20px", fontSize: "14px", color: "#666" }}
+          >
+            <S.SettingsActionButton style={{ width: "200px" }}>
+              대회 참여 코드: {contestsId}
+            </S.SettingsActionButton>
+          </div>
+          <S.SettingsActionButton
+            $variant="primary"
+            onClick={() => navigate(`/contests/update/${contestsId}`)}
+          >
             대회 수정
           </S.SettingsActionButton>
-          <S.SettingsActionButton $variant="primary">
+          <S.SettingsActionButton
+            $variant="primary"
+            onClick={async () => {
+              try {
+                if (!contest?.code) {
+                  alert("대회 코드를 찾을 수 없습니다.");
+                  return;
+                }
+                await contestApi.endContest(contest.code);
+                alert("대회가 종료되었습니다.");
+                navigate("/contests");
+              } catch (err) {
+                console.error("Failed to end contest:", err);
+                alert("대회 종료에 실패했습니다.");
+              }
+            }}
+          >
             대회 종료
           </S.SettingsActionButton>
-          <S.SettingsActionButton $variant="error">
+          <S.SettingsActionButton
+            $variant="error"
+            onClick={async () => {
+              if (!confirm("정말로 대회를 삭제하시겠습니까?")) return;
+              try {
+                if (!contest?.code) {
+                  alert("대회 코드를 찾을 수 없습니다.");
+                  return;
+                }
+                await contestApi.deleteContest(contest.code);
+                alert("대회가 삭제되었습니다.");
+                navigate("/contests");
+              } catch (err) {
+                console.error("Failed to delete contest:", err);
+                alert("대회 삭제에 실패했습니다.");
+              }
+            }}
+          >
             대회 삭제
           </S.SettingsActionButton>
         </S.SettingsWrapper>

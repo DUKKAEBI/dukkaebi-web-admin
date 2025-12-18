@@ -21,8 +21,13 @@ export const contestApi = {
     return res.data;
   },
 
-  deleteContest: async (id: string | number) => {
-    const res = await axiosInstance.delete(`/admin/contest/delete/${id}`);
+  deleteContest: async (code: string | number) => {
+    const res = await axiosInstance.delete(`/admin/contest/delete/${code}`);
+    return res.data;
+  },
+
+  endContest: async (code: string | number) => {
+    const res = await axiosInstance.post(`/admin/contest/${code}/end`);
     return res.data;
   },
 };
