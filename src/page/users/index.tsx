@@ -13,8 +13,16 @@ import ArrowRightIcon from "../../assets/image/problems/arrow-right.png";
 
 interface UserRow {
   id: string;
+  loginId: string;
   name: string;
-  grade: "은깨비" | "금깨비" | "옥깨비" | "신깨비" | "동깨비" | "철깨비" | "도깨비불";
+  grade:
+    | "은깨비"
+    | "금깨비"
+    | "옥깨비"
+    | "신깨비"
+    | "동깨비"
+    | "철깨비"
+    | "도깨비불";
 }
 
 const MOCK_USERS: UserRow[] = [];
@@ -112,45 +120,46 @@ const UsersPage = () => {
       try {
         const { default: userApi } = await import("../../api/userApi");
         const response = await userApi.getUsers();
-        console.log('User list API response:', response);
+        console.log("User list API response:", response);
         if (!mounted) return;
-        
+
         // 응답이 배열이거나 data 필드에 배열이 있는 경우 처리
-        const data = Array.isArray(response) ? response : (response?.data || []);
-        console.log('Processed data array:', data);
-        
+        const data = Array.isArray(response) ? response : response?.data || [];
+        console.log("Processed data array:", data);
+
         // 영어 growth 값을 한글 등급으로 매핑
         const growthToGrade: Record<string, UserRow["grade"]> = {
-          "WISP": "도깨비불",
-          "COPPER": "동깨비",
-          "IRON": "철깨비",
-          "SILVER": "은깨비",
-          "GOLD": "금깨비",
-          "JADE": "옥깨비",
-          "GOD": "신깨비",
+          WISP: "도깨비불",
+          COPPER: "동깨비",
+          IRON: "철깨비",
+          SILVER: "은깨비",
+          GOLD: "금깨비",
+          JADE: "옥깨비",
+          GOD: "신깨비",
         };
-        
+
         if (Array.isArray(data) && data.length > 0) {
           const mappedUsers = data.map((it: any) => {
             // growth 필드에서 영어 값을 읽어서 한글로 변환
             const rawGrowth = (it.growth ?? "COPPER").toUpperCase();
             const grade = growthToGrade[rawGrowth] ?? "동깨비";
-            
+
             return {
-              id: String(it.id ?? it.loginId ?? ''),
-              name: it.nickname ?? it.name ?? it.loginId ?? '이름 없음',
+              id: String(it.id ?? ""),
+              loginId: String(it.loginId ?? ""),
+              name: it.nickname ?? it.name ?? it.loginId ?? "이름 없음",
               grade,
             };
           });
-          console.log('Mapped users:', mappedUsers);
+          console.log("Mapped users:", mappedUsers);
           setUsers(mappedUsers);
         } else {
-          console.log('No users data or empty array');
+          console.log("No users data or empty array");
           setUsers([]);
         }
       } catch (err) {
         console.error("Failed to fetch users:", err);
-        alert('사용자 목록을 불러오는데 실패했습니다.');
+        alert("사용자 목록을 불러오는데 실패했습니다.");
         setUsers([]);
       }
     };
@@ -268,7 +277,7 @@ const UsersPage = () => {
           <S.TableBody>
             {pageItems.map((u, i) => (
               <S.Row key={`${u.id}-${i}`}>
-                <S.Cell style={{ width: 200 }}>{u.id}</S.Cell>
+                <S.Cell style={{ width: 200 }}>{u.loginId}</S.Cell>
                 <S.Cell style={{ width: 100 }}>{u.name}</S.Cell>
                 <S.Cell
                   style={{
@@ -305,34 +314,49 @@ const UsersPage = () => {
                         onClick={async () => {
                           if (!confirm("해당 유저를 삭제하시겠습니까?")) return;
                           try {
-                            const { default: userApi } = await import("../../api/userApi");
+                            const { default: userApi } = await import(
+                              "../../api/userApi"
+                            );
                             await userApi.deleteUser(u.id);
                             console.log(`User ${u.id} deleted successfully`);
-                            
+
                             // refetch
                             const response = await userApi.getUsers();
-                            const data = Array.isArray(response) ? response : (response?.data || []);
+                            const data = Array.isArray(response)
+                              ? response
+                              : response?.data || [];
                             console.log("Refetch data after delete:", data);
-                            
+
                             // 영어 growth 값을 한글 등급으로 매핑
-                            const growthToGrade: Record<string, UserRow["grade"]> = {
-                              "WISP": "도깨비불",
-                              "COPPER": "동깨비",
-                              "IRON": "철깨비",
-                              "SILVER": "은깨비",
-                              "GOLD": "금깨비",
-                              "JADE": "옥깨비",
-                              "GOD": "신깨비",
+                            const growthToGrade: Record<
+                              string,
+                              UserRow["grade"]
+                            > = {
+                              WISP: "도깨비불",
+                              COPPER: "동깨비",
+                              IRON: "철깨비",
+                              SILVER: "은깨비",
+                              GOLD: "금깨비",
+                              JADE: "옥깨비",
+                              GOD: "신깨비",
                             };
-                            
+
                             if (Array.isArray(data)) {
                               const mappedUsers = data.map((it: any) => {
-                                const rawGrowth = (it.growth ?? "COPPER").toUpperCase();
-                                const grade = growthToGrade[rawGrowth] ?? "동깨비";
-                                
+                                const rawGrowth = (
+                                  it.growth ?? "COPPER"
+                                ).toUpperCase();
+                                const grade =
+                                  growthToGrade[rawGrowth] ?? "동깨비";
+
                                 return {
-                                  id: String(it.id ?? it.loginId ?? ''),
-                                  name: it.nickname ?? it.name ?? it.loginId ?? '이름 없음',
+                                  id: String(it.id ?? ""),
+                                  loginId: String(it.loginId ?? ""),
+                                  name:
+                                    it.nickname ??
+                                    it.name ??
+                                    it.loginId ??
+                                    "이름 없음",
                                   grade,
                                 };
                               });
