@@ -47,6 +47,10 @@ export default function AppRoutes() {
         element={<ProblemUpdate />}
       />
       <Route
+        path="/course/problems/update/:problemsId"
+        element={<ProblemUpdate />}
+      />
+      <Route
         path="/contests/:contestCode/solve/:problemId"
         element={<ContestSolvePage />}
       />
