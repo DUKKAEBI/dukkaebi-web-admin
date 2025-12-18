@@ -17,12 +17,20 @@ export const contestApi = {
   },
 
   updateContest: async (id: string | number, payload: any) => {
-    const res = await axiosInstance.patch(`/admin/contest/update/${id}`, payload);
+    const res = await axiosInstance.patch(
+      `/admin/contest/update/${id}`,
+      payload
+    );
     return res.data;
   },
 
-  deleteContest: async (id: string | number) => {
-    const res = await axiosInstance.delete(`/admin/contest/delete/${id}`);
+  endContest: async (code: string | number) => {
+    const res = await axiosInstance.post(`/admin/contest/${code}/end`);
+    return res.data;
+  },
+
+  deleteContest: async (code: string | number) => {
+    const res = await axiosInstance.delete(`/admin/contest/delete/${code}`);
     return res.data;
   },
 };
