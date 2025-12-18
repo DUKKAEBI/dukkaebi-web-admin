@@ -122,6 +122,7 @@ export default function Problems() {
   const difficultyMap: Record<string, number> = {
     GOLD: 1,
     SILVER: 2,
+    SLIVER: 2,
     COPPER: 3,
     IRON: 4,
     JADE: 5,
