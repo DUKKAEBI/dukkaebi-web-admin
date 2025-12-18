@@ -35,9 +35,9 @@ const courseApi = {
     return extractBody(res);
   },
 
-  deleteCourse: async (id: string | number) => {
+  deleteCourse: async (code: string | number) => {
     try {
-      const res = await axiosInstance.delete(`/admin/course/delete/${id}`);
+      const res = await axiosInstance.delete(`/admin/course/delete/${code}`);
       return extractBody(res);
     } catch (err: any) {
       // Re-throw with enriched info for caller to display
@@ -49,6 +49,11 @@ const courseApi = {
       e.body = body;
       throw e;
     }
+  },
+
+  endCourse: async (code: string | number) => {
+    const res = await axiosInstance.post(`/admin/course/${code}/end`);
+    return extractBody(res);
   },
 
   addProblemsToCourse: async (
