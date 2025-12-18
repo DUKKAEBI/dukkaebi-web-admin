@@ -9,7 +9,9 @@ import courseApi from "../../../api/courseApi";
 
 const CourseInfo = () => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [rows, setRows] = useState<{ no: string; title: string }[]>([]);
+  const [rows, setRows] = useState<
+    { no: string; title: string; problemId: string }[]
+  >([]);
   const [course, setCourse] = useState<any | null>(null);
   const [keywords, setKeywords] = useState<string[]>([]);
   const location = useLocation();
@@ -25,7 +27,7 @@ const CourseInfo = () => {
   // If navigated back from Problems picker with selectedProblems state, add them
   useEffect(() => {
     const selected = (location.state as any)?.selectedProblems as
-      | { id: string | number; title: string }[]
+      | { id: string | number; title: string; problemId: string }[]
       | undefined;
     if (selected && selected.length > 0) {
       setRows((prev) => [
@@ -33,6 +35,7 @@ const CourseInfo = () => {
         ...selected.map((s, i) => ({
           no: String(prev.length + i + 1),
           title: s.title,
+          problemId: String(s.id ?? s.problemId),
         })),
       ]);
       // clear state to avoid duplicate adds on re-mount / back
@@ -63,7 +66,8 @@ const CourseInfo = () => {
           setRows(
             data.problems.map((p: any, idx: number) => ({
               no: String(idx + 1),
-              title: p.title ?? p.name ?? String(p.id),
+              title: p.title ?? p.name ?? String(p.problemId),
+              problemId: String(p.problemId),
             }))
           );
         }
@@ -121,7 +125,12 @@ const CourseInfo = () => {
             <S.EmptyRow>문제를 불러오는 중입니다.</S.EmptyRow>
           ) : (
             rows.map((r) => (
-              <S.Row key={r.no}>
+              <S.Row
+                key={r.no}
+                onClick={() =>
+                  navigate(`/courses/${courseId}/solve/${r.problemId}`)
+                }
+              >
                 <S.CellNo>{r.no}</S.CellNo>
                 <S.CellTitle>{r.title}</S.CellTitle>
                 <S.MoreWrapper

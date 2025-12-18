@@ -6,19 +6,14 @@ import contestApi from "../../../api/contestApi";
 
 type Tab = "problems" | "participants" | "settings";
 
-const participants = [
-  { rank: "01", name: "이윤하", submitted: 4, solved: 4 },
-  { rank: "02", name: "이윤하", submitted: 4, solved: 3 },
-  { rank: "03", name: "이윤하", submitted: 3, solved: 3 },
-  { rank: "04", name: "이윤하", submitted: 2, solved: 1 },
-  { rank: "05", name: "이윤하", submitted: 1, solved: 0 },
-];
-
 const ContestInfo = () => {
   const [activeTab, setActiveTab] = useState<Tab>("problems");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { contestsId } = useParams<{ contestsId: string }>();
+  const { contestsId, contestCode } = useParams<{
+    contestsId: string;
+    contestCode: string;
+  }>();
   const [contest, setContest] = useState<any | null>(null);
 
   useEffect(() => {
@@ -50,11 +45,8 @@ const ContestInfo = () => {
       <Header />
 
       <S.Section>
-        <S.Title>{contest?.title ?? "DGSW 프로그래밍 대회"}</S.Title>
-        <S.Description>
-          {contest?.description ??
-            `DGSW 프로그래밍 대회는 교육봉사 동아리 ‘두카미'에서 진행하는 알고리즘 대회 입니다.`}
-        </S.Description>
+        <S.Title>{contest?.title}</S.Title>
+        <S.Description>{contest?.description}</S.Description>
 
         <S.Tabs>
           <S.Tab
@@ -85,16 +77,25 @@ const ContestInfo = () => {
               <S.ColNo>번호</S.ColNo>
               <S.ColTitle>제목</S.ColTitle>
             </S.TableHead>
-            {contest?.problems?.map((p) => (
-              <S.Row key={p.no}>
-                <S.CellNo>{p.no}</S.CellNo>
-                <S.CellTitle>{p.title}</S.CellTitle>
+            {contest?.problems?.map((r, index) => (
+              <S.Row
+                key={r.problemId}
+                onClick={() =>
+                  navigate(`/contests/${contestsId}/solve/${r.problemId}`)
+                }
+              >
+                <S.CellNo>{index + 1}</S.CellNo>
+                <S.CellTitle>{r.name}</S.CellTitle>
                 <S.MoreWrapper onMouseDown={(e) => e.stopPropagation()}>
                   <S.MoreBtn
                     aria-label="more"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setOpenMenuId(openMenuId === r.no ? null : r.no);
+                      setOpenMenuId(
+                        openMenuId === String(r.problemId)
+                          ? null
+                          : String(r.problemId)
+                      );
                     }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -103,12 +104,12 @@ const ContestInfo = () => {
                       <circle cx="12" cy="19" r="1.5" fill="#BDBDBD" />
                     </svg>
                   </S.MoreBtn>
-                  {openMenuId === r.no && (
+                  {openMenuId === String(r.problemId) && (
                     <S.Dropdown>
                       <S.DropdownItem
                         onClick={() => {
                           setOpenMenuId(null);
-                          navigate(`/contests/problems/update/${r.no}`);
+                          navigate(`/contests/problems/update/${r.problemId}`);
                         }}
                       >
                         문제 수정
@@ -119,17 +120,13 @@ const ContestInfo = () => {
               </S.Row>
             ))}
           </S.Table>
-          <S.AddButton
-            onClick={() =>
-              navigate(`/contests/problems/create/${contestsId ?? "new"}`)
-            }
-          >
-            문제 추가
-          </S.AddButton>
+          <S.AddButton>문제 추가</S.AddButton>
         </S.Content>
       ) : activeTab === "participants" ? (
         <S.ParticipantsWrapper>
-          <S.ParticipantsTotal>총 참여 인원 : 5명</S.ParticipantsTotal>
+          <S.ParticipantsTotal>
+            총 참여 인원 : {contest?.participantCount ?? 0}명
+          </S.ParticipantsTotal>
           <S.ParticipantsTable>
             <S.ParticipantsTableHead>
               <span>등수</span>
@@ -137,12 +134,14 @@ const ContestInfo = () => {
               <span style={{ justifySelf: "end" }}>제출한 문제 수</span>
               <span style={{ justifySelf: "end" }}>맞춘 문제 수</span>
             </S.ParticipantsTableHead>
-            {participants.map((p) => (
-              <S.ParticipantsRow key={p.rank}>
-                <S.ParticipantsRank>{p.rank}</S.ParticipantsRank>
+            {contest?.problems?.map((p, idx) => (
+              <S.ParticipantsRow key={p.problemId}>
+                <S.ParticipantsRank>{idx + 1}</S.ParticipantsRank>
                 <S.ParticipantsName>{p.name}</S.ParticipantsName>
-                <S.ParticipantsStat>{p.submitted}</S.ParticipantsStat>
-                <S.ParticipantsStat>{p.solved}</S.ParticipantsStat>
+                <S.ParticipantsStat>{p.solvedCount}</S.ParticipantsStat>
+                <S.ParticipantsStat>
+                  {p.solvedResult === "SOLVED" ? 1 : 0}
+                </S.ParticipantsStat>
               </S.ParticipantsRow>
             ))}
           </S.ParticipantsTable>

@@ -203,7 +203,7 @@ const ContestsPage = () => {
                 <S.CardBody>
                   <S.CardTitle>{c.title}</S.CardTitle>
                   <S.CardMeta>
-                    종료까지 D-{c.dDay} ・ {c.participants}명 참여중
+                    {c.dDay}・ {c.participants}명 참여중
                   </S.CardMeta>
                 </S.CardBody>
               </S.Card>
