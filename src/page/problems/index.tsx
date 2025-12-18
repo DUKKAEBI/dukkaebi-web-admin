@@ -511,6 +511,7 @@ export default function Problems() {
                 isLast={index === filteredProblems.length - 1}
                 onClick={() => {
                   if (isPicker) toggleSelect(problem.id);
+                  else navigate(`/solve/${problem.id}`);
                 }}
               >
                 {isPicker && (

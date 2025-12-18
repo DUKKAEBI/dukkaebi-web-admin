@@ -22,6 +22,16 @@ type problem = {
   addedAt: string;
 };
 
+type problem = {
+  problemId: number;
+  name: string;
+  difficulty: string;
+  solvedCount: number;
+  correctRate: number;
+  solvedResult: string;
+  addedAt: string;
+};
+
 const ContestInfo = () => {
   const [activeTab, setActiveTab] = useState<Tab>("problems");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
