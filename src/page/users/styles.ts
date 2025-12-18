@@ -249,6 +249,7 @@ export const Row = styled.div`
   height: 60px;
   padding: 16px 20px;
   border-top: 1px solid var(--gray-4);
+  cursor: pointer;
 
   &:first-child {
     border-top: none;
@@ -276,6 +277,7 @@ export const MoreButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: default;
 `;
 
 export const ContextMenu = styled.div`

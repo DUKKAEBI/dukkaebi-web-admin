@@ -120,12 +120,10 @@ const UsersPage = () => {
       try {
         const { default: userApi } = await import("../../api/userApi");
         const response = await userApi.getUsers();
-        console.log("User list API response:", response);
         if (!mounted) return;
 
         // 응답이 배열이거나 data 필드에 배열이 있는 경우 처리
         const data = Array.isArray(response) ? response : response?.data || [];
-        console.log("Processed data array:", data);
 
         // 영어 growth 값을 한글 등급으로 매핑
         const growthToGrade: Record<string, UserRow["grade"]> = {
@@ -151,14 +149,11 @@ const UsersPage = () => {
               grade,
             };
           });
-          console.log("Mapped users:", mappedUsers);
           setUsers(mappedUsers);
         } else {
-          console.log("No users data or empty array");
           setUsers([]);
         }
       } catch (err) {
-        console.error("Failed to fetch users:", err);
         alert("사용자 목록을 불러오는데 실패했습니다.");
         setUsers([]);
       }
@@ -276,7 +271,12 @@ const UsersPage = () => {
           </S.TableHead>
           <S.TableBody>
             {pageItems.map((u, i) => (
-              <S.Row key={`${u.id}-${i}`}>
+              <S.Row
+                key={`${u.id}-${i}`}
+                onClick={(e) => {
+                  navigate(`/user/${u.id}`);
+                }}
+              >
                 <S.Cell style={{ width: 200 }}>{u.loginId}</S.Cell>
                 <S.Cell style={{ width: 100 }}>{u.name}</S.Cell>
                 <S.Cell
@@ -292,7 +292,10 @@ const UsersPage = () => {
                 <S.MoreWrapper ref={menuOpen === i ? menuRef : null}>
                   <S.MoreButton
                     aria-label="more"
-                    onClick={() => setMenuOpen(menuOpen === i ? null : i)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMenuOpen(menuOpen === i ? null : i);
+                    }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                       <circle cx="12" cy="5" r="1.5" fill="#BDBDBD" />
@@ -301,7 +304,10 @@ const UsersPage = () => {
                     </svg>
                   </S.MoreButton>
                   {menuOpen === i && (
-                    <S.ContextMenu role="menu">
+                    <S.ContextMenu
+                      role="menu"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <S.MenuItem
                         role="menuitem"
                         onClick={() => navigate(`/user/${u.id}`)}
@@ -318,16 +324,13 @@ const UsersPage = () => {
                               "../../api/userApi"
                             );
                             await userApi.deleteUser(u.id);
-                            console.log(`User ${u.id} deleted successfully`);
 
                             // refetch
                             const response = await userApi.getUsers();
                             const data = Array.isArray(response)
                               ? response
                               : response?.data || [];
-                            console.log("Refetch data after delete:", data);
 
-                            // 영어 growth 값을 한글 등급으로 매핑
                             const growthToGrade: Record<
                               string,
                               UserRow["grade"]

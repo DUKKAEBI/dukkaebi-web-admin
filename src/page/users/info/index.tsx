@@ -181,17 +181,19 @@ const Profile = () => {
         if (userId) {
           try {
             const response = await userApi.getUser(userId);
-            console.log('User detail API response:', response);
+            console.log("User detail API response:", response);
             userData = response?.data || response;
           } catch (err) {
             console.error("Failed to fetch user via userApi:", err);
-            alert('사용자 정보를 불러오는데 실패했습니다.');
+            alert("사용자 정보를 불러오는데 실패했습니다.");
           }
         }
 
         if (!userData) {
           const userResponse = await axiosInstance.get<UserData>("/user");
-          userData = (userResponse.data as UserData & { data?: UserData })?.data || userResponse.data;
+          userData =
+            (userResponse.data as UserData & { data?: UserData })?.data ||
+            userResponse.data;
         }
 
         const [contributionsResponse, streakResponse] = await Promise.all([
@@ -233,7 +235,6 @@ const Profile = () => {
         );
       } catch (error) {
         console.error("Failed to fetch profile data:", error);
-        // Initialize fallback heatmap to avoid empty UI
         setHeatmapData(generateHeatmapData());
         setStreak(0);
       }
