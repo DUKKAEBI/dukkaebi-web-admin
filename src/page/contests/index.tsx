@@ -22,19 +22,11 @@ interface ContestItem {
 
 const IMAGE = "https://i.ibb.co/Rp6GC0LG/dgsw.png";
 
-const MOCK: ContestItem[] = Array.from({ length: 12 }, (_, i) => ({
-  id: i + 1,
-  title: "DGSW 프로그래밍 대회",
-  dDay: 2,
-  participants: 100,
-  image: IMAGE,
-}));
-
 const ContestsPage = () => {
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [contests, setContests] = useState<ContestItem[]>(MOCK);
+  const [contests, setContests] = useState<ContestItem[]>([]);
   const [page, setPage] = useState(1);
   const PER_PAGE = 12;
   const menuRef = useRef<HTMLDivElement>(null);
@@ -75,7 +67,9 @@ const ContestsPage = () => {
 
   const filtered = useMemo(
     () =>
-      contests.filter((c) => (c.title ?? "").toLowerCase().includes(query.toLowerCase())),
+      contests.filter((c) =>
+        (c.title ?? "").toLowerCase().includes(query.toLowerCase())
+      ),
     [contests, query]
   );
 
@@ -121,76 +115,97 @@ const ContestsPage = () => {
           {pageItems.map((c) => {
             const idOrCode = c.code ?? c.id;
             return (
-              <S.Card key={String(idOrCode)} onClick={() => navigate(`/contests/${idOrCode}`)}>
-              <S.CardImageWrapper>
-                <S.CardImage src={c.image} alt={c.title} />
-                <S.MoreButtonWrapper ref={openMenuId === c.id ? menuRef : null}>
-                  <S.MoreButton
-                    aria-label="more"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenMenuId(openMenuId === c.id ? null : (c.id as number));
-                    }}
+              <S.Card
+                key={String(idOrCode)}
+                onClick={() => navigate(`/contests/${idOrCode}`)}
+              >
+                <S.CardImageWrapper>
+                  <S.CardImage src={c.image} alt={c.title} />
+                  <S.MoreButtonWrapper
+                    ref={openMenuId === c.id ? menuRef : null}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="5" r="1.5" fill="#BDBDBD" />
-                      <circle cx="12" cy="12" r="1.5" fill="#BDBDBD" />
-                      <circle cx="12" cy="19" r="1.5" fill="#BDBDBD" />
-                    </svg>
-                  </S.MoreButton>
-                  {openMenuId === c.id && (
-                    <S.ContestMenu>
-                      <S.ContestMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/contests/update/${idOrCode}`);
-                        }}
+                    <S.MoreButton
+                      aria-label="more"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenMenuId(
+                          openMenuId === c.id ? null : (c.id as number)
+                        );
+                      }}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
                       >
-                        대회 수정
-                      </S.ContestMenuItem>
-                      <S.ContestMenuItem
-                        $danger
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (window.confirm("정말 삭제하시겠습니까?")) {
-                            (async () => {
-                              try {
-                                await contestApi.deleteContest(idOrCode as string | number);
-                                // refetch
-                                const data = await contestApi.getContests();
-                                if (Array.isArray(data)) {
-                                  setContests(
-                                    data.map((item: any) => ({
-                                      id: item.id ?? item.code,
-                                      code: item.code,
-                                      title: item.title ?? item.name ?? item.subject,
-                                      dDay: item.dDay ?? item.dday ?? 0,
-                                      participants: item.participants ?? item.participantCount ?? 0,
-                                      image: item.image ?? item.thumbnail ?? IMAGE,
-                                    }))
+                        <circle cx="12" cy="5" r="1.5" fill="#BDBDBD" />
+                        <circle cx="12" cy="12" r="1.5" fill="#BDBDBD" />
+                        <circle cx="12" cy="19" r="1.5" fill="#BDBDBD" />
+                      </svg>
+                    </S.MoreButton>
+                    {openMenuId === c.id && (
+                      <S.ContestMenu>
+                        <S.ContestMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/contests/update/${idOrCode}`);
+                          }}
+                        >
+                          대회 수정
+                        </S.ContestMenuItem>
+                        <S.ContestMenuItem
+                          $danger
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm("정말 삭제하시겠습니까?")) {
+                              (async () => {
+                                try {
+                                  await contestApi.deleteContest(
+                                    idOrCode as string | number
                                   );
+                                  // refetch
+                                  const data = await contestApi.getContests();
+                                  if (Array.isArray(data)) {
+                                    setContests(
+                                      data.map((item: any) => ({
+                                        id: item.id ?? item.code,
+                                        code: item.code,
+                                        title:
+                                          item.title ??
+                                          item.name ??
+                                          item.subject,
+                                        dDay: item.dDay ?? item.dday ?? 0,
+                                        participants:
+                                          item.participants ??
+                                          item.participantCount ??
+                                          0,
+                                        image:
+                                          item.image ?? item.thumbnail ?? IMAGE,
+                                      }))
+                                    );
+                                  }
+                                } catch (err) {
+                                  console.error("삭제 실패:", err);
+                                  alert("삭제 중 오류가 발생했습니다.");
                                 }
-                              } catch (err) {
-                                console.error("삭제 실패:", err);
-                                alert("삭제 중 오류가 발생했습니다.");
-                              }
-                            })();
-                          }
-                          setOpenMenuId(null);
-                        }}
-                      >
-                        대회 삭제
-                      </S.ContestMenuItem>
-                    </S.ContestMenu>
-                  )}
-                </S.MoreButtonWrapper>
-              </S.CardImageWrapper>
-              <S.CardBody>
-                <S.CardTitle>{c.title}</S.CardTitle>
-                <S.CardMeta>
-                  종료까지 D-{c.dDay} ・ {c.participants}명 참여중
-                </S.CardMeta>
-              </S.CardBody>
+                              })();
+                            }
+                            setOpenMenuId(null);
+                          }}
+                        >
+                          대회 삭제
+                        </S.ContestMenuItem>
+                      </S.ContestMenu>
+                    )}
+                  </S.MoreButtonWrapper>
+                </S.CardImageWrapper>
+                <S.CardBody>
+                  <S.CardTitle>{c.title}</S.CardTitle>
+                  <S.CardMeta>
+                    종료까지 D-{c.dDay} ・ {c.participants}명 참여중
+                  </S.CardMeta>
+                </S.CardBody>
               </S.Card>
             );
           })}

@@ -4,13 +4,6 @@ import { Header } from "../../../components/header/index";
 import * as S from "./styles";
 import contestApi from "../../../api/contestApi";
 
-const rows = [
-  { no: "1", title: "문자열과 알파벳 쿼리" },
-  { no: "2", title: "문자열과 알파벳 쿼리" },
-  { no: "3", title: "문자열과 알파벳 쿼리" },
-  { no: "4", title: "문자열과 알파벳 쿼리" },
-];
-
 type Tab = "problems" | "participants" | "settings";
 
 const participants = [
@@ -92,10 +85,10 @@ const ContestInfo = () => {
               <S.ColNo>번호</S.ColNo>
               <S.ColTitle>제목</S.ColTitle>
             </S.TableHead>
-            {rows.map((r) => (
-              <S.Row key={r.no}>
-                <S.CellNo>{r.no}</S.CellNo>
-                <S.CellTitle>{r.title}</S.CellTitle>
+            {contest?.problems?.map((p) => (
+              <S.Row key={p.no}>
+                <S.CellNo>{p.no}</S.CellNo>
+                <S.CellTitle>{p.title}</S.CellTitle>
                 <S.MoreWrapper onMouseDown={(e) => e.stopPropagation()}>
                   <S.MoreBtn
                     aria-label="more"
