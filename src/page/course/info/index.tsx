@@ -8,6 +8,9 @@ import * as CourseS from "../style";
 import courseApi from "../../../api/courseApi";
 
 const CourseInfo = () => {
+  const [activeTab, setActiveTab] = useState<
+    "problems" | "participants" | "settings"
+  >("problems");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [rows, setRows] = useState<
     { no: string; title: string; problemId: string }[]
@@ -113,80 +116,182 @@ const CourseInfo = () => {
             ))}
           </CourseS.KeywordContainer>
         </S.Description>
+
+        <S.Tabs>
+          <S.Tab
+            $active={activeTab === "problems"}
+            onClick={() => setActiveTab("problems")}
+          >
+            코스
+          </S.Tab>
+          <S.Tab
+            $active={activeTab === "participants"}
+            onClick={() => setActiveTab("participants")}
+          >
+            참여 인원
+          </S.Tab>
+          <S.Tab
+            $active={activeTab === "settings"}
+            onClick={() => setActiveTab("settings")}
+          >
+            코스 설정
+          </S.Tab>
+        </S.Tabs>
       </S.Section>
 
-      <S.Content>
-        <S.Table>
-          <S.TableHead>
-            <S.ColNo>번호</S.ColNo>
-            <S.ColTitle>제목</S.ColTitle>
-          </S.TableHead>
-          {rows.length === 0 ? (
-            <S.EmptyRow>문제를 불러오는 중입니다.</S.EmptyRow>
-          ) : (
-            rows.map((r) => (
-              <S.Row
-                key={r.no}
-                onClick={() =>
-                  navigate(`/courses/${courseId}/solve/${r.problemId}`)
-                }
-              >
-                <S.CellNo>{r.no}</S.CellNo>
-                <S.CellTitle>{r.title}</S.CellTitle>
-                <S.MoreWrapper
-                  onMouseDown={(e: MouseEvent) => e.stopPropagation()}
+      {activeTab === "problems" ? (
+        <S.Content>
+          <S.Table>
+            <S.TableHead>
+              <S.ColNo>번호</S.ColNo>
+              <S.ColTitle>제목</S.ColTitle>
+            </S.TableHead>
+            {rows.length === 0 ? (
+              <S.EmptyRow>문제를 불러오는 중입니다.</S.EmptyRow>
+            ) : (
+              rows.map((r) => (
+                <S.Row
+                  key={r.no}
+                  onClick={() =>
+                    navigate(`/courses/${courseId}/solve/${r.problemId}`)
+                  }
                 >
-                  <S.MoreBtn
-                    aria-label="more"
-                    onClick={(e: MouseEvent) => {
-                      e.stopPropagation();
-                      setOpenMenuId(openMenuId === r.no ? null : r.no);
-                    }}
+                  <S.CellNo>{r.no}</S.CellNo>
+                  <S.CellTitle>{r.title}</S.CellTitle>
+                  <S.MoreWrapper
+                    onMouseDown={(e: MouseEvent) => e.stopPropagation()}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="5" r="1.5" fill="#BDBDBD" />
-                      <circle cx="12" cy="12" r="1.5" fill="#BDBDBD" />
-                      <circle cx="12" cy="19" r="1.5" fill="#BDBDBD" />
-                    </svg>
-                  </S.MoreBtn>
-                  {openMenuId === r.no && (
-                    <S.Dropdown>
-                      <S.DropdownItem
-                        onClick={() => {
-                          setOpenMenuId(null);
-                          navigate(`/course/problems/update/${r.no}`);
-                        }}
+                    <S.MoreBtn
+                      aria-label="more"
+                      onClick={(e: MouseEvent) => {
+                        e.stopPropagation();
+                        setOpenMenuId(openMenuId === r.no ? null : r.no);
+                      }}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
                       >
-                        문제 수정
-                      </S.DropdownItem>
-                      <S.DropdownItem
-                        onClick={() => {
-                          setOpenMenuId(null);
-                          // confirm and remove
-                          if (confirm("정말로 이 문제를 삭제하시겠습니까?")) {
-                            setRows((prev) =>
-                              prev.filter((p) => p.no !== r.no)
-                            );
-                          }
-                        }}
-                      >
-                        문제 삭제
-                      </S.DropdownItem>
-                    </S.Dropdown>
-                  )}
-                </S.MoreWrapper>
-              </S.Row>
-            ))
-          )}
-        </S.Table>
-        <S.AddButton
-          onClick={() =>
-            navigate(`/problems?pickerFor=course&returnTo=/course/${courseId}`)
-          }
-        >
-          문제 설정
-        </S.AddButton>
-      </S.Content>
+                        <circle cx="12" cy="5" r="1.5" fill="#BDBDBD" />
+                        <circle cx="12" cy="12" r="1.5" fill="#BDBDBD" />
+                        <circle cx="12" cy="19" r="1.5" fill="#BDBDBD" />
+                      </svg>
+                    </S.MoreBtn>
+                    {openMenuId === r.no && (
+                      <S.Dropdown>
+                        <S.DropdownItem
+                          onClick={() => {
+                            setOpenMenuId(null);
+                            navigate(`/course/problems/update/${r.no}`);
+                          }}
+                        >
+                          문제 수정
+                        </S.DropdownItem>
+                        <S.DropdownItem
+                          onClick={() => {
+                            setOpenMenuId(null);
+                            // confirm and remove
+                            if (confirm("정말로 이 문제를 삭제하시겠습니까?")) {
+                              setRows((prev) =>
+                                prev.filter((p) => p.no !== r.no)
+                              );
+                            }
+                          }}
+                        >
+                          문제 삭제
+                        </S.DropdownItem>
+                      </S.Dropdown>
+                    )}
+                  </S.MoreWrapper>
+                </S.Row>
+              ))
+            )}
+          </S.Table>
+          <S.AddButton
+            onClick={() =>
+              navigate(
+                `/problems?pickerFor=course&returnTo=/course/${courseId}`
+              )
+            }
+          >
+            문제 설정
+          </S.AddButton>
+        </S.Content>
+      ) : activeTab === "participants" ? (
+        <S.ParticipantsWrapper>
+          <S.ParticipantsTotal>
+            총 참여 인원 : {course?.participantCount ?? 0}명
+          </S.ParticipantsTotal>
+          <S.ParticipantsTable>
+            <S.ParticipantsTableHead>
+              <span>등수</span>
+              <span>이름</span>
+              <span style={{ justifySelf: "end" }}>제출한 문제 수</span>
+              <span style={{ justifySelf: "end" }}>맞춘 문제 수</span>
+            </S.ParticipantsTableHead>
+            {course?.problems?.map((p: any, idx: number) => (
+              <S.ParticipantsRow key={p.problemId}>
+                <S.ParticipantsRank>{idx + 1}</S.ParticipantsRank>
+                <S.ParticipantsName>{p.name}</S.ParticipantsName>
+                <S.ParticipantsStat>{p.solvedCount}</S.ParticipantsStat>
+                <S.ParticipantsStat>
+                  {p.solvedResult === "SOLVED" ? 1 : 0}
+                </S.ParticipantsStat>
+              </S.ParticipantsRow>
+            ))}
+          </S.ParticipantsTable>
+        </S.ParticipantsWrapper>
+      ) : (
+        <S.SettingsWrapper>
+          <S.SettingsActionButton
+            $variant="primary"
+            onClick={() => navigate(`/course/update/${courseId}`)}
+          >
+            코스 수정
+          </S.SettingsActionButton>
+          <S.SettingsActionButton
+            $variant="primary"
+            onClick={async () => {
+              try {
+                if (!course?.courseId) {
+                  alert("코스 코드를 찾을 수 없습니다.");
+                  return;
+                }
+                await courseApi.endCourse(course.courseId);
+                alert("코스가 종료되었습니다.");
+                navigate("/course");
+              } catch (err) {
+                console.error("Failed to end course:", err);
+                alert("코스 종료에 실패했습니다.");
+              }
+            }}
+          >
+            코스 종료
+          </S.SettingsActionButton>
+          <S.SettingsActionButton
+            $variant="error"
+            onClick={async () => {
+              if (!confirm("정말로 코스를 삭제하시겠습니까?")) return;
+              try {
+                if (!course?.courseId) {
+                  alert("코스 코드를 찾을 수 없습니다.");
+                  return;
+                }
+                await courseApi.deleteCourse(course.courseId);
+                alert("코스가 삭제되었습니다.");
+                navigate("/course");
+              } catch (err) {
+                console.error("Failed to delete course:", err);
+                alert("코스 삭제에 실패했습니다.");
+              }
+            }}
+          >
+            코스 삭제
+          </S.SettingsActionButton>
+        </S.SettingsWrapper>
+      )}
     </S.Page>
   );
 };
