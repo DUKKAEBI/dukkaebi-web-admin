@@ -16,6 +16,9 @@ import ProblemCreate from "../page/contests/problems/create";
 import ProblemUpdate from "../page/contests/problems/update";
 import ProblemCreatePage from "../page/problems/create/index";
 import ProblemUpdatePage from "../page/problems/update/index";
+import SolvePage from "../page/solve";
+import CourseSolvePage from "../page/solve/course";
+import ContestSolvePage from "../page/solve/contests";
 
 export default function AppRoutes() {
   return (
@@ -42,6 +45,15 @@ export default function AppRoutes() {
       <Route
         path="/contests/problems/update/:problemsId"
         element={<ProblemUpdate />}
+      />
+      <Route
+        path="/contests/:contestCode/solve/:problemId"
+        element={<ContestSolvePage />}
+      />
+      <Route path="/solve/:problemId" element={<SolvePage />} />
+      <Route
+        path="/courses/:courseId/solve/:problemId"
+        element={<CourseSolvePage />}
       />
     </Routes>
   );

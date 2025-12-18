@@ -143,7 +143,6 @@ export const MoreWrapper = styled.div`
 
 export const Dropdown = styled.div`
   position: absolute;
-  top: 24px;
   right: 0;
   width: 120px;
   background: ${COLORS.white};
