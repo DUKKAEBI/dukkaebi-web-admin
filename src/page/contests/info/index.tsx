@@ -6,6 +6,16 @@ import contestApi from "../../../api/contestApi";
 
 type Tab = "problems" | "participants" | "settings";
 
+type problem = {
+  problemId: number;
+  name: string;
+  difficulty: string;
+  solvedCount: number;
+  correctRate: number;
+  solvedResult: string;
+  addedAt: string;
+};
+
 const ContestInfo = () => {
   const [activeTab, setActiveTab] = useState<Tab>("problems");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -77,7 +87,7 @@ const ContestInfo = () => {
               <S.ColNo>번호</S.ColNo>
               <S.ColTitle>제목</S.ColTitle>
             </S.TableHead>
-            {contest?.problems?.map((r, index) => (
+            {contest?.problems?.map((r: problem, index: number) => (
               <S.Row
                 key={r.problemId}
                 onClick={() =>
@@ -134,7 +144,7 @@ const ContestInfo = () => {
               <span style={{ justifySelf: "end" }}>제출한 문제 수</span>
               <span style={{ justifySelf: "end" }}>맞춘 문제 수</span>
             </S.ParticipantsTableHead>
-            {contest?.problems?.map((p, idx) => (
+            {contest?.problems?.map((p: problem, idx: number) => (
               <S.ParticipantsRow key={p.problemId}>
                 <S.ParticipantsRank>{idx + 1}</S.ParticipantsRank>
                 <S.ParticipantsName>{p.name}</S.ParticipantsName>

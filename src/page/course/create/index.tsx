@@ -6,7 +6,7 @@ import ArrowUpIcon from "../../../assets/image/course/simple-line-icons_arrow-up
 import * as S from "./style";
 import courseApi from "../../../api/courseApi";
 
-interface FormData {
+interface FormData {   
   title: string;
   description: string;
   keywords: string[];
