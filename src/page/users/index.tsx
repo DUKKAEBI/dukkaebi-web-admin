@@ -154,7 +154,6 @@ const UsersPage = () => {
           setUsers([]);
         }
       } catch (err) {
-        alert("사용자 목록을 불러오는데 실패했습니다.");
         setUsers([]);
       }
     };

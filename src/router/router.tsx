@@ -19,12 +19,14 @@ import ProblemUpdatePage from "../page/problems/update/index";
 import SolvePage from "../page/solve";
 import CourseSolvePage from "../page/solve/course";
 import ContestSolvePage from "../page/solve/contests";
+import NoticesPage from "../page/notifications";
+import NoticeInfoPage from "../page/notifications/info";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
       <Route path="/" element={<Main />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/problems" element={<Problems />} />
       <Route path="/problems/create" element={<ProblemCreatePage />} />
       <Route path="/problems/update/:id" element={<ProblemUpdatePage />} />
@@ -46,19 +48,22 @@ export default function AppRoutes() {
         path="/contests/problems/update/:problemsId"
         element={<ProblemUpdate />}
       />
-      <Route
-        path="/course/problems/update/:problemsId"
-        element={<ProblemUpdate />}
-      />
+
       <Route
         path="/contests/:contestCode/solve/:problemId"
         element={<ContestSolvePage />}
+      />
+      <Route
+        path="/course/problems/update/:problemsId"
+        element={<ProblemUpdate />}
       />
       <Route path="/solve/:problemId" element={<SolvePage />} />
       <Route
         path="/courses/:courseId/solve/:problemId"
         element={<CourseSolvePage />}
       />
+      <Route path="/notifications" element={<NoticesPage />} />
+      <Route path="/notifications/:id" element={<NoticeInfoPage />} />
     </Routes>
   );
 }

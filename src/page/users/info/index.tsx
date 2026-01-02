@@ -185,7 +185,6 @@ const Profile = () => {
             userData = response?.data || response;
           } catch (err) {
             console.error("Failed to fetch user via userApi:", err);
-            alert("사용자 정보를 불러오는데 실패했습니다.");
           }
         }
 
