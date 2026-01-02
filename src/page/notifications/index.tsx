@@ -70,7 +70,7 @@ export default function NoticesPage() {
               <TableRow
                 key={notice.id}
                 isLast={index === notices.length - 1}
-                onClick={() => navigate("/notifications/:id")}
+                onClick={() => navigate(`/notifications/${notice.id}`)}
               >
                 <span>{notice.id}</span>
                 <span>{notice.title}</span>
