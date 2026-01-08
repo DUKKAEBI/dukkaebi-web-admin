@@ -103,7 +103,7 @@ export const TextArea = styled.textarea`
 
 // Date input looks white with slightly darker border in the design
 export const DateInput = styled.input`
-  width: 100%;
+  width: 202px;
   height: 40px;
   padding: 0 16px;
   border: 1px solid ${COLORS.gray3};
@@ -121,8 +121,8 @@ export const DateInput = styled.input`
 
 export const RadioGroup = styled.div`
   display: flex;
-  gap: 24px;
-  align-items: center;
+  flex-direction: column;
+  gap: 12px;
 `;
 
 export const RadioLabel = styled.label`
@@ -169,11 +169,11 @@ export const DateTimeRow = styled.div`
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 4px;
 `;
 
 export const TimeInput = styled.input`
-  width: 140px;
+  width: 168px;
   height: 40px;
   padding: 0 16px;
   border: 1px solid ${COLORS.gray3};
