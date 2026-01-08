@@ -214,7 +214,7 @@ export const ParticipantsTable = styled.div`
 
 export const ParticipantsTableHead = styled.div`
   display: grid;
-  grid-template-columns: 84px 1fr 120px 120px;
+  grid-template-columns: 84px 1fr 120px 120px 40px;
   align-items: center;
   padding: 16px 20px;
   border-bottom: 1px solid ${COLORS.gray4};
@@ -224,16 +224,23 @@ export const ParticipantsTableHead = styled.div`
   font-weight: 500;
 `;
 
+export const ParticipantRowWrapper = styled.div`
+  &:first-of-type > div {
+    border-top: none;
+  }
+`;
+
 export const ParticipantsRow = styled.div`
   display: grid;
-  grid-template-columns: 84px 1fr 120px 120px;
+  grid-template-columns: 84px 1fr 120px 120px 40px;
   align-items: center;
   height: 60px;
   padding: 0 20px;
   border-top: 1px solid ${COLORS.gray4};
+  transition: background-color 0.2s;
 
-  &:first-of-type {
-    border-top: none;
+  &:hover {
+    background: ${COLORS.gray5};
   }
 `;
 
@@ -257,6 +264,98 @@ export const ParticipantsStat = styled.span`
   font-size: 16px;
   font-weight: 500;
   color: ${COLORS.black};
+`;
+
+export const ExpandIcon = styled.div<{ $expanded?: boolean }>`
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+  }
+`;
+
+export const ExpandedContent = styled.div`
+  padding: 24px 20px;
+  background: #EDEDED;
+  border-top: 1px solid ${COLORS.gray4};
+`;
+
+export const ProblemsTable = styled.div`
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden;
+  background: ${COLORS.white};
+`;
+
+export const ProblemsHeaderRow = styled.div`
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  background: #F5F5F5;
+  border-bottom: 1px solid #E0E0E0;
+`;
+
+export const ProblemsScoreRow = styled.div`
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  background: ${COLORS.white};
+`;
+
+export const ProblemNumberCell = styled.div`
+  font-family: "Pretendard", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #828282;
+  text-align: center;
+  padding: 10px 4px;
+  border-right: 1px solid #E0E0E0;
+
+  &:last-child {
+    border-right: none;
+  }
+`;
+
+export const ScoreCell = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 4px;
+  border-right: 1px solid #E0E0E0;
+
+  &:last-child {
+    border-right: none;
+  }
+`;
+
+export const ScoreText = styled.span`
+  font-family: "Pretendard", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: ${COLORS.black};
+`;
+
+export const EditIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  img {
+    width: 12px;
+    height: 12px;
+    object-fit: contain;
+  }
 `;
 
 // Settings tab

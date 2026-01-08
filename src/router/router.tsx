@@ -21,6 +21,8 @@ import CourseSolvePage from "../page/solve/course";
 import ContestSolvePage from "../page/solve/contests";
 import NoticesPage from "../page/notifications";
 import NoticeInfoPage from "../page/notifications/info";
+import NotificationCreatePage from "../page/notifications/create";
+import NotificationUpdatePage from "../page/notifications/update";
 
 export default function AppRoutes() {
   return (
@@ -63,6 +65,8 @@ export default function AppRoutes() {
         element={<CourseSolvePage />}
       />
       <Route path="/notifications" element={<NoticesPage />} />
+      <Route path="/notifications/create" element={<NotificationCreatePage />} />
+      <Route path="/notifications/update/:notificationId" element={<NotificationUpdatePage />} />
       <Route path="/notifications/:id" element={<NoticeInfoPage />} />
     </Routes>
   );

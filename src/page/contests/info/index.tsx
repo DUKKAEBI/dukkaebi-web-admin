@@ -3,6 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../components/header/index";
 import * as S from "./styles";
 import contestApi from "../../../api/contestApi";
+import ArrowDown from "../../../assets/image/course/simple-line-icons_arrow-down.png";
+import ArrowUp from "../../../assets/image/course/simple-line-icons_arrow-up.png";
+import EditIcon from "../../../assets/image/auth/edit.png";
 
 type Tab = "problems" | "participants" | "settings";
 
@@ -16,14 +19,83 @@ type problem = {
   addedAt: string;
 };
 
+type Participant = {
+  rank: number;
+  userId: number;
+  nickname: string;
+  totalScore: number;
+  totalTime: string;
+  problemScores: {
+    problemId: number;
+    earnedScore: number;
+    maxScore: number;
+  }[];
+};
+
 const ContestInfo = () => {
   const [activeTab, setActiveTab] = useState<Tab>("problems");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [expandedParticipantId, setExpandedParticipantId] = useState<
+    number | null
+  >(null);
   const navigate = useNavigate();
   const { contestsId } = useParams<{
     contestsId: string;
   }>();
-  const [contest, setContest] = useState<any | null>(null);
+  const [contest, setContest] = useState<any | null>({
+    title: "DGSW 프로그래밍 대회",
+    description: "DGSW 프로그래밍 대회는 교육봉사 동아리 '두카미'에서 진행하는 알고리즘 대회 입니다.",
+    code: "CONTEST123",
+    participantCount: 5,
+    problems: [
+      {
+        problemId: 1,
+        name: "A+B",
+        difficulty: "EASY",
+        solvedCount: 150,
+        correctRate: 85.5,
+        solvedResult: "SOLVED",
+        addedAt: "2025-12-01",
+      },
+      {
+        problemId: 2,
+        name: "두 수 비교하기",
+        difficulty: "EASY",
+        solvedCount: 120,
+        correctRate: 75.2,
+        solvedResult: "SOLVED",
+        addedAt: "2025-12-01",
+      },
+      {
+        problemId: 3,
+        name: "별 찍기",
+        difficulty: "MEDIUM",
+        solvedCount: 90,
+        correctRate: 65.8,
+        solvedResult: "UNSOLVED",
+        addedAt: "2025-12-02",
+      },
+      {
+        problemId: 4,
+        name: "피보나치 수",
+        difficulty: "MEDIUM",
+        solvedCount: 70,
+        correctRate: 55.4,
+        solvedResult: "UNSOLVED",
+        addedAt: "2025-12-02",
+      },
+      {
+        problemId: 5,
+        name: "최단 경로",
+        difficulty: "HARD",
+        solvedCount: 45,
+        correctRate: 35.2,
+        solvedResult: "UNSOLVED",
+        addedAt: "2025-12-03",
+      },
+    ],
+  });
+  const [participants, setParticipants] = useState<Participant[]>([]);
 
   useEffect(() => {
     const onDocClick = () => setOpenMenuId(null);
@@ -39,6 +111,11 @@ const ContestInfo = () => {
         const data = await contestApi.getContest(contestsId);
         if (!mounted) return;
         setContest(data);
+
+        // 참여자 목록 조회
+        const participantsData = await contestApi.getParticipants(contestsId);
+        if (!mounted) return;
+        setParticipants(participantsData || []);
       } catch (err) {
         console.error("Failed to load contest:", err);
       }
@@ -140,18 +217,92 @@ const ContestInfo = () => {
             <S.ParticipantsTableHead>
               <span>등수</span>
               <span>이름</span>
-              <span style={{ justifySelf: "end" }}>제출한 문제 수</span>
-              <span style={{ justifySelf: "end" }}>맞춘 문제 수</span>
+              <span style={{ justifySelf: "end" }}>소요 시간</span>
+              <span style={{ justifySelf: "end" }}>총 점수</span>
             </S.ParticipantsTableHead>
-            {contest?.problems?.map((p: problem, idx: number) => (
-              <S.ParticipantsRow key={p.problemId}>
-                <S.ParticipantsRank>{idx + 1}</S.ParticipantsRank>
-                <S.ParticipantsName>{p.name}</S.ParticipantsName>
-                <S.ParticipantsStat>{p.solvedCount}</S.ParticipantsStat>
-                <S.ParticipantsStat>
-                  {p.solvedResult === "SOLVED" ? 1 : 0}
-                </S.ParticipantsStat>
-              </S.ParticipantsRow>
+            {participants.map((participant: Participant) => (
+              <S.ParticipantRowWrapper key={participant.userId}>
+                <S.ParticipantsRow
+                  onClick={() =>
+                    setExpandedParticipantId(
+                      expandedParticipantId === participant.userId
+                        ? null
+                        : participant.userId
+                    )
+                  }
+                  style={{ cursor: "pointer" }}
+                >
+                  <S.ParticipantsRank>
+                    {participant.rank < 10 ? `0${participant.rank}` : participant.rank}
+                  </S.ParticipantsRank>
+                  <S.ParticipantsName>{participant.nickname}</S.ParticipantsName>
+                  <S.ParticipantsStat>{participant.totalTime}</S.ParticipantsStat>
+                  <S.ParticipantsStat>{participant.totalScore}</S.ParticipantsStat>
+                  <S.ExpandIcon $expanded={expandedParticipantId === participant.userId}>
+                    <img 
+                      src={expandedParticipantId === participant.userId ? ArrowUp : ArrowDown} 
+                      alt={expandedParticipantId === participant.userId ? "닫기" : "열기"}
+                    />
+                  </S.ExpandIcon>
+                </S.ParticipantsRow>
+                {expandedParticipantId === participant.userId && (
+                  <S.ExpandedContent>
+                    <S.ProblemsTable>
+                      <S.ProblemsHeaderRow>
+                        {participant.problemScores.map((score, index) => (
+                          <S.ProblemNumberCell key={`header-${score.problemId}`}>
+                            {index + 1}번
+                          </S.ProblemNumberCell>
+                        ))}
+                      </S.ProblemsHeaderRow>
+                      <S.ProblemsScoreRow>
+                        {participant.problemScores.map((score, index) => (
+                          <S.ScoreCell key={`score-${score.problemId}`}>
+                            <S.ScoreText>
+                              <strong>{score.earnedScore}</strong>/{score.maxScore}
+                            </S.ScoreText>
+                            <S.EditIcon
+                              onClick={async () => {
+                                const newScore = prompt(
+                                  `${index + 1}번 문제 점수 입력 (최대: ${score.maxScore}점)`,
+                                  score.earnedScore.toString()
+                                );
+                                if (newScore === null) return;
+
+                                const earnedScore = parseInt(newScore);
+                                if (isNaN(earnedScore) || earnedScore < 0 || earnedScore > score.maxScore) {
+                                  alert("올바른 점수를 입력해주세요.");
+                                  return;
+                                }
+
+                                try {
+                                  await contestApi.updateParticipantScore(
+                                    contestsId!,
+                                    participant.userId,
+                                    {
+                                      problemId: score.problemId,
+                                      earnedScore: earnedScore,
+                                    }
+                                  );
+                                  alert("점수가 수정되었습니다.");
+                                  // 참여자 목록 재조회
+                                  const participantsData = await contestApi.getParticipants(contestsId!);
+                                  setParticipants(participantsData || []);
+                                } catch (error) {
+                                  console.error("Failed to update score:", error);
+                                  alert("점수 수정에 실패했습니다.");
+                                }
+                              }}
+                            >
+                              <img src={EditIcon} alt="수정" />
+                            </S.EditIcon>
+                          </S.ScoreCell>
+                        ))}
+                      </S.ProblemsScoreRow>
+                    </S.ProblemsTable>
+                  </S.ExpandedContent>
+                )}
+              </S.ParticipantRowWrapper>
             ))}
           </S.ParticipantsTable>
         </S.ParticipantsWrapper>

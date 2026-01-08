@@ -1,15 +1,14 @@
 import styled from "styled-components";
 
-// Shared tokens (align with contests/page styles)
 const COLORS = {
   primary: "#00b4b7",
   black: "#1d1d1d",
   white: "#ffffff",
-  gray1: "#828282", // label text
-  gray2: "#bdbdbd", // placeholder
-  gray3: "#e0e0e0", // light border
-  gray4: "#ededed", // default border
-  gray5: "#f6f6f6", // input bg
+  gray1: "#828282",
+  gray2: "#bdbdbd",
+  gray3: "#e0e0e0",
+  gray4: "#ededed",
+  gray5: "#f6f6f6",
 };
 
 export const Container = styled.div`
@@ -101,91 +100,71 @@ export const TextArea = styled.textarea`
   }
 `;
 
-// Date input looks white with slightly darker border in the design
-export const DateInput = styled.input`
-  width: 100%;
-  height: 40px;
-  padding: 0 16px;
-  border: 1px solid ${COLORS.gray3};
+export const FileInputWrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export const FileInput = styled.input`
+  display: none;
+`;
+
+export const FileButton = styled.label`
+  padding: 8px 24px;
   border-radius: 8px;
-  background: ${COLORS.white};
-  font-family: "Pretendard", sans-serif;
-  font-size: 16px;
+  border: 1px solid ${COLORS.gray3};
+  background: ${COLORS.gray5};
   color: ${COLORS.black};
-  box-sizing: border-box;
-
-  &::placeholder {
-    color: ${COLORS.gray2};
-  }
-`;
-
-export const RadioGroup = styled.div`
-  display: flex;
-  gap: 24px;
-  align-items: center;
-`;
-
-export const RadioLabel = styled.label`
-  display: flex;
-  align-items: center;
-  gap: 8px;
   font-family: "Pretendard", sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: ${COLORS.black};
   cursor: pointer;
-`;
+  transition: background-color 0.2s;
 
-export const RadioInput = styled.input`
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  appearance: none;
-  border: 2px solid ${COLORS.gray3};
-  border-radius: 50%;
-  position: relative;
-  background: ${COLORS.white};
-  transition: all 0.2s;
-
-  &:checked {
-    border-color: ${COLORS.primary};
-    background: ${COLORS.primary};
-  }
-
-  &:checked::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: ${COLORS.white};
+  &:hover {
+    background: ${COLORS.gray4};
   }
 `;
 
-export const DateTimeRow = styled.div`
-  display: flex;
-  gap: 12px;
+export const FileItem = styled.div`
+  display: inline-flex;
   align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
   margin-top: 8px;
-`;
-
-export const TimeInput = styled.input`
-  width: 140px;
-  height: 40px;
-  padding: 0 16px;
   border: 1px solid ${COLORS.gray3};
   border-radius: 8px;
-  background: ${COLORS.white};
-  font-family: "Pretendard", sans-serif;
-  font-size: 16px;
-  color: ${COLORS.black};
-  box-sizing: border-box;
+  background: ${COLORS.gray5};
+  width: fit-content;
+`;
 
-  &::placeholder {
-    color: ${COLORS.gray2};
+export const FileIcon = styled.span`
+  font-size: 16px;
+  flex-shrink: 0;
+`;
+
+export const FileName = styled.span`
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  color: ${COLORS.black};
+`;
+
+export const FileRemove = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: ${COLORS.gray1};
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.2s;
+
+  &:hover {
+    color: ${COLORS.black};
   }
 `;
 

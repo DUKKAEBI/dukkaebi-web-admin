@@ -26,7 +26,40 @@ const ContestsPage = () => {
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [contests, setContests] = useState<ContestItem[]>([]);
+  const [contests, setContests] = useState<ContestItem[]>([
+    {
+      id: 1,
+      code: "CONTEST123",
+      title: "DGSW 프로그래밍 대회",
+      dDay: 5,
+      participants: 45,
+      image: IMAGE,
+    },
+    {
+      id: 2,
+      code: "CONTEST124",
+      title: "알고리즘 챌린지 2025",
+      dDay: 12,
+      participants: 32,
+      image: IMAGE,
+    },
+    {
+      id: 3,
+      code: "CONTEST125",
+      title: "코딩 마스터 대회",
+      dDay: 3,
+      participants: 58,
+      image: IMAGE,
+    },
+    {
+      id: 4,
+      code: "CONTEST126",
+      title: "프로그래밍 경진대회",
+      dDay: 7,
+      participants: 27,
+      image: IMAGE,
+    },
+  ]);
   const [page, setPage] = useState(1);
   const PER_PAGE = 12;
   const menuRef = useRef<HTMLDivElement>(null);

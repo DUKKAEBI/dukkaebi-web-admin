@@ -1,11 +1,12 @@
 // todo : api연결, pagination 부분에 페이지 버튼 동적으로 변경
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "../../components/header";
 import { Footer } from "../../components/footer";
 import arrowLeft from "../../assets/image/notifications/arrow-left.png";
 import arrowRight from "../../assets/image/notifications/arrow-right.png";
 import search from "../../assets/image/notifications/search.png";
+import noticeApi from "../../api/noticeApi";
 
 import {
   Page,
@@ -30,14 +31,39 @@ export default function NoticesPage() {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [notices, setNotices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const notices = Array.from({ length: 15 }, (_, i) => ({
-    id: 15 - i,
-    title: "DGSW 프로그래밍 대회 관련 안내",
-    author: "이**",
-    date: "2026.01.01",
-    views: 10,
-  }));
+  useEffect(() => {
+    const fetchNotices = async () => {
+      setLoading(true);
+      try {
+        const data = await noticeApi.getNotices();
+        setNotices(data.content || data || []);
+      } catch (error) {
+        console.error("Failed to fetch notices:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotices();
+  }, []);
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      const data = await noticeApi.getNotices();
+      setNotices(data.content || data || []);
+      return;
+    }
+
+    try {
+      const data = await noticeApi.searchNotices(searchQuery);
+      setNotices(data.content || data || []);
+    } catch (error) {
+      console.error("Failed to search notices:", error);
+    }
+  };
 
   return (
     <Page>
@@ -52,8 +78,13 @@ export default function NoticesPage() {
               placeholder="공지사항을 검색하세요.."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  handleSearch();
+                }
+              }}
             />
-            <img src={search} alt="search" />
+            <img src={search} alt="search" onClick={handleSearch} style={{ cursor: "pointer" }} />
           </SearchBar>
 
           {/* Table */}

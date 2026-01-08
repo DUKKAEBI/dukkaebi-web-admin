@@ -7,8 +7,12 @@ import contestApi from "../../../api/contestApi";
 interface FormData {
   title: string;
   description: string;
+  startDateType: "unlimited" | "specific"; // 시작 날짜 타입
   startDate: string;
+  startTime: string;
+  endDateType: "unlimited" | "specific"; // 종료 날짜 타입
   endDate: string;
+  endTime: string;
 }
 
 const ContestCreatePage = () => {
@@ -17,8 +21,12 @@ const ContestCreatePage = () => {
   const [form, setForm] = useState<FormData>({
     title: "",
     description: "",
+    startDateType: "unlimited",
     startDate: "",
+    startTime: "",
+    endDateType: "unlimited",
     endDate: "",
+    endTime: "",
   });
 
   const onChange = (
@@ -26,6 +34,17 @@ const ContestCreatePage = () => {
   ) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
+  };
+
+  const onRadioChange = (
+    type: "start" | "end",
+    value: "unlimited" | "specific"
+  ) => {
+    if (type === "start") {
+      setForm((p) => ({ ...p, startDateType: value }));
+    } else {
+      setForm((p) => ({ ...p, endDateType: value }));
+    }
   };
 
   const onCancel = () => navigate("/contests");
@@ -79,27 +98,85 @@ const ContestCreatePage = () => {
             </S.Group>
 
             <S.Group>
-              <S.Label htmlFor="startDate">대회 시작 날짜</S.Label>
-              <S.DateInput
-                id="startDate"
-                name="startDate"
-                type="date"
-                placeholder="YYYY / MM / DD"
-                value={form.startDate}
-                onChange={onChange}
-              />
+              <S.Label>대회 시작 날짜</S.Label>
+              <S.RadioGroup>
+                <S.RadioLabel>
+                  <S.RadioInput
+                    type="radio"
+                    name="startDateType"
+                    checked={form.startDateType === "unlimited"}
+                    onChange={() => onRadioChange("start", "unlimited")}
+                  />
+                  제한 없음
+                </S.RadioLabel>
+                <S.RadioLabel>
+                  <S.RadioInput
+                    type="radio"
+                    name="startDateType"
+                    checked={form.startDateType === "specific"}
+                    onChange={() => onRadioChange("start", "specific")}
+                  />
+                  특정 시각
+                </S.RadioLabel>
+              </S.RadioGroup>
+              {form.startDateType === "specific" && (
+                <S.DateTimeRow>
+                  <S.DateInput
+                    name="startDate"
+                    type="date"
+                    value={form.startDate}
+                    onChange={onChange}
+                  />
+                  <S.TimeInput
+                    name="startTime"
+                    type="time"
+                    value={form.startTime}
+                    onChange={onChange}
+                    placeholder="오후 8:00"
+                  />
+                </S.DateTimeRow>
+              )}
             </S.Group>
 
             <S.Group>
-              <S.Label htmlFor="endDate">대회 종료 날짜</S.Label>
-              <S.DateInput
-                id="endDate"
-                name="endDate"
-                type="date"
-                placeholder="YYYY / MM / DD"
-                value={form.endDate}
-                onChange={onChange}
-              />
+              <S.Label>대회 종료 날짜</S.Label>
+              <S.RadioGroup>
+                <S.RadioLabel>
+                  <S.RadioInput
+                    type="radio"
+                    name="endDateType"
+                    checked={form.endDateType === "unlimited"}
+                    onChange={() => onRadioChange("end", "unlimited")}
+                  />
+                  제한 없음
+                </S.RadioLabel>
+                <S.RadioLabel>
+                  <S.RadioInput
+                    type="radio"
+                    name="endDateType"
+                    checked={form.endDateType === "specific"}
+                    onChange={() => onRadioChange("end", "specific")}
+                  />
+                  특정 시각
+                </S.RadioLabel>
+              </S.RadioGroup>
+              {form.endDateType === "specific" && (
+                <S.DateTimeRow>
+                  <S.DateInput
+                    name="endDate"
+                    type="date"
+                    value={form.endDate}
+                    onChange={onChange}
+                  />
+                  <S.TimeInput
+                    name="endTime"
+                    type="time"
+                    value={form.endTime}
+                    onChange={onChange}
+                    placeholder="오후 8:00"
+                  />
+                </S.DateTimeRow>
+              )}
             </S.Group>
 
             <S.Actions>
