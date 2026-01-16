@@ -1,8 +1,10 @@
 import axiosInstance from "./axiosInstance";
 
 export const contestApi = {
-  getContests: async () => {
-    const res = await axiosInstance.get(`/contest/list`);
+  getContests: async (page: number = 0, size: number = 12) => {
+    const res = await axiosInstance.get(`/contest/list`, {
+      params: { page, size },
+    });
     return res.data;
   },
 
@@ -11,7 +13,26 @@ export const contestApi = {
     return res.data;
   },
 
-  createContest: async (payload: any) => {
+  // 대회 이미지 업로드
+  uploadImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await axiosInstance.post(`/admin/contest/upload-image`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return res.data;
+  },
+
+  // 대회 생성
+  createContest: async (payload: {
+    title: string;
+    description: string;
+    imageUrl: string;
+    startDate: string;
+    endDate: string;
+  }) => {
     const res = await axiosInstance.post(`/admin/contest/create`, payload);
     return res.data;
   },

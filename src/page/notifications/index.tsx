@@ -29,40 +29,60 @@ import {
 
 export default function NoticesPage() {
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [notices, setNotices] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchNotices = async () => {
-      setLoading(true);
-      try {
-        const data = await noticeApi.getNotices();
-        setNotices(data.content || data || []);
-      } catch (error) {
-        console.error("Failed to fetch notices:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchNotices = async (page: number) => {
+    setLoading(true);
+    try {
+      const data = await noticeApi.getNotices(page, 10);
+      setNotices(data.content || []);
+      setTotalPages(data.totalPages || 0);
+      setCurrentPage(data.currentPage || 0);
+    } catch (error) {
+      console.error("Failed to fetch notices:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchNotices();
+  useEffect(() => {
+    fetchNotices(0);
   }, []);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 0 && page < totalPages) {
+      fetchNotices(page);
+    }
+  };
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
-      const data = await noticeApi.getNotices();
-      setNotices(data.content || data || []);
+      fetchNotices(0);
       return;
     }
 
     try {
       const data = await noticeApi.searchNotices(searchQuery);
       setNotices(data.content || data || []);
+      setTotalPages(data.totalPages || 1);
+      setCurrentPage(0);
     } catch (error) {
       console.error("Failed to search notices:", error);
     }
+  };
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const startPage = Math.max(0, currentPage - 2);
+    const endPage = Math.min(totalPages - 1, startPage + 4);
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
   };
 
   return (
@@ -99,15 +119,15 @@ export default function NoticesPage() {
 
             {notices.map((notice, index) => (
               <TableRow
-                key={notice.id}
+                key={notice.noticeId}
                 isLast={index === notices.length - 1}
-                onClick={() => navigate(`/notifications/${notice.id}`)}
+                onClick={() => navigate(`/notifications/${notice.noticeId}`)}
               >
-                <span>{notice.id}</span>
+                <span>{notice.noticeId}</span>
                 <span>{notice.title}</span>
-                <span>{notice.author}</span>
+                <span>{notice.writer}</span>
                 <span>{notice.date}</span>
-                <span>{notice.views}</span>
+                <span>{notice.hits}</span>
               </TableRow>
             ))}
           </NoticeTable>
@@ -117,23 +137,31 @@ export default function NoticesPage() {
             {/* 가운데 페이지네이션 */}
             <PaginationCenter>
               <Pagination>
-                <ArrowButton direction="left">
+                <ArrowButton
+                  direction="left"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  style={{ cursor: currentPage > 0 ? "pointer" : "default", opacity: currentPage > 0 ? 1 : 0.5 }}
+                >
                   <img src={arrowLeft} alt="prev" />
                 </ArrowButton>
 
                 <Pages>
-                  {[1, 2, 3, 4, 5].map((page) => (
+                  {getPageNumbers().map((page) => (
                     <PageButton
                       key={page}
                       active={currentPage === page}
-                      onClick={() => setCurrentPage(page)}
+                      onClick={() => handlePageChange(page)}
                     >
-                      {page}
+                      {page + 1}
                     </PageButton>
                   ))}
                 </Pages>
 
-                <ArrowButton direction="right">
+                <ArrowButton
+                  direction="right"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  style={{ cursor: currentPage < totalPages - 1 ? "pointer" : "default", opacity: currentPage < totalPages - 1 ? 1 : 0.5 }}
+                >
                   <img src={arrowRight} alt="next" />
                 </ArrowButton>
               </Pagination>

@@ -7,12 +7,11 @@ import * as S from "./style";
 import noticeApi from "../../../api/noticeApi";
 
 interface NoticeDetail {
-  id: number;
   title: string;
-  author: string;
-  date: string;
-  views: number;
+  writer: string;
   content: string;
+  fileUrl: string;
+  createdAt: string;
 }
 
 export default function NoticeInfoPage() {
@@ -96,15 +95,11 @@ export default function NoticeInfoPage() {
             <S.MetaInfo>
               <S.MetaItem>
                 <S.MetaLabel>작성자</S.MetaLabel>
-                <S.MetaValue>{notice.author}</S.MetaValue>
+                <S.MetaValue>{notice.writer}</S.MetaValue>
               </S.MetaItem>
               <S.MetaItem>
                 <S.MetaLabel>등록일</S.MetaLabel>
-                <S.MetaValue>{notice.date}</S.MetaValue>
-              </S.MetaItem>
-              <S.MetaItem>
-                <S.MetaLabel>조회</S.MetaLabel>
-                <S.MetaValue>{notice.views}</S.MetaValue>
+                <S.MetaValue>{notice.createdAt}</S.MetaValue>
               </S.MetaItem>
             </S.MetaInfo>
           </S.NoticeHeader>
@@ -112,6 +107,13 @@ export default function NoticeInfoPage() {
           {/* Notice Content */}
           <S.NoticeContent>
             <S.ContentText>{notice.content}</S.ContentText>
+            {notice.fileUrl && (
+              <img
+                src={notice.fileUrl}
+                alt="첨부 파일"
+                style={{ maxWidth: "100%", marginTop: "20px" }}
+              />
+            )}
           </S.NoticeContent>
 
           {/* Navigation Buttons */}

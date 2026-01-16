@@ -222,3 +222,74 @@ export const SubmitButton = styled.button`
     cursor: not-allowed;
   }
 `;
+
+export const FileInputWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+export const FileInput = styled.input`
+  display: none;
+`;
+
+export const FileButton = styled.label`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid ${COLORS.gray3};
+  background: ${COLORS.white};
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: ${COLORS.black};
+  cursor: pointer;
+  width: fit-content;
+
+  &:hover {
+    background: ${COLORS.gray5};
+  }
+`;
+
+export const FileItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: ${COLORS.gray5};
+  width: fit-content;
+`;
+
+export const FileIcon = styled.span`
+  font-size: 16px;
+`;
+
+export const FileName = styled.span`
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  color: ${COLORS.black};
+`;
+
+export const FileRemove = styled.button`
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: ${COLORS.gray1};
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+
+  &:hover {
+    color: ${COLORS.black};
+  }
+`;
+
+export const ImagePreview = styled.img`
+  max-width: 200px;
+  max-height: 150px;
+  border-radius: 8px;
+  object-fit: cover;
+`;

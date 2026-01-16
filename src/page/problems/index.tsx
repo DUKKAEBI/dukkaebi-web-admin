@@ -56,6 +56,9 @@ export default function Problems() {
   const buttonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const PAGE_SIZE = 10;
 
   // Close action menu when clicking outside
   useEffect(() => {
@@ -149,17 +152,21 @@ export default function Problems() {
 
   const extractProblemList = (payload: any): any[] => {
     if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.content)) return payload.content;
     if (Array.isArray(payload?.data)) return payload.data;
     if (Array.isArray(payload?.results)) return payload.results;
     return [];
   };
 
-  const fetchProblems = async () => {
+  const fetchProblems = async (page: number = 0) => {
     setIsLoading(true);
     try {
-      const response = await getProblems();
-      const list = extractProblemList(response.data);
+      const response = await getProblems({ page, size: PAGE_SIZE });
+      const data = response.data;
+      const list = extractProblemList(data);
       mapProblems(list);
+      setCurrentPage(data.currentPage ?? page);
+      setTotalPages(data.totalPages ?? 1);
     } catch (error) {
       console.error("Failed to fetch problems:", error);
     } finally {
@@ -619,17 +626,36 @@ export default function Problems() {
         {/* Pagination */}
         <S.FooterControls>
           <S.PaginationContainer>
-            <S.PaginationButton>
+            <S.PaginationButton
+              onClick={() => {
+                if (currentPage > 0) fetchProblems(currentPage - 1);
+              }}
+              disabled={currentPage === 0}
+            >
               <S.ArrowIcon src={ArrowLeftIcon} alt="이전" />
             </S.PaginationButton>
             <S.PaginationNumbers>
-              <S.PaginationNumber isActive={true}>1</S.PaginationNumber>
-              <S.PaginationNumber>2</S.PaginationNumber>
-              <S.PaginationNumber>3</S.PaginationNumber>
-              <S.PaginationNumber>4</S.PaginationNumber>
-              <S.PaginationNumber>5</S.PaginationNumber>
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const startPage = Math.max(0, Math.min(currentPage - 2, totalPages - 5));
+                const pageNum = startPage + i;
+                if (pageNum >= totalPages) return null;
+                return (
+                  <S.PaginationNumber
+                    key={pageNum}
+                    isActive={pageNum === currentPage}
+                    onClick={() => fetchProblems(pageNum)}
+                  >
+                    {pageNum + 1}
+                  </S.PaginationNumber>
+                );
+              })}
             </S.PaginationNumbers>
-            <S.PaginationButton>
+            <S.PaginationButton
+              onClick={() => {
+                if (currentPage < totalPages - 1) fetchProblems(currentPage + 1);
+              }}
+              disabled={currentPage >= totalPages - 1}
+            >
               <S.ArrowIcon src={ArrowRightIcon} alt="다음" />
             </S.PaginationButton>
           </S.PaginationContainer>

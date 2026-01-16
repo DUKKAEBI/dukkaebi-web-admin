@@ -1,12 +1,32 @@
 import axiosInstance from "./axiosInstance";
 
+export type Difficulty = "COPPER" | "IRON" | "SILVER" | "GOLD" | "JADE";
+export type SolvedResult = "NOT_SOLVED" | "SOLVED" | "WRONG";
+
 export interface ProblemItem {
   problemId: number;
   name: string;
-  difficulty: string;
+  difficulty: Difficulty;
+  score: number;
   solvedCount: number;
   correctRate: number;
-  solvedResult?: string;
+  solvedResult: SolvedResult;
+  addedAt: string;
+}
+
+export interface ProblemListResponse {
+  content: ProblemItem[];
+  currentPage: number;
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  first: boolean;
+  last: boolean;
+}
+
+export interface ProblemListParams {
+  page?: number;
+  size?: number;
 }
 
 export interface TestCase {
@@ -23,8 +43,8 @@ export interface ProblemCreatePayload {
   testCases: TestCase[];
 }
 
-export const getProblems = (params?: Record<string, unknown>) => {
-  return axiosInstance.get<ProblemItem[]>(`/problems`, { params });
+export const getProblems = (params?: ProblemListParams) => {
+  return axiosInstance.get<ProblemListResponse>(`/problems`, { params });
 };
 
 export const getProblem = (id: number) =>
