@@ -7,10 +7,10 @@ import contestApi from "../../../api/contestApi";
 interface FormData {
   title: string;
   description: string;
-  startDateType: "unlimited" | "specific"; // 시작 날짜 타입
+  startDateType: "unlimited" | "specific";
   startDate: string;
   startTime: string;
-  endDateType: "unlimited" | "specific"; // 종료 날짜 타입
+  endDateType: "unlimited" | "specific";
   endDate: string;
   endTime: string;
 }
@@ -28,12 +28,22 @@ const ContestCreatePage = () => {
     endDate: "",
     endTime: "",
   });
+  const [image, setImage] = useState<File | null>(null);
 
   const onChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
+  };
+
+  const onImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setImage(file);
+  };
+
+  const onImageRemove = () => {
+    setImage(null);
   };
 
   const onRadioChange = (
@@ -53,15 +63,41 @@ const ContestCreatePage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Map form to API payload
-      const payload = {
+      let imageUrl = "";
+
+      // 이미지가 있으면 먼저 업로드
+      if (image) {
+        const uploadRes = await contestApi.uploadImage(image);
+        imageUrl = uploadRes.data || uploadRes;
+      }
+
+      // 날짜+시간 조합하여 ISO 형식으로 변환
+      let startDate = "";
+      let endDate = "";
+
+      if (form.startDateType === "specific" && form.startDate) {
+        const time = form.startTime || "00:00";
+        startDate = new Date(`${form.startDate}T${time}`).toISOString();
+      }
+
+      if (form.endDateType === "specific" && form.endDate) {
+        const time = form.endTime || "23:59";
+        endDate = new Date(`${form.endDate}T${time}`).toISOString();
+      }
+
+      await contestApi.createContest({
         title: form.title,
         description: form.description,
-        startDate: form.startDate,
-        endDate: form.endDate,
-      };
-      await contestApi.createContest(payload);
+        imageUrl,
+        startDate,
+        endDate,
+      });
+
+      alert("대회가 생성되었습니다.");
       navigate("/contests");
+    } catch (error) {
+      console.error("Failed to create contest:", error);
+      alert("대회 생성에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -95,6 +131,26 @@ const ContestCreatePage = () => {
                 value={form.description}
                 onChange={onChange}
               />
+            </S.Group>
+
+            <S.Group>
+              <S.Label>대회 이미지</S.Label>
+              <S.FileInputWrapper>
+                <S.FileInput
+                  type="file"
+                  id="image"
+                  onChange={onImageChange}
+                  accept="image/*"
+                />
+                <S.FileButton htmlFor="image">이미지 선택</S.FileButton>
+              </S.FileInputWrapper>
+              {image && (
+                <S.FileItem>
+                  <S.FileIcon>🖼️</S.FileIcon>
+                  <S.FileName>{image.name}</S.FileName>
+                  <S.FileRemove type="button" onClick={onImageRemove}>✕</S.FileRemove>
+                </S.FileItem>
+              )}
             </S.Group>
 
             <S.Group>

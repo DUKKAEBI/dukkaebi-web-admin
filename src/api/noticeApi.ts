@@ -2,8 +2,10 @@ import axiosInstance from "./axiosInstance";
 
 export const noticeApi = {
   // 공지사항 모두 조회
-  getNotices: async () => {
-    const res = await axiosInstance.get(`/notice`);
+  getNotices: async (page: number = 0, size: number = 10) => {
+    const res = await axiosInstance.get(`/notice`, {
+      params: { page, size },
+    });
     return res.data;
   },
 
@@ -21,13 +23,25 @@ export const noticeApi = {
     return res.data;
   },
 
-  // 공지사항 생성
-  createNotice: async (payload: FormData) => {
-    const res = await axiosInstance.post(`/admin/notice/create`, payload, {
+  // 파일 업로드
+  uploadFile: async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await axiosInstance.post(`/admin/notice/upload-file`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
+    return res.data;
+  },
+
+  // 공지사항 생성
+  createNotice: async (payload: {
+    title: string;
+    content: string;
+    fileUrl: string;
+  }) => {
+    const res = await axiosInstance.post(`/admin/notice/create`, payload);
     return res.data;
   },
 

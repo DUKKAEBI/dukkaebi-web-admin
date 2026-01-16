@@ -4,20 +4,14 @@ import { Header } from "../../../components/header/index";
 import * as S from "./styles";
 import noticeApi from "../../../api/noticeApi";
 
-interface FormData {
-  title: string;
-  description: string;
-  file: File | null;
-}
-
 const NotificationCreatePage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState<FormData>({
+  const [form, setForm] = useState({
     title: "",
-    description: "",
-    file: null,
+    content: "",
   });
+  const [file, setFile] = useState<File | null>(null);
 
   const onChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -27,12 +21,12 @@ const NotificationCreatePage = () => {
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setForm((p) => ({ ...p, file }));
+    const selectedFile = e.target.files?.[0] || null;
+    setFile(selectedFile);
   };
 
   const onFileRemove = () => {
-    setForm((p) => ({ ...p, file: null }));
+    setFile(null);
   };
 
   const onCancel = () => navigate("/notifications");
@@ -41,14 +35,19 @@ const NotificationCreatePage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append("title", form.title);
-      formData.append("description", form.description);
-      if (form.file) {
-        formData.append("file", form.file);
+      let fileUrl = "";
+
+      // 파일이 있으면 먼저 업로드
+      if (file) {
+        const uploadRes = await noticeApi.uploadFile(file);
+        fileUrl = uploadRes.data;
       }
 
-      await noticeApi.createNotice(formData);
+      await noticeApi.createNotice({
+        title: form.title,
+        content: form.content,
+        fileUrl,
+      });
       alert("공지가 생성되었습니다.");
       navigate("/notifications");
     } catch (error) {
@@ -62,7 +61,7 @@ const NotificationCreatePage = () => {
   return (
     <S.Container>
       <Header />
-      <S.Main>
+      <S.Main>    
         <S.FormContainer>
           <S.Title>공지 생성</S.Title>
 
@@ -80,12 +79,12 @@ const NotificationCreatePage = () => {
             </S.Group>
 
             <S.Group>
-              <S.Label htmlFor="description">설명</S.Label>
+              <S.Label htmlFor="content">내용</S.Label>
               <S.TextArea
-                id="description"
-                name="description"
+                id="content"
+                name="content"
                 placeholder=""
-                value={form.description}
+                value={form.content}
                 onChange={onChange}
                 required
               />
@@ -102,10 +101,10 @@ const NotificationCreatePage = () => {
                 />
                 <S.FileButton htmlFor="file">파일 추가</S.FileButton>
               </S.FileInputWrapper>
-              {form.file && (
+              {file && (
                 <S.FileItem>
                   <S.FileIcon>📎</S.FileIcon>
-                  <S.FileName>{form.file.name}</S.FileName>
+                  <S.FileName>{file.name}</S.FileName>
                   <S.FileRemove onClick={onFileRemove}>✕</S.FileRemove>
                 </S.FileItem>
               )}

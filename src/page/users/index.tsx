@@ -122,8 +122,10 @@ const UsersPage = () => {
         const response = await userApi.getUsers();
         if (!mounted) return;
 
-        // 응답이 배열이거나 data 필드에 배열이 있는 경우 처리
-        const data = Array.isArray(response) ? response : response?.data || [];
+        // 응답이 배열이거나 content/data 필드에 배열이 있는 경우 처리
+        const data = Array.isArray(response)
+          ? response
+          : response?.content || response?.data || [];
 
         // 영어 growth 값을 한글 등급으로 매핑
         const growthToGrade: Record<string, UserRow["grade"]> = {
@@ -328,7 +330,7 @@ const UsersPage = () => {
                             const response = await userApi.getUsers();
                             const data = Array.isArray(response)
                               ? response
-                              : response?.data || [];
+                              : response?.content || response?.data || [];
 
                             const growthToGrade: Record<
                               string,
@@ -384,17 +386,36 @@ const UsersPage = () => {
 
         <S.Pagination>
           <S.PaginationContainer>
-            <S.PaginationButton>
+            <S.PaginationButton
+              onClick={() => {
+                if (page > 1) setPage(page - 1);
+              }}
+              disabled={page === 1}
+            >
               <S.ArrowIcon src={ArrowLeftIcon} alt="이전" />
             </S.PaginationButton>
             <S.PaginationNumbers>
-              <S.PaginationNumber data-is-active={true}>1</S.PaginationNumber>
-              <S.PaginationNumber>2</S.PaginationNumber>
-              <S.PaginationNumber>3</S.PaginationNumber>
-              <S.PaginationNumber>4</S.PaginationNumber>
-              <S.PaginationNumber>5</S.PaginationNumber>
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const startPage = Math.max(1, Math.min(page - 2, totalPages - 4));
+                const pageNum = startPage + i;
+                if (pageNum > totalPages) return null;
+                return (
+                  <S.PaginationNumber
+                    key={pageNum}
+                    data-is-active={pageNum === page}
+                    onClick={() => setPage(pageNum)}
+                  >
+                    {pageNum}
+                  </S.PaginationNumber>
+                );
+              })}
             </S.PaginationNumbers>
-            <S.PaginationButton>
+            <S.PaginationButton
+              onClick={() => {
+                if (page < totalPages) setPage(page + 1);
+              }}
+              disabled={page >= totalPages}
+            >
               <S.ArrowIcon src={ArrowRightIcon} alt="다음" />
             </S.PaginationButton>
           </S.PaginationContainer>

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "../../components/header";
 import { Footer } from "../../components/footer";
@@ -12,118 +12,61 @@ import ArrowRightIcon from "../../assets/image/problems/arrow-right.png";
 import { contestApi } from "../../api/contestApi";
 
 interface ContestItem {
-  id?: number | string;
-  code?: string;
-  title?: string;
-  dDay?: number;
-  participants?: number;
-  image?: string;
+  code: string;
+  title: string;
+  imageUrl: string;
+  dDay: string;
+  participantCount: number;
+  status: string;
 }
 
-const IMAGE = "https://i.ibb.co/Rp6GC0LG/dgsw.png";
+const DEFAULT_IMAGE = "https://i.ibb.co/Rp6GC0LG/dgsw.png";
 
 const ContestsPage = () => {
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [contests, setContests] = useState<ContestItem[]>([
-    {
-      id: 1,
-      code: "CONTEST123",
-      title: "DGSW 프로그래밍 대회",
-      dDay: 5,
-      participants: 45,
-      image: IMAGE,
-    },
-    {
-      id: 2,
-      code: "CONTEST124",
-      title: "알고리즘 챌린지 2025",
-      dDay: 12,
-      participants: 32,
-      image: IMAGE,
-    },
-    {
-      id: 3,
-      code: "CONTEST125",
-      title: "코딩 마스터 대회",
-      dDay: 3,
-      participants: 58,
-      image: IMAGE,
-    },
-    {
-      id: 4,
-      code: "CONTEST126",
-      title: "프로그래밍 경진대회",
-      dDay: 7,
-      participants: 27,
-      image: IMAGE,
-    },
-  ]);
-  const [page, setPage] = useState(1);
-  const PER_PAGE = 12;
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [contests, setContests] = useState<ContestItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const fetchContests = async (page: number) => {
+    setLoading(true);
+    try {
+      const data = await contestApi.getContests(page, 12);
+      setContests(data.content || []);
+      setTotalPages(data.totalPages || 0);
+      setCurrentPage(data.currentPage || 0);
+    } catch (err) {
+      console.error("Failed to fetch contests:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let mounted = true;
-
-    const fetchContests = async () => {
-      try {
-        const data = await contestApi.getContests();
-        if (!mounted) return;
-
-        // Expecting array - use fallback mapping
-        if (Array.isArray(data)) {
-          setContests(
-            data.map((item: any) => ({
-              id: item.id ?? item.code,
-              code: item.code,
-              title: item.title ?? item.name ?? item.subject,
-              dDay: item.dDay ?? item.dday ?? 0,
-              participants: item.participants ?? item.participantCount ?? 0,
-              image: item.image ?? item.thumbnail ?? IMAGE,
-            }))
-          );
-        }
-      } catch (err) {
-        // leave MOCK as fallback
-        console.error("Failed to fetch contests:", err);
-      }
-    };
-
-    fetchContests();
-
-    return () => {
-      mounted = false;
-    };
+    fetchContests(0);
   }, []);
 
-  const filtered = useMemo(
-    () =>
-      contests.filter((c) =>
-        (c.title ?? "").toLowerCase().includes(query.toLowerCase())
-      ),
-    [contests, query]
-  );
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-  const pageItems = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setOpenMenuId(null);
-      }
-    };
-
-    if (openMenuId !== null) {
-      document.addEventListener("mousedown", handleClickOutside);
+  const handlePageChange = (page: number) => {
+    if (page >= 0 && page < totalPages) {
+      fetchContests(page);
     }
+  };
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [openMenuId]);
+  const getPageNumbers = () => {
+    const pages = [];
+    const startPage = Math.max(0, currentPage - 2);
+    const endPage = Math.min(totalPages - 1, startPage + 4);
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
+
+  const filteredContests = contests.filter((c) =>
+    c.title.toLowerCase().includes(query.toLowerCase())
+  );
 
   return (
     <S.Container>
@@ -136,7 +79,6 @@ const ContestsPage = () => {
             value={query}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setQuery(e.target.value);
-              setPage(1);
             }}
           />
           <S.SearchIcon aria-hidden>
@@ -145,44 +87,49 @@ const ContestsPage = () => {
         </S.SearchBar>
 
         <S.Grid>
-          {pageItems.map((c) => {
-            const idOrCode = c.code ?? c.id;
-            return (
-              <S.Card
-                key={String(idOrCode)}
-                onClick={() => navigate(`/contests/${idOrCode}`)}
-              >
-                <S.CardImageWrapper>
-                  <S.CardImage src={c.image} alt={c.title} />
-                  <S.MoreButtonWrapper
-                    ref={openMenuId === c.id ? menuRef : null}
-                  ></S.MoreButtonWrapper>
-                </S.CardImageWrapper>
-                <S.CardBody>
-                  <S.CardTitle>{c.title}</S.CardTitle>
-                  <S.CardMeta>
-                    {c.dDay}・ {c.participants}명 참여중
-                  </S.CardMeta>
-                </S.CardBody>
-              </S.Card>
-            );
-          })}
+          {filteredContests.map((c) => (
+            <S.Card
+              key={c.code}
+              onClick={() => navigate(`/contests/${c.code}`)}
+            >
+              <S.CardImageWrapper>
+                <S.CardImage src={c.imageUrl || DEFAULT_IMAGE} alt={c.title} />
+              </S.CardImageWrapper>
+              <S.CardBody>
+                <S.CardTitle>{c.title}</S.CardTitle>
+                <S.CardMeta>
+                  {c.dDay} ・ {c.participantCount}명 참여중
+                </S.CardMeta>
+              </S.CardBody>
+            </S.Card>
+          ))}
         </S.Grid>
 
         <S.BottomBar>
           <S.Pagination>
             <S.PaginationContainer>
-              <S.PaginationButton>
+              <S.PaginationButton
+                onClick={() => handlePageChange(currentPage - 1)}
+                style={{ cursor: currentPage > 0 ? "pointer" : "default", opacity: currentPage > 0 ? 1 : 0.5 }}
+              >
                 <S.ArrowIcon src={ArrowLeftIcon} alt="이전" />
               </S.PaginationButton>
               <S.PaginationNumbers>
-                <S.PaginationNumber data-is-active={true}>1</S.PaginationNumber>
-                <S.PaginationNumber>2</S.PaginationNumber>
-                <S.PaginationNumber>3</S.PaginationNumber>
-                <S.PaginationNumber>4</S.PaginationNumber>
-                <S.PaginationNumber>5</S.PaginationNumber>
+                {getPageNumbers().map((page) => (
+                  <S.PaginationNumber
+                    key={page}
+                    data-is-active={currentPage === page}
+                    onClick={() => handlePageChange(page)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {page + 1}
+                  </S.PaginationNumber>
+                ))}
               </S.PaginationNumbers>
-              <S.PaginationButton>
+              <S.PaginationButton
+                onClick={() => handlePageChange(currentPage + 1)}
+                style={{ cursor: currentPage < totalPages - 1 ? "pointer" : "default", opacity: currentPage < totalPages - 1 ? 1 : 0.5 }}
+              >
                 <S.ArrowIcon src={ArrowRightIcon} alt="다음" />
               </S.PaginationButton>
             </S.PaginationContainer>
