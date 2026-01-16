@@ -103,7 +103,7 @@ export const TextArea = styled.textarea`
 
 // Date input looks white with slightly darker border in the design
 export const DateInput = styled.input`
-  width: 100%;
+  width: 202px;
   height: 40px;
   padding: 0 16px;
   border: 1px solid ${COLORS.gray3};
@@ -117,6 +117,76 @@ export const DateInput = styled.input`
   &::placeholder {
     color: ${COLORS.gray2};
   }
+`;
+
+export const RadioGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+export const RadioLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: ${COLORS.black};
+  cursor: pointer;
+`;
+
+export const RadioInput = styled.input`
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  appearance: none;
+  border: 2px solid ${COLORS.gray3};
+  border-radius: 50%;
+  position: relative;
+  background: ${COLORS.white};
+  transition: all 0.2s;
+
+  &:checked {
+    border-color: ${COLORS.primary};
+    background: ${COLORS.primary};
+  }
+
+  &:checked::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: ${COLORS.white};
+  }
+`;
+
+export const TimeInput = styled.input`
+  width: 168px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid ${COLORS.gray3};
+  border-radius: 8px;
+  background: ${COLORS.white};
+  font-family: "Pretendard", sans-serif;
+  font-size: 16px;
+  color: ${COLORS.black};
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: ${COLORS.gray2};
+  }
+`;
+
+export const DateTimeRow = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 4px;
 `;
 
 export const Actions = styled.div`

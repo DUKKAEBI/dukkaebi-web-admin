@@ -44,7 +44,8 @@ const ContestInfo = () => {
   }>();
   const [contest, setContest] = useState<any | null>({
     title: "DGSW 프로그래밍 대회",
-    description: "DGSW 프로그래밍 대회는 교육봉사 동아리 '두카미'에서 진행하는 알고리즘 대회 입니다.",
+    description:
+      "DGSW 프로그래밍 대회는 교육봉사 동아리 '두카미'에서 진행하는 알고리즘 대회 입니다.",
     code: "CONTEST123",
     participantCount: 5,
     problems: [
@@ -206,7 +207,11 @@ const ContestInfo = () => {
               </S.Row>
             ))}
           </S.Table>
-          <S.AddButton>문제 추가</S.AddButton>
+          <S.AddButton
+            onClick={() => navigate(`/contests/problems/create/${contestsId}`)}
+          >
+            문제 추가
+          </S.AddButton>
         </S.Content>
       ) : activeTab === "participants" ? (
         <S.ParticipantsWrapper>
@@ -233,15 +238,33 @@ const ContestInfo = () => {
                   style={{ cursor: "pointer" }}
                 >
                   <S.ParticipantsRank>
-                    {participant.rank < 10 ? `0${participant.rank}` : participant.rank}
+                    {participant.rank < 10
+                      ? `0${participant.rank}`
+                      : participant.rank}
                   </S.ParticipantsRank>
-                  <S.ParticipantsName>{participant.nickname}</S.ParticipantsName>
-                  <S.ParticipantsStat>{participant.totalTime}</S.ParticipantsStat>
-                  <S.ParticipantsStat>{participant.totalScore}</S.ParticipantsStat>
-                  <S.ExpandIcon $expanded={expandedParticipantId === participant.userId}>
-                    <img 
-                      src={expandedParticipantId === participant.userId ? ArrowUp : ArrowDown} 
-                      alt={expandedParticipantId === participant.userId ? "닫기" : "열기"}
+                  <S.ParticipantsName>
+                    {participant.nickname}
+                  </S.ParticipantsName>
+                  <S.ParticipantsStat>
+                    {participant.totalTime}
+                  </S.ParticipantsStat>
+                  <S.ParticipantsStat>
+                    {participant.totalScore}
+                  </S.ParticipantsStat>
+                  <S.ExpandIcon
+                    $expanded={expandedParticipantId === participant.userId}
+                  >
+                    <img
+                      src={
+                        expandedParticipantId === participant.userId
+                          ? ArrowUp
+                          : ArrowDown
+                      }
+                      alt={
+                        expandedParticipantId === participant.userId
+                          ? "닫기"
+                          : "열기"
+                      }
                     />
                   </S.ExpandIcon>
                 </S.ParticipantsRow>
@@ -250,7 +273,9 @@ const ContestInfo = () => {
                     <S.ProblemsTable>
                       <S.ProblemsHeaderRow>
                         {participant.problemScores.map((score, index) => (
-                          <S.ProblemNumberCell key={`header-${score.problemId}`}>
+                          <S.ProblemNumberCell
+                            key={`header-${score.problemId}`}
+                          >
                             {index + 1}번
                           </S.ProblemNumberCell>
                         ))}
@@ -259,18 +284,25 @@ const ContestInfo = () => {
                         {participant.problemScores.map((score, index) => (
                           <S.ScoreCell key={`score-${score.problemId}`}>
                             <S.ScoreText>
-                              <strong>{score.earnedScore}</strong>/{score.maxScore}
+                              <strong>{score.earnedScore}</strong>/
+                              {score.maxScore}
                             </S.ScoreText>
                             <S.EditIcon
                               onClick={async () => {
                                 const newScore = prompt(
-                                  `${index + 1}번 문제 점수 입력 (최대: ${score.maxScore}점)`,
+                                  `${index + 1}번 문제 점수 입력 (최대: ${
+                                    score.maxScore
+                                  }점)`,
                                   score.earnedScore.toString()
                                 );
                                 if (newScore === null) return;
 
                                 const earnedScore = parseInt(newScore);
-                                if (isNaN(earnedScore) || earnedScore < 0 || earnedScore > score.maxScore) {
+                                if (
+                                  isNaN(earnedScore) ||
+                                  earnedScore < 0 ||
+                                  earnedScore > score.maxScore
+                                ) {
                                   alert("올바른 점수를 입력해주세요.");
                                   return;
                                 }
@@ -286,10 +318,16 @@ const ContestInfo = () => {
                                   );
                                   alert("점수가 수정되었습니다.");
                                   // 참여자 목록 재조회
-                                  const participantsData = await contestApi.getParticipants(contestsId!);
+                                  const participantsData =
+                                    await contestApi.getParticipants(
+                                      contestsId!
+                                    );
                                   setParticipants(participantsData || []);
                                 } catch (error) {
-                                  console.error("Failed to update score:", error);
+                                  console.error(
+                                    "Failed to update score:",
+                                    error
+                                  );
                                   alert("점수 수정에 실패했습니다.");
                                 }
                               }}
