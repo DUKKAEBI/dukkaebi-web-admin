@@ -234,7 +234,6 @@ import SearchIcon from "../../assets/image/problems/search.png";
 import ArrowLeftIcon from "../../assets/image/problems/arrow-left.png";
 //오른쪽
 import ArrowRightIcon from "../../assets/image/problems/arrow-right.png";
-
 interface CourseItem {
   id?: number | string;
   title?: string;
@@ -242,21 +241,17 @@ interface CourseItem {
   keywords?: string[];
 }
 
-const IMAGE = "https://i.ibb.co/Rp6GC0LG/dgsw.png";
-
-const MOCK: CourseItem[] = Array.from({ length: 12 }, (_, i) => ({
-  id: i + 1,
-  title: "자료구조 알고리즘",
-  level: "상",
-  keywords: ["#자료", "#구조", "#알고리즘", "#그래프"],
-}));
-
 const CoursePage = () => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [courses, setCourses] = useState<CourseItem[]>(MOCK);
-  const [page, setPage] = useState(1);
+  const [courses, setCourses] = useState<CourseItem[]>([]);
+
+  // 서버에서 받아온 전체 페이지 수를 저장하는 상태
+  const [totalPages, setTotalPages] = useState(1);
+  // 현재 보고 있는 페이지 (1부터 시작)
+  const [currentPage, setCurrentPage] = useState(1);
+
   const PER_PAGE = 12;
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -265,25 +260,22 @@ const CoursePage = () => {
     const fetchCourses = async () => {
       try {
         const { default: courseApi } = await import("../../api/courseApi");
+        // API가 페이지 파라미터를 지원한다면: courseApi.getCourses(currentPage - 1)
         const data = await courseApi.getCourses();
+
         if (!mounted) return;
-        if (Array.isArray(data)) {
-          console.debug("courseApi.getCourses raw:", data);
-          const mapped = data.map((it: any) => ({
-            id:
-              it.id ??
-              it.code ??
-              it.courseId ??
-              it._id ??
-              it.identifier ??
-              null,
-            title: it.title ?? it.name ?? it.subject ?? "",
-            level: it.level ?? it.difficulty ?? "",
-            keywords: it.keywords ?? it.tags ?? it.labels ?? [],
-            _raw: it,
+
+        // API 응답 데이터가 { content: [], totalPages: n, ... } 구조일 때
+        if (data && Array.isArray(data.content)) {
+          const mapped = data.content.map((it: any) => ({
+            id: it.courseId ?? it.id,
+            title: it.title ?? "",
+            level: it.level ?? "",
+            keywords: it.keywords ?? [], // null일 경우 빈 배열 처리
           }));
-          console.debug("course list mapped:", mapped);
+
           setCourses(mapped);
+          setTotalPages(data.totalPages || 1);
         }
       } catch (err) {
         console.error("Failed to fetch courses:", err);
@@ -295,8 +287,9 @@ const CoursePage = () => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [currentPage]); // 페이지 변경 시 데이터를 다시 불러올 수 있도록 설정
 
+  // 검색어 필터링 (클라이언트 사이드)
   const filtered = useMemo(
     () =>
       courses.filter((c) =>
@@ -305,8 +298,8 @@ const CoursePage = () => {
     [courses, query]
   );
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-  const pageItems = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  // totalPages 수만큼 배열 생성 (예: [1, 2, 3])
+  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -335,7 +328,7 @@ const CoursePage = () => {
             value={query}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setQuery(e.target.value);
-              setPage(1);
+              setCurrentPage(1);
             }}
           />
           <S.SearchIcon aria-hidden>
@@ -344,16 +337,16 @@ const CoursePage = () => {
         </S.SearchBar>
 
         <S.Grid>
-          {pageItems.map((c, idx) => {
-            const itemKey = `${page}-${idx}-${String(c.id ?? "")}`;
+          {filtered.map((c, idx) => {
+            const itemKey = `course-${c.id}-${idx}`;
             return (
               <S.Card key={itemKey} onClick={() => navigate(`/course/${c.id}`)}>
                 <S.CardContent>
                   <S.LevelBadge>난이도 : {c.level}</S.LevelBadge>
                   <S.CardTitle>{c.title}</S.CardTitle>
                   <S.KeywordContainer>
-                    {(c.keywords ?? []).map((keyword, idx) => (
-                      <S.Keyword key={idx}>{keyword}</S.Keyword>
+                    {(c.keywords ?? []).map((keyword, kIdx) => (
+                      <S.Keyword key={kIdx}>{keyword}</S.Keyword>
                     ))}
                   </S.KeywordContainer>
                 </S.CardContent>
@@ -397,17 +390,16 @@ const CoursePage = () => {
                             const { default: courseApi } = await import(
                               "../../api/courseApi"
                             );
-                            await courseApi.deleteCourse(
-                              c.id as string | number
-                            );
-                            const data = await courseApi.getCourses();
-                            if (Array.isArray(data)) {
+                            await courseApi.deleteCourse(c.id!);
+                            // 삭제 후 다시 목록 갱신
+                            const newData = await courseApi.getCourses();
+                            if (newData && Array.isArray(newData.content)) {
                               setCourses(
-                                data.map((it: any) => ({
-                                  id: it.id ?? it.code,
-                                  title: it.title ?? it.name,
-                                  level: it.level ?? it.difficulty ?? "",
-                                  keywords: it.keywords ?? it.tags ?? [],
+                                newData.content.map((it: any) => ({
+                                  id: it.courseId ?? it.id,
+                                  title: it.title ?? "",
+                                  level: it.level ?? "",
+                                  keywords: it.keywords ?? [],
                                 }))
                               );
                             }
@@ -431,17 +423,31 @@ const CoursePage = () => {
         <S.BottomBar>
           <S.Pagination>
             <S.PaginationContainer>
-              <S.PaginationButton>
+              <S.PaginationButton
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
                 <S.ArrowIcon src={ArrowLeftIcon} alt="이전" />
               </S.PaginationButton>
+
               <S.PaginationNumbers>
-                <S.PaginationNumber data-is-active={true}>1</S.PaginationNumber>
-                <S.PaginationNumber>2</S.PaginationNumber>
-                <S.PaginationNumber>3</S.PaginationNumber>
-                <S.PaginationNumber>4</S.PaginationNumber>
-                <S.PaginationNumber>5</S.PaginationNumber>
+                {pageNumbers.map((num) => (
+                  <S.PaginationNumber
+                    key={num}
+                    data-is-active={currentPage === num}
+                    onClick={() => setCurrentPage(num)}
+                  >
+                    {num}
+                  </S.PaginationNumber>
+                ))}
               </S.PaginationNumbers>
-              <S.PaginationButton>
+
+              <S.PaginationButton
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                }
+                disabled={currentPage === totalPages}
+              >
                 <S.ArrowIcon src={ArrowRightIcon} alt="다음" />
               </S.PaginationButton>
             </S.PaginationContainer>
