@@ -5,7 +5,6 @@ import * as S from "./styles";
 import contestApi from "../../../api/contestApi";
 import ArrowDown from "../../../assets/image/course/simple-line-icons_arrow-down.png";
 import ArrowUp from "../../../assets/image/course/simple-line-icons_arrow-up.png";
-import EditIcon from "../../../assets/image/auth/edit.png";
 
 type Tab = "problems" | "participants" | "settings";
 
@@ -287,49 +286,11 @@ const ContestInfo = () => {
                               <strong>{score.earnedScore}</strong>/
                               {score.maxScore}
                             </S.ScoreText>
-                            <S.EditIcon
-                              onClick={async () => {
-                                const newScore = prompt(
-                                  `${index + 1}번 문제 점수 입력 (최대: ${
-                                    score.maxScore
-                                  }점)`,
-                                  score.earnedScore.toString()
+                            <S.ViewCodeButton
+                              onClick={() => {
+                                navigate(
+                                  `/contests/${contestsId}/solve/${score.problemId}?userId=${participant.userId}`
                                 );
-                                if (newScore === null) return;
-
-                                const earnedScore = parseInt(newScore);
-                                if (
-                                  isNaN(earnedScore) ||
-                                  earnedScore < 0 ||
-                                  earnedScore > score.maxScore
-                                ) {
-                                  alert("올바른 점수를 입력해주세요.");
-                                  return;
-                                }
-
-                                try {
-                                  await contestApi.updateParticipantScore(
-                                    contestsId!,
-                                    participant.userId,
-                                    {
-                                      problemId: score.problemId,
-                                      earnedScore: earnedScore,
-                                    }
-                                  );
-                                  alert("점수가 수정되었습니다.");
-                                  // 참여자 목록 재조회
-                                  const participantsData =
-                                    await contestApi.getParticipants(
-                                      contestsId!
-                                    );
-                                  setParticipants(participantsData || []);
-                                } catch (error) {
-                                  console.error(
-                                    "Failed to update score:",
-                                    error
-                                  );
-                                  alert("점수 수정에 실패했습니다.");
-                                }
                               }}
                             >
                               제출코드 보기
