@@ -43,10 +43,9 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         console.error("Token refresh failed:", refreshError);
 
-        // 토큰 제거 후 로그인 페이지 이동
+        // 토큰 제거
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        window.location.assign("/login"); // SPA 환경에서도 확실하게 이동
 
         return Promise.reject(refreshError);
       }

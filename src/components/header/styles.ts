@@ -74,3 +74,37 @@ export const UserIcon = styled.div`
     object-fit: contain;
   }
 `;
+
+export const HeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+export const AuthButton = styled.button`
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+
+  &.login {
+    background: #00b4b7;
+    color: white;
+
+    &:hover {
+      background: #009a9c;
+    }
+  }
+
+  &.logout {
+    background: #f5f5f5;
+    color: #666;
+
+    &:hover {
+      background: #e8e8e8;
+    }
+  }
+`;
