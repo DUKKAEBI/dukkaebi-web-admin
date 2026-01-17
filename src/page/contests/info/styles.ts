@@ -314,8 +314,9 @@ export const ProblemNumberCell = styled.div`
   font-weight: 500;
   color: #828282;
   text-align: center;
-  padding: 10px 4px;
+  padding: 12px 8px;
   border-right: 1px solid #E0E0E0;
+  min-width: 60px;
 
   &:last-child {
     border-right: none;
@@ -324,11 +325,13 @@ export const ProblemNumberCell = styled.div`
 
 export const ScoreCell = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 4px;
+  gap: 4px;
+  padding: 12px 8px;
   border-right: 1px solid #E0E0E0;
+  min-width: 60px;
 
   &:last-child {
     border-right: none;
@@ -336,6 +339,9 @@ export const ScoreCell = styled.div`
 `;
 
 export const ScoreText = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-family: "Pretendard", sans-serif;
   font-size: 12px;
   font-weight: 500;
@@ -355,6 +361,23 @@ export const EditIcon = styled.div`
     width: 12px;
     height: 12px;
     object-fit: contain;
+  }
+`;
+
+export const ViewCodeButton = styled.button`
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-family: "Pretendard", sans-serif;
+  font-size: 10px;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &:hover {
+    background: #e8e8e8;
   }
 `;
 

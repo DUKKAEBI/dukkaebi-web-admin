@@ -9,9 +9,10 @@ import type * as monacoEditor from "monaco-editor";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Editor from "@monaco-editor/react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import * as Style from "./style";
 import axiosInstance from "../../../api/axiosInstance";
+import contestApi from "../../../api/contestApi";
 
 type ProblemDetail = {
   name: string;
@@ -78,6 +79,9 @@ export default function SolvePage() {
     contestCode?: string;
     problemId?: string;
   }>();
+  const [searchParams] = useSearchParams();
+  const viewUserId = searchParams.get("userId");
+  const isViewMode = !!viewUserId;
   const navigate = useNavigate();
   const [sampleInput, setSampleInput] = useState("");
   const [sampleOutput, setSampleOutput] = useState("");
@@ -99,7 +103,8 @@ export default function SolvePage() {
   const [problemError, setProblemError] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isTesting, setIsTesting] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [courseProblems, setCourseProblems] = useState<CourseProblemItem[]>([]);
   const [courseLoading, setCourseLoading] = useState(false);
   const [activeResultTab, setActiveResultTab] = useState<"result" | "tests">(
@@ -305,6 +310,48 @@ export default function SolvePage() {
     return () => controller.abort();
   }, [contestCode]);
 
+  // Fetch user submission code for view mode
+  useEffect(() => {
+    console.log("View mode check:", { isViewMode, contestCode, problemId, viewUserId });
+    if (!isViewMode || !contestCode || !problemId || !viewUserId) return;
+
+    const fetchSubmission = async () => {
+      try {
+        console.log("Fetching submission for:", { contestCode, problemId, viewUserId });
+        const data = await contestApi.getUserSubmission(
+          contestCode,
+          problemId,
+          viewUserId
+        );
+        console.log("Submission data:", data);
+        if (data?.submittedCode) {
+          setCode(data.submittedCode);
+        } else if (data?.code) {
+          setCode(data.code);
+        }
+        if (data?.language) {
+          const langOption = LANGUAGE_OPTIONS.find(
+            (opt) => opt.value === data.language
+          );
+          if (langOption) {
+            setLanguage(langOption.value);
+          }
+        }
+        if (data?.terminalOutput) {
+          setTerminalOutput(data.terminalOutput);
+        }
+        if (data?.gradingDetails && Array.isArray(data.gradingDetails)) {
+          setGradingDetails(data.gradingDetails);
+        }
+      } catch (error) {
+        console.error("Failed to fetch submission:", error);
+        // 제출 코드를 불러오지 못하면 빈 상태로 유지
+      }
+    };
+
+    fetchSubmission();
+  }, [isViewMode, contestCode, problemId, viewUserId]);
+
   // Live update remaining time (start/end)
   useEffect(() => {
     if (!contestInfo) {
@@ -488,6 +535,74 @@ export default function SolvePage() {
     }
   };
 
+  const handleTestCode = async () => {
+    if (!problemId) {
+      setTerminalOutput("문제 ID가 없어 테스트할 수 없습니다.");
+      return;
+    }
+    const numericProblemId = Number(problemId);
+    if (Number.isNaN(numericProblemId)) {
+      setTerminalOutput("유효한 문제 ID가 아닙니다.");
+      return;
+    }
+    if (!API_BASE_URL) {
+      setTerminalOutput("서버 주소가 설정되지 않았습니다.");
+      return;
+    }
+    if (!code.trim()) {
+      setTerminalOutput("테스트할 코드를 작성해 주세요.");
+      return;
+    }
+
+    setTerminalOutput("테스트 중입니다...");
+    setIsTesting(true);
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      const response = await fetch(`${API_BASE_URL}solve/test`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
+        body: JSON.stringify({
+          problemId: numericProblemId,
+          code,
+          language,
+        }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || "테스트 요청이 실패했습니다.");
+      }
+
+      const data = await response.json();
+      setTerminalOutput(formatGradingResult(data));
+      setGradingDetails(Array.isArray(data?.details) ? data.details : []);
+
+      const passed = Array.isArray(data?.details)
+        ? data.details.every((d: { passed?: boolean }) => d?.passed === true)
+        : false;
+      if (passed) {
+        toast.success("테스트 통과", { autoClose: 2500 });
+      } else {
+        toast.warning("테스트 실패", { autoClose: 2500 });
+      }
+    } catch (error) {
+      setTerminalOutput(
+        error instanceof Error
+          ? error.message
+          : "테스트 중 알 수 없는 오류가 발생했습니다."
+      );
+      toast.error(
+        error instanceof Error ? error.message : "테스트 오류가 발생했습니다.",
+        { autoClose: 3000 }
+      );
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
   const handleEditorBeforeMount = (monaco: typeof monacoEditor) => {
     monaco.editor.defineTheme("dukkaebi-dark", {
       base: "vs-dark",
@@ -574,7 +689,11 @@ export default function SolvePage() {
 
   const handleSidebarItemClick = (pid: number) => {
     if (!contestCode) return;
-    navigate(`/contests/${contestCode}/solve/${pid}`);
+    if (isViewMode && viewUserId) {
+      navigate(`/contests/${contestCode}/solve/${pid}?userId=${viewUserId}`);
+    } else {
+      navigate(`/contests/${contestCode}/solve/${pid}`);
+    }
   };
 
   return (
@@ -600,6 +719,20 @@ export default function SolvePage() {
               : "문제 정보 없음")}
         </Style.HeaderTitle>
         <Style.HeaderActions>
+          {isViewMode && (
+            <span
+              style={{
+                color: "#fbbf24",
+                marginRight: 12,
+                padding: "4px 10px",
+                backgroundColor: "rgba(251, 191, 36, 0.15)",
+                borderRadius: 4,
+                fontSize: 13,
+              }}
+            >
+              학생 제출 코드 보기 (읽기 전용)
+            </span>
+          )}
           {timeLeft && (
             <span style={{ color: "#9fb1bc", marginRight: 12 }}>
               {timeLeft}
@@ -608,6 +741,7 @@ export default function SolvePage() {
           <Style.LanguageSelect
             value={language}
             onChange={handleLanguageChange}
+            disabled={isViewMode}
           >
             {LANGUAGE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -675,7 +809,7 @@ export default function SolvePage() {
               width="100%"
               language={currentLanguageOption.monaco}
               value={code}
-              onChange={(value) => setCode(value || "")}
+              onChange={(value) => !isViewMode && setCode(value || "")}
               beforeMount={handleEditorBeforeMount}
               theme="dukkaebi-dark"
               options={{
@@ -685,6 +819,7 @@ export default function SolvePage() {
                 wordWrap: "on",
                 tabSize: 2,
                 scrollBeyondLastLine: false,
+                readOnly: isViewMode,
               }}
             />
           </Style.EditorContainer>
@@ -874,16 +1009,45 @@ export default function SolvePage() {
               </Style.Terminal>
             )}
 
-            <Style.SubmitWrapper>
-              <Style.SubmitButton
-                onClick={handleSubmitCode}
-                disabled={isSubmitting || !problemId}
-                style={
-                  isSidebarOpen ? { marginRight: 268 } : { marginRight: 0 }
+            <Style.SubmitWrapper
+              style={
+                isSidebarOpen ? { marginRight: 268 } : { marginRight: 0 }
+              }
+            >
+              <Style.ActionButton onClick={handleExitSolvePage}>
+                끝내기
+              </Style.ActionButton>
+              <Style.TestButton
+                onClick={handleTestCode}
+                disabled={isSubmitting || isTesting || !problemId}
+              >
+                {isTesting ? "테스트 중..." : "테스트"}
+              </Style.TestButton>
+              {!isViewMode && (
+                <Style.SubmitButton
+                  onClick={handleSubmitCode}
+                  disabled={isSubmitting || !problemId}
+                >
+                  {isSubmitting ? "채점 중..." : "제출"}
+                </Style.SubmitButton>
+              )}
+              <Style.NextButton
+                onClick={() => {
+                  const currentIndex = courseProblems.findIndex(
+                    (p) => String(p.problemId) === String(problemId)
+                  );
+                  if (currentIndex < courseProblems.length - 1) {
+                    handleSidebarItemClick(courseProblems[currentIndex + 1].problemId);
+                  }
+                }}
+                disabled={
+                  courseProblems.findIndex(
+                    (p) => String(p.problemId) === String(problemId)
+                  ) >= courseProblems.length - 1
                 }
               >
-                {isSubmitting ? "채점 중..." : "제출 후 채점하기"}
-              </Style.SubmitButton>
+                다음 문제
+              </Style.NextButton>
             </Style.SubmitWrapper>
           </Style.ResultContainer>
         </Style.RightPanel>

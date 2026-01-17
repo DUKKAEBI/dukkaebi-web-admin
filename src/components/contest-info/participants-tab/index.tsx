@@ -1,48 +1,105 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as S from "./styles";
+import contestApi from "../../../api/contestApi";
+
+interface ProblemScore {
+  problemId: number;
+  earnedScore: number;
+  maxScore: number;
+}
 
 interface Participant {
-  id: string;
-  rank: string;
-  name: string;
-  submitted: number;
-  solved: number;
+  rank: number;
+  userId: number;
+  nickname: string;
+  totalScore: number;
+  totalTime: string;
+  problemScores: ProblemScore[];
 }
 
 interface ParticipantsTabProps {
   contestId?: string;
+  onViewCode?: (userId: number, problemId: number) => void;
 }
 
-const MOCK_PARTICIPANTS: Participant[] = [
-  { id: "1", rank: "01", name: "이윤하", submitted: 4, solved: 4 },
-  { id: "2", rank: "02", name: "이윤하", submitted: 4, solved: 3 },
-  { id: "3", rank: "03", name: "이윤하", submitted: 3, solved: 3 },
-  { id: "4", rank: "04", name: "이윤하", submitted: 2, solved: 1 },
-  { id: "5", rank: "05", name: "이윤하", submitted: 1, solved: 0 },
-];
+export const ParticipantsTab = ({ contestId, onViewCode }: ParticipantsTabProps) => {
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [problemCount, setProblemCount] = useState(0);
 
-export const ParticipantsTab = ({ contestId }: ParticipantsTabProps) => {
-  const [participants] = useState<Participant[]>(MOCK_PARTICIPANTS);
+  useEffect(() => {
+    if (!contestId) return;
+
+    const fetchParticipants = async () => {
+      setLoading(true);
+      try {
+        const data = await contestApi.getParticipants(contestId);
+        const list = Array.isArray(data) ? data : [];
+        setParticipants(list);
+        if (list.length > 0 && list[0].problemScores) {
+          setProblemCount(list[0].problemScores.length);
+        }
+      } catch (error) {
+        console.error("Failed to fetch participants:", error);
+        setParticipants([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchParticipants();
+  }, [contestId]);
+
+  const handleViewCode = (userId: number, problemId: number) => {
+    if (onViewCode) {
+      onViewCode(userId, problemId);
+    } else {
+      alert(`유저 ${userId}의 문제 ${problemId} 제출 코드 보기`);
+    }
+  };
 
   return (
     <S.Container>
       <S.InfoText>총 참여 인원 : {participants.length}명</S.InfoText>
       <S.Table>
         <S.TableHeader>
-          <S.HeaderCell>등수</S.HeaderCell>
-          <S.HeaderCell>이름</S.HeaderCell>
-          <S.HeaderCell $alignRight>제출한 문제 수</S.HeaderCell>
-          <S.HeaderCell $alignRight>맞춘 문제 수</S.HeaderCell>
+          <tr>
+            <S.HeaderCell>등수</S.HeaderCell>
+            <S.HeaderCell>이름</S.HeaderCell>
+            {Array.from({ length: problemCount }, (_, i) => (
+              <S.HeaderCell key={i} style={{ textAlign: "center" }}>
+                {i + 1}번
+              </S.HeaderCell>
+            ))}
+          </tr>
         </S.TableHeader>
         <S.TableBody>
-          {participants.map((participant) => (
-            <S.TableRow key={participant.id}>
-              <S.RankCell>{participant.rank}</S.RankCell>
-              <S.NameCell>{participant.name}</S.NameCell>
-              <S.NumberCell $alignRight>{participant.submitted}</S.NumberCell>
-              <S.NumberCell $alignRight>{participant.solved}</S.NumberCell>
+          {loading ? (
+            <S.TableRow>
+              <S.NameCell colSpan={2 + problemCount}>로딩 중...</S.NameCell>
             </S.TableRow>
-          ))}
+          ) : (
+            participants.map((participant) => (
+              <S.TableRow key={participant.userId}>
+                <S.RankCell>{String(participant.rank).padStart(2, "0")}</S.RankCell>
+                <S.NameCell>{participant.nickname}</S.NameCell>
+                {participant.problemScores.map((ps) => (
+                  <S.ProblemScoreCell key={ps.problemId}>
+                    <S.ScoreWrapper>
+                      <S.ScoreText>
+                        {ps.earnedScore}/{ps.maxScore} ✏️
+                      </S.ScoreText>
+                      <S.ViewCodeButton
+                        onClick={() => handleViewCode(participant.userId, ps.problemId)}
+                      >
+                        제출코드 보기
+                      </S.ViewCodeButton>
+                    </S.ScoreWrapper>
+                  </S.ProblemScoreCell>
+                ))}
+              </S.TableRow>
+            ))
+          )}
         </S.TableBody>
       </S.Table>
     </S.Container>

@@ -1,10 +1,10 @@
 import axiosInstance from "./axiosInstance";
 
 export const noticeApi = {
-  // 공지사항 모두 조회
+  // 공지사항 모두 조회 (등록일 최신순 정렬)
   getNotices: async (page: number = 0, size: number = 10) => {
     const res = await axiosInstance.get(`/notice`, {
-      params: { page, size },
+      params: { page, size, sort: "date,desc" },
     });
     return res.data;
   },

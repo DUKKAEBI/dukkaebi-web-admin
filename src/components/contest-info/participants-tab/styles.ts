@@ -69,3 +69,54 @@ export const NumberCell = styled.td<{ $alignRight?: boolean }>`
   color: #1d1d1d;
 `;
 
+export const ProblemScoreCell = styled.td`
+  padding: 16px 8px;
+  text-align: center;
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d1d1d;
+`;
+
+export const ScoreWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+`;
+
+export const ScoreText = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+export const EditIcon = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  color: #888;
+  font-size: 12px;
+
+  &:hover {
+    color: #00b4b7;
+  }
+`;
+
+export const ViewCodeButton = styled.button`
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-family: "Pretendard", sans-serif;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: #e8e8e8;
+  }
+`;
+
