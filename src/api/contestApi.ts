@@ -93,6 +93,18 @@ export const contestApi = {
     );
     return res.data;
   },
+
+  // 학생 제출 코드 조회
+  getUserSubmission: async (
+    code: string | number,
+    problemId: string | number,
+    userId: string | number
+  ) => {
+    const res = await axiosInstance.get(
+      `/admin/contest/${code}/problem/${problemId}/user/${userId}/submission`
+    );
+    return res.data;
+  },
 };
 
 export default contestApi;

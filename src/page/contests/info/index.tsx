@@ -332,8 +332,8 @@ const ContestInfo = () => {
                                 }
                               }}
                             >
-                              <img src={EditIcon} alt="수정" />
-                            </S.EditIcon>
+                              제출코드 보기
+                            </S.ViewCodeButton>
                           </S.ScoreCell>
                         ))}
                       </S.ProblemsScoreRow>

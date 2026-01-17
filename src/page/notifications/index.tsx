@@ -31,16 +31,19 @@ export default function NoticesPage() {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [notices, setNotices] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const PAGE_SIZE = 10;
 
   const fetchNotices = async (page: number) => {
     setLoading(true);
     try {
-      const data = await noticeApi.getNotices(page, 10);
-      setNotices(data.content || []);
+      const data = await noticeApi.getNotices(page, PAGE_SIZE);
+      setNotices([...(data.content || [])].reverse());
       setTotalPages(data.totalPages || 0);
+      setTotalElements(data.totalElements || 0);
       setCurrentPage(data.currentPage || 0);
     } catch (error) {
       console.error("Failed to fetch notices:", error);
