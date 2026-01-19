@@ -19,7 +19,8 @@ const ProblemUpdate = () => {
     { input: "2 7", output: "5" },
   ]);
 
-  const addCase = () => setCases((prev) => [...prev, { input: "", output: "" }]);
+  const addCase = () =>
+    setCases((prev) => [...prev, { input: "", output: "" }]);
 
   const navigate = useNavigate();
   const { problemsId } = useParams<{ problemsId: string }>();
@@ -52,11 +53,12 @@ const ProblemUpdate = () => {
     e.preventDefault();
     try {
       if (!problemsId) return;
+      //todo : 문제 수정하는 api 개발되면 수정
       const payload = {
         title,
         description,
-        inputCond,
-        outputCond,
+        input: inputCond,
+        output: outputCond,
         testCases: cases,
       };
       await problemApi.updateProblem(Number(problemsId), payload);
@@ -138,7 +140,9 @@ const ProblemUpdate = () => {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       const v = e.target.value;
                       setCases((prev) =>
-                        prev.map((x, i) => (i === idx ? { ...x, input: v } : x))
+                        prev.map((x, i) =>
+                          i === idx ? { ...x, input: v } : x,
+                        ),
                       );
                     }}
                   />
@@ -149,8 +153,8 @@ const ProblemUpdate = () => {
                       const v = e.target.value;
                       setCases((prev) =>
                         prev.map((x, i) =>
-                          i === idx ? { ...x, output: v } : x
-                        )
+                          i === idx ? { ...x, output: v } : x,
+                        ),
                       );
                     }}
                   />
@@ -170,7 +174,9 @@ const ProblemUpdate = () => {
           </S.Field>
 
           <S.Actions>
-            <S.SecondaryButton onClick={() => navigate(-1)}>문제 수정 취소하기</S.SecondaryButton>
+            <S.SecondaryButton onClick={() => navigate(-1)}>
+              문제 수정 취소하기
+            </S.SecondaryButton>
             <S.PrimaryButton onClick={onSubmit}>문제 수정하기</S.PrimaryButton>
           </S.Actions>
         </S.Content>
