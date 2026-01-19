@@ -151,6 +151,10 @@ export const Dropdown = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 6px 0;
   z-index: 10;
+
+  :last-child {
+    color: red;
+  }
 `;
 
 export const DropdownItem = styled.button`
@@ -168,6 +172,11 @@ export const DropdownItem = styled.button`
   &:hover {
     background: ${COLORS.gray5};
   }
+`;
+
+export const AddButtonWrapper = styled.div`
+  display: flex;
+  gap: 20px;
 `;
 
 export const AddButton = styled.button`
@@ -282,14 +291,14 @@ export const ExpandIcon = styled.div<{ $expanded?: boolean }>`
 
 export const ExpandedContent = styled.div`
   padding: 24px 20px;
-  background: #EDEDED;
+  background: #ededed;
   border-top: 1px solid ${COLORS.gray4};
 `;
 
 export const ProblemsTable = styled.div`
   display: flex;
   flex-direction: column;
-  border: 1px solid #E0E0E0;
+  border: 1px solid #e0e0e0;
   border-radius: 4px;
   overflow: hidden;
   background: ${COLORS.white};
@@ -298,8 +307,8 @@ export const ProblemsTable = styled.div`
 export const ProblemsHeaderRow = styled.div`
   display: grid;
   grid-template-columns: repeat(15, 1fr);
-  background: #F5F5F5;
-  border-bottom: 1px solid #E0E0E0;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
 `;
 
 export const ProblemsScoreRow = styled.div`
@@ -315,7 +324,7 @@ export const ProblemNumberCell = styled.div`
   color: #828282;
   text-align: center;
   padding: 12px 8px;
-  border-right: 1px solid #E0E0E0;
+  border-right: 1px solid #e0e0e0;
   min-width: 60px;
 
   &:last-child {
@@ -330,7 +339,7 @@ export const ScoreCell = styled.div`
   justify-content: center;
   gap: 4px;
   padding: 12px 8px;
-  border-right: 1px solid #E0E0E0;
+  border-right: 1px solid #e0e0e0;
   min-width: 60px;
 
   &:last-child {

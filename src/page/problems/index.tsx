@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import courseApi from "../../api/courseApi";
+import contestApi from "../../api/contestApi";
 import {
   getProblems,
   filterProblems,
@@ -11,12 +12,8 @@ import {
 import * as S from "./style";
 import SearchIcon from "../../assets/image/problems/search.png";
 import ArrowDownIcon from "../../assets/image/problems/arrow-down.png";
-//왼쪽
 import ArrowLeftIcon from "../../assets/image/problems/arrow-left.png";
-//오른쪽
 import ArrowRightIcon from "../../assets/image/problems/arrow-right.png";
-// (status icons removed from table)
-//난이도 이미지
 import GoldIcon from "../../assets/image/problems/difficulty/gold.svg";
 import SilverIcon from "../../assets/image/problems/difficulty/silver.svg";
 import CopperIcon from "../../assets/image/problems/difficulty/copper.svg";
@@ -38,7 +35,8 @@ interface Problem {
 export default function Problems() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const isPicker = (searchParams.get("pickerFor") || "") === "course";
+  const pickerFor = searchParams.get("pickerFor") || "";
+  const isPicker = pickerFor === "course" || pickerFor === "contest";
   const returnTo = searchParams.get("returnTo") || "";
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<string | null>(null);
@@ -64,7 +62,6 @@ export default function Problems() {
   useEffect(() => {
     const handleDocClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      // If click is outside both the inline action container and the portal menu, close
       if (
         !target.closest("[data-action-container]") &&
         !target.closest("[data-portal-action-menu]")
@@ -77,24 +74,37 @@ export default function Problems() {
     return () => document.removeEventListener("click", handleDocClick);
   }, []);
 
-  // Preselect problems already in the course when in picker mode
+  // Preselect problems already in the course/contest when in picker mode
   useEffect(() => {
     if (!isPicker) return;
-    const match = (returnTo || "").match(/\/course\/(\d+)/);
-    const courseId = match ? match[1] : null;
-    if (!courseId) return;
+
+    const match = (returnTo || "").match(/\/(course|contest)\/(\d+)/);
+    const entityType = match ? match[1] : null;
+    const entityId = match ? match[2] : null;
+
+    if (!entityId || !entityType) return;
 
     (async () => {
       try {
-        const course = await courseApi.getCourse(courseId);
-        const problemIds: number[] = Array.isArray(course?.problems)
-          ? course.problems
-              .map((p: any) => p?.problemId)
-              .filter((v: any) => typeof v === "number")
-          : [];
-        setSelectedIds(new Set(problemIds));
+        if (entityType === "course") {
+          const course = await courseApi.getCourse(entityId);
+          const problemIds: number[] = Array.isArray(course?.problems)
+            ? course.problems
+                .map((p: any) => p?.problemId)
+                .filter((v: any) => typeof v === "number")
+            : [];
+          setSelectedIds(new Set(problemIds));
+        } else if (entityType === "contest") {
+          const contest = await contestApi.getContest(entityId);
+          const problemIds: number[] = Array.isArray(contest?.problems)
+            ? contest.problems
+                .map((p: any) => p?.problemId)
+                .filter((v: any) => typeof v === "number")
+            : [];
+          setSelectedIds(new Set(problemIds));
+        }
       } catch (err) {
-        console.error("Failed to fetch course for preselect:", err);
+        console.error(`Failed to fetch ${entityType} for preselect:`, err);
       }
     })();
   }, [isPicker, returnTo]);
@@ -240,7 +250,7 @@ export default function Problems() {
 
   const handleDifficultySelect = (
     level: number | null,
-    label: string | null
+    label: string | null,
   ) => {
     setDifficultyFilter(level);
     setDifficultyLabel(label);
@@ -262,7 +272,6 @@ export default function Problems() {
     if (!window.confirm("정말로 이 문제를 삭제하시겠습니까?")) return;
     try {
       await deleteProblem(id);
-      // remove locally
       setProblems((prev) => prev.filter((p) => p.id !== id));
       setOpenActionId(null);
     } catch (error) {
@@ -282,13 +291,13 @@ export default function Problems() {
 
   const handleTimeSelect = (time: string | null, label: string | null) => {
     setSortBy(time);
-    setTimeLabel(label); // 추가
+    setTimeLabel(label);
     setOpenDropdown(null);
   };
 
   const handleSuccessRateSelect = (
     order: "asc" | "desc" | null,
-    label: string | null
+    label: string | null,
   ) => {
     setSuccessRateFilter(order);
     setSuccessRateLabel(label);
@@ -296,22 +305,22 @@ export default function Problems() {
   };
 
   let filteredProblems = problems.filter((problem) =>
-    problem.title.toLowerCase().includes(searchTerm.toLowerCase())
+    problem.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (difficultyFilter !== null) {
     filteredProblems = filteredProblems.filter(
-      (problem) => problem.difficulty === difficultyFilter
+      (problem) => problem.difficulty === difficultyFilter,
     );
   }
 
   if (successRateFilter === "asc") {
     filteredProblems = [...filteredProblems].sort(
-      (a, b) => a.successRate - b.successRate
+      (a, b) => a.successRate - b.successRate,
     );
   } else if (successRateFilter === "desc") {
     filteredProblems = [...filteredProblems].sort(
-      (a, b) => b.successRate - a.successRate
+      (a, b) => b.successRate - a.successRate,
     );
   }
 
@@ -333,12 +342,9 @@ export default function Problems() {
 
   return (
     <S.ProblemsContainer>
-      {/* Header */}
       <Header />
 
-      {/* Main Content */}
       <S.MainContent>
-        {/* Search Bar */}
         <S.SearchBox>
           <S.SearchInput
             type="text"
@@ -351,7 +357,6 @@ export default function Problems() {
           </S.SearchIconContainer>
         </S.SearchBox>
 
-        {/* Filter Section */}
         <S.FilterSection ref={dropdownRef}>
           <S.FilterButtonsWrapper>
             <S.FilterButtonGroup>
@@ -361,7 +366,7 @@ export default function Problems() {
                 }
                 onClick={() =>
                   setOpenDropdown(
-                    openDropdown === "difficulty" ? null : "difficulty"
+                    openDropdown === "difficulty" ? null : "difficulty",
                   )
                 }
               >
@@ -369,7 +374,6 @@ export default function Problems() {
                 <S.ArrowIcon src={ArrowDownIcon} alt="드롭다운" />
               </S.FilterButton>
 
-              {/* Dropdown Menu - Difficulty */}
               {openDropdown === "difficulty" && (
                 <S.DropdownMenu>
                   <S.DropdownItem
@@ -423,7 +427,6 @@ export default function Problems() {
                 <S.ArrowIcon src={ArrowDownIcon} alt="드롭다운" />
               </S.FilterButton>
 
-              {/* Dropdown Menu - Time */}
               {openDropdown === "time" && (
                 <S.DropdownMenu>
                   <S.DropdownItem
@@ -455,7 +458,7 @@ export default function Problems() {
                 }
                 onClick={() =>
                   setOpenDropdown(
-                    openDropdown === "successRate" ? null : "successRate"
+                    openDropdown === "successRate" ? null : "successRate",
                   )
                 }
               >
@@ -463,7 +466,6 @@ export default function Problems() {
                 <S.ArrowIcon src={ArrowDownIcon} alt="드롭다운" />
               </S.FilterButton>
 
-              {/* Dropdown Menu - Success Rate */}
               {openDropdown === "successRate" && (
                 <S.DropdownMenu>
                   <S.DropdownItem
@@ -494,10 +496,7 @@ export default function Problems() {
           </S.FilterButtonsWrapper>
         </S.FilterSection>
 
-        {/* Problems Table */}
         <S.TableContainer>
-          {/* Table Header */}
-
           <S.TableHeader $picker={isPicker}>
             {isPicker && (
               <S.TableHeaderCell style={{ width: 48 }}>선택</S.TableHeaderCell>
@@ -508,7 +507,6 @@ export default function Problems() {
             <S.TableHeaderCellRight>정답률</S.TableHeaderCellRight>
           </S.TableHeader>
 
-          {/* Table Body */}
           <S.TableBody>
             {filteredProblems.map((problem, index) => (
               <S.TableRow
@@ -555,7 +553,6 @@ export default function Problems() {
                       ⋮
                     </S.ActionButton>
 
-                    {/* Render menu via portal to avoid clipping/overflow issues */}
                     {openActionId === problem.id &&
                       buttonRefs.current[problem.id] &&
                       createPortal(
@@ -566,18 +563,16 @@ export default function Problems() {
                                 const btn = buttonRefs.current[problem.id];
                                 if (!btn) return {};
                                 const rect = btn.getBoundingClientRect();
-                                const menuWidth = 96; // matches ActionMenu min-width
-                                // compute left so menu's right edge aligns with button's right, with an 8px gap
+                                const menuWidth = 96;
                                 const computedLeft =
                                   rect.right + window.scrollX - menuWidth - 8;
                                 const left = Math.max(
                                   16,
                                   Math.min(
                                     computedLeft,
-                                    window.innerWidth - menuWidth - 16
-                                  )
+                                    window.innerWidth - menuWidth - 16,
+                                  ),
                                 );
-                                // slightly lower than center to match design
                                 const top =
                                   rect.top +
                                   window.scrollY +
@@ -614,7 +609,7 @@ export default function Problems() {
                             </S.ActionMenuItemDanger>
                           </S.ActionMenu>
                         </div>,
-                        document.body
+                        document.body,
                       )}
                   </S.ActionContainer>
                 </S.TableCellRight>
@@ -623,7 +618,6 @@ export default function Problems() {
           </S.TableBody>
         </S.TableContainer>
 
-        {/* Pagination */}
         <S.FooterControls>
           <S.PaginationContainer>
             <S.PaginationButton
@@ -636,7 +630,10 @@ export default function Problems() {
             </S.PaginationButton>
             <S.PaginationNumbers>
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const startPage = Math.max(0, Math.min(currentPage - 2, totalPages - 5));
+                const startPage = Math.max(
+                  0,
+                  Math.min(currentPage - 2, totalPages - 5),
+                );
                 const pageNum = startPage + i;
                 if (pageNum >= totalPages) return null;
                 return (
@@ -652,7 +649,8 @@ export default function Problems() {
             </S.PaginationNumbers>
             <S.PaginationButton
               onClick={() => {
-                if (currentPage < totalPages - 1) fetchProblems(currentPage + 1);
+                if (currentPage < totalPages - 1)
+                  fetchProblems(currentPage + 1);
               }}
               disabled={currentPage >= totalPages - 1}
             >
@@ -662,24 +660,45 @@ export default function Problems() {
           <S.CreateButton
             onClick={async () => {
               if (isPicker) {
-                const match = (returnTo || "").match(/\/course\/(\d+)/);
-                const courseId = match ? match[1] : null;
-                if (!courseId) {
-                  alert("코스 ID를 찾을 수 없습니다.");
+                const match = (returnTo || "").match(
+                  /\/(course|contest)\/(\d+)/,
+                );
+                const entityType = match ? match[1] : null;
+                const entityId = match ? match[2] : null;
+
+                if (!entityId || !entityType) {
+                  alert(
+                    `${entityType === "course" ? "코스" : "대회"} ID를 찾을 수 없습니다.`,
+                  );
                   return;
                 }
+
                 const ids = Array.from(selectedIds);
                 if (ids.length === 0) {
                   alert("추가할 문제를 선택하세요.");
                   return;
                 }
+
                 try {
-                  await courseApi.addProblemsToCourse(courseId, {
-                    problemIds: ids,
-                  });
-                  navigate(returnTo || "/problems");
+                  if (entityType === "course") {
+                    await courseApi.addProblemsToCourse(entityId, {
+                      problemIds: ids,
+                    });
+                    navigate(returnTo || "/problems");
+                  } else if (entityType === "contest") {
+                    // TODO: 대회 API 구현 후 연결
+                    console.log("Contest ID:", entityId);
+                    console.log("Selected Problem IDs:", ids);
+                    console.log("Payload:", { problemIds: ids });
+                    // await contestApi.addProblemsToContest(entityId, { problemIds: ids });
+                    alert("대회 문제 추가 기능은 곧 구현됩니다.");
+                    // navigate(returnTo || "/problems");
+                  }
                 } catch (err) {
-                  console.error("Failed to add problems to course:", err);
+                  console.error(
+                    `Failed to add problems to ${entityType}:`,
+                    err,
+                  );
                   alert("문제 추가 중 오류가 발생했습니다.");
                 }
               } else {
@@ -692,7 +711,6 @@ export default function Problems() {
         </S.FooterControls>
       </S.MainContent>
 
-      {/* Footer */}
       <Footer />
     </S.ProblemsContainer>
   );
