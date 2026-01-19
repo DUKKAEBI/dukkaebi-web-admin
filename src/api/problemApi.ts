@@ -47,8 +47,11 @@ export const getProblems = (params?: ProblemListParams) => {
   return axiosInstance.get<ProblemListResponse>(`/problems`, { params });
 };
 
-export const getProblem = (id: number) =>
-  axiosInstance.get<ProblemItem>(`/problems/${id}`);
+export const getProblem = (id: number, contestId?: string) => {
+  return axiosInstance.get<ProblemItem>(
+    contestId ? `/problems/${id}?contestCode=${contestId}` : `/problems/${id}`,
+  );
+};
 
 export const searchProblems = (name: string) =>
   axiosInstance.get<ProblemItem[]>(`/problems/search`, { params: { name } });
@@ -61,7 +64,7 @@ export const createProblem = (payload: ProblemCreatePayload) =>
 
 export const updateProblem = (
   id: number,
-  payload: Partial<ProblemCreatePayload>
+  payload: Partial<ProblemCreatePayload>,
 ) => axiosInstance.put(`/admin/problems/update/${id}`, payload);
 
 export const deleteProblem = (id: number) =>

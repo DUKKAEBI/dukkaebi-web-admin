@@ -1,4 +1,3 @@
-// todo : api연결, pagination 부분에 페이지 버튼 동적으로 변경
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "../../components/header";
@@ -107,7 +106,12 @@ export default function NoticesPage() {
                 }
               }}
             />
-            <img src={search} alt="search" onClick={handleSearch} style={{ cursor: "pointer" }} />
+            <img
+              src={search}
+              alt="search"
+              onClick={handleSearch}
+              style={{ cursor: "pointer" }}
+            />
           </SearchBar>
 
           {/* Table */}
@@ -143,7 +147,10 @@ export default function NoticesPage() {
                 <ArrowButton
                   direction="left"
                   onClick={() => handlePageChange(currentPage - 1)}
-                  style={{ cursor: currentPage > 0 ? "pointer" : "default", opacity: currentPage > 0 ? 1 : 0.5 }}
+                  style={{
+                    cursor: currentPage > 0 ? "pointer" : "default",
+                    opacity: currentPage > 0 ? 1 : 0.5,
+                  }}
                 >
                   <img src={arrowLeft} alt="prev" />
                 </ArrowButton>
@@ -163,7 +170,11 @@ export default function NoticesPage() {
                 <ArrowButton
                   direction="right"
                   onClick={() => handlePageChange(currentPage + 1)}
-                  style={{ cursor: currentPage < totalPages - 1 ? "pointer" : "default", opacity: currentPage < totalPages - 1 ? 1 : 0.5 }}
+                  style={{
+                    cursor:
+                      currentPage < totalPages - 1 ? "pointer" : "default",
+                    opacity: currentPage < totalPages - 1 ? 1 : 0.5,
+                  }}
                 >
                   <img src={arrowRight} alt="next" />
                 </ArrowButton>

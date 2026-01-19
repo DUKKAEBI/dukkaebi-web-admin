@@ -76,28 +76,23 @@ export const Table = styled.div`
 `;
 
 export const TableHead = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-columns: 80px 100px 1fr 16px;
   align-items: center;
   padding: 16px 20px;
-  background: ${COLORS.white};
-  border-bottom: 1px solid ${COLORS.gray4};
-  color: ${COLORS.gray1};
-  font-family: "Pretendard", sans-serif;
-  font-size: 14px;
-  font-weight: 500;
 `;
 
 export const ColNo = styled.span`
-  width: 64px; /* enough for 2 digits */
+  width: 90px;
 `;
 
 export const ColTitle = styled.span`
-  flex: 1;
+  width: 100px;
 `;
 
 export const Row = styled.div`
   display: grid;
-  grid-template-columns: 84px 1fr 16px; /* number space, title, more */
+  grid-template-columns: 80px 100px 1fr 16px;
   align-items: center;
   height: 60px;
   padding: 0 20px;

@@ -4,39 +4,50 @@ import { Header } from "../../../../components/header";
 import { Footer } from "../../../../components/footer";
 import * as S from "./styles";
 import problemApi from "../../../../api/problemApi";
+import contestApi from "../../../../api/contestApi";
 
 interface TestCase {
   input: string;
   output: string;
 }
 
-const ProblemUpdate = () => {
+const ContestProblemUpdatePage = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [inputCond, setInputCond] = useState("");
   const [outputCond, setOutputCond] = useState("");
+  const [score, setScore] = useState<number>(0);
   const [cases, setCases] = useState<TestCase[]>([
     { input: "2 7", output: "5" },
   ]);
+  const [isContestOnly, setIsContestOnly] = useState<boolean | null>(true);
 
   const addCase = () =>
     setCases((prev) => [...prev, { input: "", output: "" }]);
 
   const navigate = useNavigate();
-  const { problemsId } = useParams<{ problemsId: string }>();
+  const { contestId, problemsId } = useParams<{
+    contestId: string;
+    problemsId: string;
+  }>();
 
   useEffect(() => {
     let mounted = true;
     const fetch = async () => {
-      if (!problemsId) return;
+      if (!problemsId || !contestId) return;
       try {
-        const res = await problemApi.getProblem(Number(problemsId));
+        const res = await problemApi.getProblem(Number(problemsId), contestId);
         if (!mounted) return;
         const data: any = (res as any)?.data ?? (res as any);
         setTitle(data.title ?? data.name ?? "");
         setDescription(data.description ?? "");
-        setInputCond(data.inputCond ?? data.inputRange ?? "");
-        setOutputCond(data.outputCond ?? data.outputRange ?? "");
+        setInputCond(data.input ?? data.inputRange ?? "");
+        setOutputCond(data.output ?? data.outputRange ?? "");
+        setIsContestOnly(data.isContestOnly);
+        const resolvedScore =
+          data.score != null ? data.score : difficultyToScore(data.difficulty);
+
+        setScore(resolvedScore);
         if (Array.isArray(data.testCases)) setCases(data.testCases);
       } catch (err) {
         console.error("Failed to load problem:", err);
@@ -51,17 +62,33 @@ const ProblemUpdate = () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!problemsId || !contestId) return;
+
     try {
-      if (!problemsId) return;
-      //todo : 문제 수정하는 api 개발되면 수정
-      const payload = {
-        title,
-        description,
-        input: inputCond,
-        output: outputCond,
-        testCases: cases,
-      };
-      await problemApi.updateProblem(Number(problemsId), payload);
+      if (isContestOnly) {
+        // 🔹 전체 수정 가능
+        const payload = {
+          name: title,
+          description,
+          input: inputCond,
+          output: outputCond,
+          score,
+          testCases: cases,
+        };
+
+        await contestApi.contestUpdateProblem(
+          contestId,
+          Number(problemsId),
+          payload,
+        );
+      } else {
+        await contestApi.updateContestProblemScore(
+          contestId,
+          Number(problemsId),
+          { score },
+        );
+      }
+
       navigate(-1);
     } catch (err) {
       console.error("Failed to update problem:", err);
@@ -69,19 +96,47 @@ const ProblemUpdate = () => {
     }
   };
 
+  //기본 점수가 없을때에 난이도를 확인하여 난이도에 따라 점수
+  const difficultyToScore = (difficulty?: string | null): number => {
+    switch (difficulty) {
+      case "COPPER":
+        return 1;
+      case "IRON":
+        return 3;
+      case "SILVER":
+        return 5;
+      case "GOLD":
+        return 10;
+      case "JADE":
+        return 15;
+      default:
+        return 0;
+    }
+  };
+  //폼 입력 전용 여부 확인 변수
+  const isScoreOnly = isContestOnly === null;
+
   return (
     <S.Container>
       <Header />
 
       <S.Main>
         <S.Content>
-          <S.PageTitle>문제 수정</S.PageTitle>
+          <S.TitleWrapper>
+            <S.PageTitle>문제 수정</S.PageTitle>
 
+            {isContestOnly === false && (
+              <S.Label>
+                (기존 문제를 가져온 문제이니 점수만 수정 가능합니다.)
+              </S.Label>
+            )}
+          </S.TitleWrapper>
           <S.Field>
             <S.Label>문제 제목</S.Label>
             <S.Input
               placeholder="학교 복도 최단거리"
               value={title}
+              disabled={isScoreOnly}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setTitle(e.target.value)
               }
@@ -91,6 +146,7 @@ const ProblemUpdate = () => {
           <S.Field>
             <S.Label>문제 설명</S.Label>
             <S.TextArea
+              disabled={isScoreOnly}
               placeholder={
                 "당신은 쉬는 시간에 친구의 과자를 뺏으러 친구에게 가려고 한다.\n하지만 복도가 너무 길어서 몇 걸음 걸어야 하는지 계산해야 한다.\n\n입력으로 현재 위치 P와 친구 위치 F가 주어질 때,\n두 값의 차이의 절댓값을 출력하시오.\n(걸음 수 = 거리)"
               }
@@ -105,6 +161,7 @@ const ProblemUpdate = () => {
           <S.Field>
             <S.Label>입력 조건</S.Label>
             <S.Input
+              disabled={isScoreOnly}
               placeholder="한 줄, 두 정수 P와 F (0 ≤ P, F ≤ 10,000)"
               value={inputCond}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -116,11 +173,28 @@ const ProblemUpdate = () => {
           <S.Field>
             <S.Label>출력 조건</S.Label>
             <S.Input
+              disabled={isScoreOnly}
               placeholder="한 줄, 최단 거리(걸음 수)를 출력"
               value={outputCond}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setOutputCond(e.target.value)
               }
+              $primaryBorder
+            />
+          </S.Field>
+
+          <S.Field>
+            <S.Label>점수</S.Label>
+            <S.Input
+              type="text"
+              placeholder="100"
+              value={score}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.target.value;
+                // 숫자만 추출
+                const numericValue = value.replace(/[^0-9]/g, "");
+                setScore(numericValue ? Number(numericValue) : 0);
+              }}
               $primaryBorder
             />
           </S.Field>
@@ -187,4 +261,4 @@ const ProblemUpdate = () => {
   );
 };
 
-export default ProblemUpdate;
+export default ContestProblemUpdatePage;
