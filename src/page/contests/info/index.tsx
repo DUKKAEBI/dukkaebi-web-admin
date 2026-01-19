@@ -16,6 +16,7 @@ type problem = {
   correctRate: number;
   solvedResult: string;
   addedAt: string;
+  score: number;
 };
 
 type Participant = {
@@ -119,6 +120,7 @@ const ContestInfo = () => {
           <S.Table>
             <S.TableHead>
               <S.ColNo>번호</S.ColNo>
+              <S.ColNo>점수</S.ColNo>
               <S.ColTitle>제목</S.ColTitle>
             </S.TableHead>
             {contest?.problems?.map((r: problem, index: number) => (
@@ -130,6 +132,7 @@ const ContestInfo = () => {
                 }}
               >
                 <S.CellNo>{index + 1}</S.CellNo>
+                <S.CellTitle>{r.score}점</S.CellTitle>
                 <S.CellTitle>{r.name}</S.CellTitle>
                 <S.MoreWrapper onMouseDown={(e) => e.stopPropagation()}>
                   <S.MoreBtn
@@ -156,7 +159,9 @@ const ContestInfo = () => {
                           e.stopPropagation();
                           e.preventDefault();
                           setOpenMenuId(null);
-                          navigate(`/contests/problems/update/${r.problemId}`);
+                          navigate(
+                            `/contests/problems/${contestsId}/update/${r.problemId}`,
+                          );
                         }}
                       >
                         문제 수정
@@ -182,7 +187,7 @@ const ContestInfo = () => {
             <S.AddButton
               onClick={() =>
                 navigate(
-                  `/problems?pickerFor=contest&returnTo=/contest/${contestsId}`,
+                  `/problems?pickerFor=contest&returnTo=/contests/${contestsId}`,
                 )
               }
             >

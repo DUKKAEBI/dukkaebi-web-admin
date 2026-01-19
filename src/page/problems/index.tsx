@@ -663,10 +663,20 @@ export default function Problems() {
                 const match = (returnTo || "").match(
                   /\/(course|contest)\/(\d+)/,
                 );
-                const entityType = match ? match[1] : null;
-                const entityId = match ? match[2] : null;
+                let entityType: "course" | "contest" | null = null;
+                let entityId: string | null = null;
 
-                if (!entityId || !entityType) {
+                if (returnTo.includes("/course/")) {
+                  entityType = "course";
+                  entityId =
+                    returnTo.split("/course/")[1]?.split("/")[0] ?? null;
+                } else if (returnTo.includes("/contest/")) {
+                  entityType = "contest";
+                  entityId =
+                    returnTo.split("/contest/")[1]?.split("/")[0] ?? null;
+                }
+
+                if (!entityType || !entityId) {
                   alert(
                     `${entityType === "course" ? "코스" : "대회"} ID를 찾을 수 없습니다.`,
                   );
@@ -690,9 +700,11 @@ export default function Problems() {
                     console.log("Contest ID:", entityId);
                     console.log("Selected Problem IDs:", ids);
                     console.log("Payload:", { problemIds: ids });
-                    // await contestApi.addProblemsToContest(entityId, { problemIds: ids });
-                    alert("대회 문제 추가 기능은 곧 구현됩니다.");
-                    // navigate(returnTo || "/problems");
+                    await contestApi.addProblemsToContest(entityId, {
+                      problemIds: ids,
+                    });
+
+                    navigate(returnTo || "/problems");
                   }
                 } catch (err) {
                   console.error(

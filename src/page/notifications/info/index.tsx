@@ -1,4 +1,3 @@
-//todo : api 연결(서버 반환 방식에 따라 공지사항 이미지 표시 방법 반영)
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../components/header";
@@ -120,7 +119,11 @@ export default function NoticeInfoPage() {
           <S.ActionBar>
             <S.LeftActions>
               <S.DeleteButton onClick={handleDelete}>공지 삭제</S.DeleteButton>
-              <S.EditButton onClick={() => navigate(`/notifications/update/${id}`)}>공지 수정</S.EditButton>
+              <S.EditButton
+                onClick={() => navigate(`/notifications/update/${id}`)}
+              >
+                공지 수정
+              </S.EditButton>
             </S.LeftActions>
 
             <S.ListButton onClick={handleBack}>목록으로</S.ListButton>

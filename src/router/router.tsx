@@ -13,7 +13,7 @@ import ContestCreate from "../page/contests/create/index";
 import ContestUpdate from "../page/contests/update";
 import ContestInfo from "../page/contests/info";
 import ProblemCreate from "../page/contests/problems/create";
-import ProblemUpdate from "../page/contests/problems/update";
+import ContestProblemUpdatePage from "../page/contests/problems/update";
 import ProblemCreatePage from "../page/problems/create/index";
 import ProblemUpdatePage from "../page/problems/update/index";
 import SolvePage from "../page/solve";
@@ -47,8 +47,8 @@ export default function AppRoutes() {
         element={<ProblemCreate />}
       />
       <Route
-        path="/contests/problems/update/:problemsId"
-        element={<ProblemUpdate />}
+        path="/contests/problems/:contestId/update/:problemsId"
+        element={<ContestProblemUpdatePage />}
       />
 
       <Route
@@ -57,7 +57,7 @@ export default function AppRoutes() {
       />
       <Route
         path="/course/problems/update/:problemsId"
-        element={<ProblemUpdate />}
+        element={<ProblemUpdatePage />}
       />
       <Route path="/solve/:problemId" element={<SolvePage />} />
       <Route
