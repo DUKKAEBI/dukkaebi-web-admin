@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { signIn } from "../../api/authApi";
 import * as S from "./style";
 import iconMessage from "../../assets/image/auth/Message.png";

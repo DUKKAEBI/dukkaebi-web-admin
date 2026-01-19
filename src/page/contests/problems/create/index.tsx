@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../../components/header";
 import { Footer } from "../../../../components/footer";
 import * as S from "./styles";
-import problemApi from "../../../../api/problemApi";
+import contestApi from "../../../../api/contestApi";
 
 interface TestCase {
   input: string;
@@ -15,30 +15,36 @@ const ProblemCreate = () => {
   const [description, setDescription] = useState("");
   const [inputCond, setInputCond] = useState("");
   const [outputCond, setOutputCond] = useState("");
+  const [score, setScore] = useState("");
   const [cases, setCases] = useState<TestCase[]>([
-    { input: "2 7", output: "5" },
+    { input: "", output: "" },
   ]);
 
   const addCase = () => setCases((prev) => [...prev, { input: "", output: "" }]);
+  const removeCase = (idx: number) => setCases((prev) => prev.filter((_, i) => i !== idx));
 
   const navigate = useNavigate();
   const { contestsId } = useParams<{ contestsId: string }>();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!contestsId) {
+      alert("대회 ID가 없습니다.");
+      return;
+    }
     try {
       const payload = {
         name: title,
         description,
         input: inputCond,
         output: outputCond,
-        difficulty: "SILVER" as const,
+        difficulty: "COPPER",
+        score: score ? Number(score) : 100,
         testCases: cases,
-        contestId: contestsId,
       };
 
-      await problemApi.createProblem(payload as any);
-      navigate(`/contests/${contestsId ?? ""}`);
+      await contestApi.createContestProblem(contestsId, payload);
+      navigate(`/contests/${contestsId}`);
     } catch (err) {
       console.error("Failed to create problem:", err);
       alert("문제 생성 중 오류가 발생했습니다.");
@@ -102,6 +108,18 @@ const ProblemCreate = () => {
           </S.Field>
 
           <S.Field>
+            <S.Label>배점</S.Label>
+            <S.Input
+              type="number"
+              placeholder="10"
+              value={score}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setScore(e.target.value)
+              }
+            />
+          </S.Field>
+
+          <S.Field>
             <S.Label>테스트 케이스</S.Label>
             <S.TestCaseTable>
               <S.TestCaseHead>
@@ -111,7 +129,7 @@ const ProblemCreate = () => {
               {cases.map((c, idx) => (
                 <S.TestCaseRow key={idx}>
                   <S.CaseInput
-                    placeholder="예) 2 7"
+                    placeholder="2 7"
                     value={c.input}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       const v = e.target.value;
@@ -121,7 +139,7 @@ const ProblemCreate = () => {
                     }}
                   />
                   <S.CaseInput
-                    placeholder="예) 5"
+                    placeholder="5"
                     value={c.output}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       const v = e.target.value;
@@ -132,6 +150,16 @@ const ProblemCreate = () => {
                       );
                     }}
                   />
+                  <S.DeleteButton onClick={() => removeCase(idx)}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M18 6L6 18M6 6l12 12"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </S.DeleteButton>
                 </S.TestCaseRow>
               ))}
               <S.AddRow onClick={addCase}>

@@ -260,36 +260,6 @@ const Profile = () => {
               <S.Divider />
             </S.ProfileSection>
 
-            <S.StatsSection>
-              <S.StatItem>
-                <S.StatLabel>맞은 문제</S.StatLabel>
-                <S.StatValue>200</S.StatValue>
-              </S.StatItem>
-              <S.StatItem>
-                <S.StatLabel>제출</S.StatLabel>
-                <S.StatValue>300</S.StatValue>
-              </S.StatItem>
-              <S.StatItem>
-                <S.StatLabel>틀린 문제</S.StatLabel>
-                <S.StatValue>100</S.StatValue>
-              </S.StatItem>
-              <S.StatItem>
-                <S.StatLabel $error>시간 초과</S.StatLabel>
-                <S.StatValue>18</S.StatValue>
-              </S.StatItem>
-              <S.StatItem>
-                <S.StatLabel $error>메모리 초과</S.StatLabel>
-                <S.StatValue>20</S.StatValue>
-              </S.StatItem>
-              <S.StatItem>
-                <S.StatLabel $error>런타임에러</S.StatLabel>
-                <S.StatValue>1</S.StatValue>
-              </S.StatItem>
-              <S.StatItem>
-                <S.StatLabel $error>컴파일에러</S.StatLabel>
-                <S.StatValue>2</S.StatValue>
-              </S.StatItem>
-            </S.StatsSection>
           </S.Sidebar>
 
           {/* Right Content Area */}
