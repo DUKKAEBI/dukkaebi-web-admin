@@ -78,7 +78,7 @@ export default function Problems() {
   useEffect(() => {
     if (!isPicker) return;
 
-    const match = (returnTo || "").match(/\/(course|contest)\/(\d+)/);
+    const match = (returnTo || "").match(/\/(course|contest)s?\/([^/]+)/);
     const entityType = match ? match[1] : null;
     const entityId = match ? match[2] : null;
 
@@ -659,27 +659,23 @@ export default function Problems() {
           </S.PaginationContainer>
           <S.CreateButton
             onClick={async () => {
+              console.log(isPicker);
               if (isPicker) {
-                const match = (returnTo || "").match(
-                  /\/(course|contest)\/(\d+)/,
-                );
                 let entityType: "course" | "contest" | null = null;
                 let entityId: string | null = null;
 
-                if (returnTo.includes("/course/")) {
+                if (pickerFor === "course") {
                   entityType = "course";
-                  entityId =
-                    returnTo.split("/course/")[1]?.split("/")[0] ?? null;
-                } else if (returnTo.includes("/contest/")) {
+                  const match = returnTo.match(/\/courses?\/([^/]+)/);
+                  entityId = match ? match[1] : null;
+                } else if (pickerFor === "contest") {
                   entityType = "contest";
-                  entityId =
-                    returnTo.split("/contest/")[1]?.split("/")[0] ?? null;
+                  const match = returnTo.match(/\/contests?\/([^/]+)/);
+                  entityId = match ? match[1] : null;
                 }
 
                 if (!entityType || !entityId) {
-                  alert(
-                    `${entityType === "course" ? "코스" : "대회"} ID를 찾을 수 없습니다.`,
-                  );
+                  alert("코스 또는 대회 ID를 찾을 수 없습니다.");
                   return;
                 }
 
@@ -694,18 +690,13 @@ export default function Problems() {
                     await courseApi.addProblemsToCourse(entityId, {
                       problemIds: ids,
                     });
-                    navigate(returnTo || "/problems");
                   } else if (entityType === "contest") {
-                    // TODO: 대회 API 구현 후 연결
-                    console.log("Contest ID:", entityId);
-                    console.log("Selected Problem IDs:", ids);
-                    console.log("Payload:", { problemIds: ids });
                     await contestApi.addProblemsToContest(entityId, {
                       problemIds: ids,
                     });
-
-                    navigate(returnTo || "/problems");
                   }
+
+                  navigate(returnTo || "/problems");
                 } catch (err) {
                   console.error(
                     `Failed to add problems to ${entityType}:`,
