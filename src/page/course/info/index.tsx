@@ -46,7 +46,7 @@ const CourseInfo = () => {
         history.replaceState(
           {},
           document.title,
-          window.location.pathname + window.location.search
+          window.location.pathname + window.location.search,
         );
       } catch (e) {
         // ignore
@@ -71,7 +71,7 @@ const CourseInfo = () => {
               no: String(idx + 1),
               title: p.title ?? p.name ?? String(p.problemId),
               problemId: String(p.problemId),
-            }))
+            })),
           );
         }
 
@@ -88,6 +88,24 @@ const CourseInfo = () => {
       mounted = false;
     };
   }, [courseId]);
+
+  const deleteProblem = async (r: {
+    no: string;
+    title: string;
+    problemId: string;
+  }) => {
+    try {
+      await courseApi.deleteProblemToCourse(
+        Number(courseId),
+        Number(r.problemId),
+      );
+      alert("문제가 삭제되었습니다.");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      window.location.reload();
+    }
+  };
 
   return (
     <S.Page onMouseDown={() => setOpenMenuId(null)}>
@@ -182,22 +200,21 @@ const CourseInfo = () => {
                     {openMenuId === r.no && (
                       <S.Dropdown>
                         <S.DropdownItem
-                          onClick={() => {
+                          onClick={(e) => {
                             setOpenMenuId(null);
+                            e.stopPropagation();
+                            e.preventDefault();
                             navigate(`/course/problems/update/${r.no}`);
                           }}
                         >
                           문제 수정
                         </S.DropdownItem>
                         <S.DropdownItem
-                          onClick={() => {
+                          onClick={(e) => {
                             setOpenMenuId(null);
-                            // confirm and remove
-                            if (confirm("정말로 이 문제를 삭제하시겠습니까?")) {
-                              setRows((prev) =>
-                                prev.filter((p) => p.no !== r.no)
-                              );
-                            }
+                            e.stopPropagation();
+                            e.preventDefault();
+                            deleteProblem(r);
                           }}
                         >
                           문제 삭제
@@ -212,7 +229,7 @@ const CourseInfo = () => {
           <S.AddButton
             onClick={() =>
               navigate(
-                `/problems?pickerFor=course&returnTo=/course/${courseId}`
+                `/problems?pickerFor=course&returnTo=/course/${courseId}`,
               )
             }
           >

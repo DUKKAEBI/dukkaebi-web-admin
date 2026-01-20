@@ -173,6 +173,9 @@ export const Dropdown = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 6px 0;
   z-index: 10;
+  :last-child {
+    color: red;
+  }
 `;
 
 export const DropdownItem = styled.button`
