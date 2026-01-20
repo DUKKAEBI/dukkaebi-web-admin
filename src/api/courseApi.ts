@@ -60,13 +60,22 @@ const courseApi = {
     courseId: string | number,
     payload: { problemIds: Array<number | string> },
   ) => {
-    console.log(courseId);
-
     const res = await axiosInstance.post(
       `/admin/course/${courseId}/problems`,
       payload,
     );
     return extractBody(res);
+  },
+
+  deleteProblemToCourse: async (courseId: number, problemId: number) => {
+    try {
+      const res = await axiosInstance.delete(
+        `/admin/course/${courseId}/problem/${problemId}`,
+      );
+      return res;
+    } catch (error) {
+      console.log(error);
+    }
   },
 };
 
