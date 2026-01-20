@@ -94,7 +94,7 @@ export default function SolvePage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>(
-    INITIAL_CHAT_MESSAGES
+    INITIAL_CHAT_MESSAGES,
   );
   const [problem, setProblem] = useState<ProblemDetail | null>(null);
   const [problemStatus, setProblemStatus] = useState<
@@ -108,7 +108,7 @@ export default function SolvePage() {
   const [courseProblems, setCourseProblems] = useState<CourseProblemItem[]>([]);
   const [courseLoading, setCourseLoading] = useState(false);
   const [activeResultTab, setActiveResultTab] = useState<"result" | "tests">(
-    "result"
+    "result",
   );
   const [gradingDetails, setGradingDetails] = useState<
     Array<{
@@ -160,7 +160,7 @@ export default function SolvePage() {
       const MAX_LEFT_WIDTH = rect.width * 0.8;
       const clampedX = Math.max(
         MIN_LEFT_WIDTH,
-        Math.min(MAX_LEFT_WIDTH, relativeX)
+        Math.min(MAX_LEFT_WIDTH, relativeX),
       );
 
       const rightWidthPercent = ((rect.width - clampedX) / rect.width) * 100;
@@ -204,7 +204,7 @@ export default function SolvePage() {
       setProblem(null);
       setProblemStatus("error");
       setProblemError(
-        "서버 주소가 설정되어 있지 않습니다. .env의 VITE_API_URL 값을 확인하세요."
+        "서버 주소가 설정되어 있지 않습니다. .env의 VITE_API_URL 값을 확인하세요.",
       );
       return;
     }
@@ -224,7 +224,7 @@ export default function SolvePage() {
                   Authorization: `Bearer ${accessToken}`,
                 }
               : undefined,
-          }
+          },
         );
         const data: ProblemDetail = response.data;
         setProblem(data);
@@ -236,7 +236,7 @@ export default function SolvePage() {
         setProblemError(
           error instanceof Error
             ? error.message
-            : "문제 정보를 가져오는 중 오류가 발생했습니다."
+            : "문제 정보를 가져오는 중 오류가 발생했습니다.",
         );
         setSampleInput("");
         setSampleOutput("");
@@ -272,7 +272,7 @@ export default function SolvePage() {
             headers: accessToken
               ? { Authorization: `Bearer ${accessToken}` }
               : undefined,
-          }
+          },
         );
 
         const data: any = await res.data;
@@ -312,16 +312,19 @@ export default function SolvePage() {
 
   // Fetch user submission code for view mode
   useEffect(() => {
-    console.log("View mode check:", { isViewMode, contestCode, problemId, viewUserId });
     if (!isViewMode || !contestCode || !problemId || !viewUserId) return;
 
     const fetchSubmission = async () => {
       try {
-        console.log("Fetching submission for:", { contestCode, problemId, viewUserId });
+        console.log("Fetching submission for:", {
+          contestCode,
+          problemId,
+          viewUserId,
+        });
         const data = await contestApi.getUserSubmission(
           contestCode,
           problemId,
-          viewUserId
+          viewUserId,
         );
         console.log("Submission data:", data);
         if (data?.submittedCode) {
@@ -331,7 +334,7 @@ export default function SolvePage() {
         }
         if (data?.language) {
           const langOption = LANGUAGE_OPTIONS.find(
-            (opt) => opt.value === data.language
+            (opt) => opt.value === data.language,
           );
           if (langOption) {
             setLanguage(langOption.value);
@@ -444,16 +447,16 @@ export default function SolvePage() {
         "",
         `테스트 케이스 ${detail.testCaseNumber ?? "?"} : ${
           detail.passed ? "통과" : "실패"
-        }`
+        }`,
       );
       lines.push(`입력값: ${(detail.input ?? "X").replace(/\s+$/, "") || "X"}`);
       if (detail.expectedOutput !== undefined) {
         lines.push(
-          `기댓값: ${(detail.expectedOutput ?? "").replace(/\s+$/, "") || "X"}`
+          `기댓값: ${(detail.expectedOutput ?? "").replace(/\s+$/, "") || "X"}`,
         );
       }
       lines.push(
-        `실제값: ${(detail.actualOutput ?? "").replace(/\s+$/, "") || "X"}`
+        `실제값: ${(detail.actualOutput ?? "").replace(/\s+$/, "") || "X"}`,
       );
     }
 
@@ -524,11 +527,11 @@ export default function SolvePage() {
       setTerminalOutput(
         error instanceof Error
           ? error.message
-          : "채점 중 알 수 없는 오류가 발생했습니다."
+          : "채점 중 알 수 없는 오류가 발생했습니다.",
       );
       toast.error(
         error instanceof Error ? error.message : "채점 오류가 발생했습니다.",
-        { autoClose: 3000 }
+        { autoClose: 3000 },
       );
     } finally {
       setIsSubmitting(false);
@@ -592,11 +595,11 @@ export default function SolvePage() {
       setTerminalOutput(
         error instanceof Error
           ? error.message
-          : "테스트 중 알 수 없는 오류가 발생했습니다."
+          : "테스트 중 알 수 없는 오류가 발생했습니다.",
       );
       toast.error(
         error instanceof Error ? error.message : "테스트 오류가 발생했습니다.",
-        { autoClose: 3000 }
+        { autoClose: 3000 },
       );
     } finally {
       setIsTesting(false);
@@ -680,8 +683,8 @@ export default function SolvePage() {
     problemStatus === "loading"
       ? "문제를 불러오는 중입니다..."
       : problemStatus === "error"
-      ? problemError || "문제를 불러오지 못했습니다."
-      : "";
+        ? problemError || "문제를 불러오지 못했습니다."
+        : "";
 
   const handleExitSolvePage = () => {
     navigate(`/contests/${contestCode}`);
@@ -927,7 +930,7 @@ export default function SolvePage() {
                             >
                               {String(d.testCaseNumber ?? idx + 1).padStart(
                                 2,
-                                "0"
+                                "0",
                               )}
                             </td>
                             <td
@@ -1010,9 +1013,7 @@ export default function SolvePage() {
             )}
 
             <Style.SubmitWrapper
-              style={
-                isSidebarOpen ? { marginRight: 268 } : { marginRight: 0 }
-              }
+              style={isSidebarOpen ? { marginRight: 268 } : { marginRight: 0 }}
             >
               <Style.ActionButton onClick={handleExitSolvePage}>
                 끝내기
@@ -1034,16 +1035,19 @@ export default function SolvePage() {
               <Style.NextButton
                 onClick={() => {
                   const currentIndex = courseProblems.findIndex(
-                    (p) => String(p.problemId) === String(problemId)
+                    (p) => String(p.problemId) === String(problemId),
                   );
                   if (currentIndex < courseProblems.length - 1) {
-                    handleSidebarItemClick(courseProblems[currentIndex + 1].problemId);
+                    handleSidebarItemClick(
+                      courseProblems[currentIndex + 1].problemId,
+                    );
                   }
                 }}
                 disabled={
                   courseProblems.findIndex(
-                    (p) => String(p.problemId) === String(problemId)
-                  ) >= courseProblems.length - 1
+                    (p) => String(p.problemId) === String(problemId),
+                  ) >=
+                  courseProblems.length - 1
                 }
               >
                 다음 문제

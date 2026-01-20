@@ -27,6 +27,22 @@ export const Content = styled.div`
   margin-top: 40px;
 `;
 
+export const Label = styled.label`
+  font-family: "Pretendard", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--gray-1);
+`;
+
+export const TitleWrapper = styled.div`
+  display: flex;
+  gap: 8px;
+  ${Label} {
+    font-size: 20px;
+    align-self: flex-end;
+  }
+`;
+
 export const PageTitle = styled.h2`
   font-family: "Pretendard", sans-serif;
   font-weight: 600;
@@ -38,13 +54,6 @@ export const Field = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-`;
-
-export const Label = styled.label`
-  font-family: "Pretendard", sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  color: var(--gray-1);
 `;
 
 const baseBox = css`
