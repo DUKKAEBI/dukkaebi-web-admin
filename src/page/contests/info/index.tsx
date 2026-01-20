@@ -77,10 +77,7 @@ const ContestInfo = () => {
 
   const deleteProblem = async (contestId: string, problemId: number) => {
     try {
-      const deleteConfirm = window.confirm("정말 이 문제를 삭제 하시겠습니까?");
-      if (deleteConfirm) {
-        contestApi.deleteContestProblem(contestId, problemId);
-      }
+      contestApi.deleteContestProblem(contestId, problemId);
     } catch (error) {
       console.log(error);
     }
