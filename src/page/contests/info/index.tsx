@@ -78,8 +78,12 @@ const ContestInfo = () => {
   const deleteProblem = async (contestId: string, problemId: number) => {
     try {
       contestApi.deleteContestProblem(contestId, problemId);
+
+      alert("문제가 삭제되었습니다.");
     } catch (error) {
       console.log(error);
+    } finally {
+      window.location.reload();
     }
   };
   return (
