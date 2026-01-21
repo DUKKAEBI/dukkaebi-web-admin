@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../../components/header";
 import { Footer } from "../../../../components/footer";
+import { nanoid } from "nanoid";
 import * as S from "./styles";
 import contestApi from "../../../../api/contestApi";
 
 interface TestCase {
+  id: string;
   input: string;
   output: string;
 }
@@ -16,12 +18,15 @@ const ProblemCreate = () => {
   const [inputCond, setInputCond] = useState("");
   const [outputCond, setOutputCond] = useState("");
   const [score, setScore] = useState("");
-  const [cases, setCases] = useState<TestCase[]>([{ input: "", output: "" }]);
+  const [cases, setCases] = useState<TestCase[]>([
+    { id: nanoid(), input: "", output: "" },
+  ]);
 
   const addCase = () =>
-    setCases((prev) => [...prev, { input: "", output: "" }]);
-  const removeCase = (idx: number) =>
-    setCases((prev) => prev.filter((_, i) => i !== idx));
+    setCases((prev) => [...prev, { id: nanoid(), input: "", output: "" }]);
+
+  const removeCase = (id: string) =>
+    setCases((prev) => prev.filter((c) => c.id !== id));
 
   const navigate = useNavigate();
   const { contestsId } = useParams<{ contestsId: string }>();
@@ -51,11 +56,17 @@ const ProblemCreate = () => {
     }
   };
 
-  //테스트 케이스  scrollHeight로 height를 직접 맞춰주는 함수
-  const autoResize = (el: HTMLTextAreaElement) => {
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-  };
+  //테스트 케이스 autoResize 변경 관련 useEffect
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      document
+        .querySelectorAll<HTMLTextAreaElement>("textarea")
+        .forEach((el) => {
+          el.style.height = "auto";
+          el.style.height = `${el.scrollHeight}px`;
+        });
+    });
+  }, [cases]);
 
   return (
     <S.Container>
@@ -133,18 +144,20 @@ const ProblemCreate = () => {
                 <S.HeadCell $right>출력</S.HeadCell>
               </S.TestCaseHead>
               {cases.map((c, idx) => (
-                <S.TestCaseRow key={idx}>
+                <S.TestCaseRow key={c.id}>
                   <S.CaseTextArea
                     placeholder="2 7"
                     value={c.input}
                     rows={1}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                      const v = e.target.value;
-                      autoResize(e.target);
+                    onInput={(e) => {
+                      const el = e.currentTarget;
+                      el.style.height = "auto";
+                      el.style.height = `${el.scrollHeight}px`;
 
+                      const v = el.value;
                       setCases((prev) =>
-                        prev.map((x, i) =>
-                          i === idx ? { ...x, input: v } : x,
+                        prev.map((x) =>
+                          x.id === c.id ? { ...x, input: v } : x,
                         ),
                       );
                     }}
@@ -153,18 +166,20 @@ const ProblemCreate = () => {
                     placeholder="5"
                     value={c.output}
                     rows={1}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                      const v = e.target.value;
-                      autoResize(e.target);
+                    onInput={(e) => {
+                      const el = e.currentTarget;
+                      el.style.height = "auto";
+                      el.style.height = `${el.scrollHeight}px`;
 
+                      const v = el.value;
                       setCases((prev) =>
-                        prev.map((x, i) =>
-                          i === idx ? { ...x, output: v } : x,
+                        prev.map((x) =>
+                          x.id === c.id ? { ...x, output: v } : x,
                         ),
                       );
                     }}
                   />
-                  <S.DeleteButton onClick={() => removeCase(idx)}>
+                  <S.DeleteButton onClick={() => removeCase(c.id)}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                       <path
                         d="M18 6L6 18M6 6l12 12"

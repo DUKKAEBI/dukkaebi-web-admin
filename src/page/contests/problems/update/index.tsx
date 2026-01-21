@@ -2,33 +2,34 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../../components/header";
 import { Footer } from "../../../../components/footer";
-import { useRef } from "react";
+import { nanoid } from "nanoid";
 import * as S from "./styles";
 import problemApi from "../../../../api/problemApi";
 import contestApi from "../../../../api/contestApi";
 
 interface TestCase {
+  id: string;
   input: string;
   output: string;
 }
 
 const ContestProblemUpdatePage = () => {
-  //테스트 케이스 초깃값 설정 autoResize 적용 하기 위한 ref
-  const inputRefs = useRef<HTMLTextAreaElement[]>([]);
-  const outputRefs = useRef<HTMLTextAreaElement[]>([]);
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [inputCond, setInputCond] = useState("");
   const [outputCond, setOutputCond] = useState("");
   const [score, setScore] = useState<number>(0);
-  const [cases, setCases] = useState<TestCase[]>([
-    { input: "2 7", output: "5" },
-  ]);
   const [isContestOnly, setIsContestOnly] = useState<boolean | null>(true);
 
+  const [cases, setCases] = useState<TestCase[]>([
+    { id: nanoid(), input: "", output: "" },
+  ]);
+
   const addCase = () =>
-    setCases((prev) => [...prev, { input: "", output: "" }]);
+    setCases((prev) => [...prev, { id: nanoid(), input: "", output: "" }]);
+
+  const removeCase = (id: string) =>
+    setCases((prev) => prev.filter((c) => c.id !== id));
 
   const navigate = useNavigate();
   const { contestId, problemsId } = useParams<{
@@ -67,11 +68,13 @@ const ContestProblemUpdatePage = () => {
 
   //테스트 케이스 autoResize 변경 관련 useEffect
   useEffect(() => {
-    inputRefs.current.forEach((el) => {
-      if (el) autoResize(el);
-    });
-    outputRefs.current.forEach((el) => {
-      if (el) autoResize(el);
+    requestAnimationFrame(() => {
+      document
+        .querySelectorAll<HTMLTextAreaElement>("textarea")
+        .forEach((el) => {
+          el.style.height = "auto";
+          el.style.height = `${el.scrollHeight}px`;
+        });
     });
   }, [cases]);
 
@@ -130,12 +133,6 @@ const ContestProblemUpdatePage = () => {
   };
   //폼 입력 전용 여부 확인 변수
   const isScoreOnly = isContestOnly === null;
-
-  //테스트 케이스  scrollHeight로 height를 직접 맞춰주는 함수
-  const autoResize = (el: HTMLTextAreaElement) => {
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-  };
 
   return (
     <S.Container>
@@ -228,43 +225,51 @@ const ContestProblemUpdatePage = () => {
                 <S.HeadCell $right>출력</S.HeadCell>
               </S.TestCaseHead>
               {cases.map((c, idx) => (
-                <S.TestCaseRow key={idx}>
+                <S.TestCaseRow key={c.id}>
                   <S.CaseTextArea
-                    ref={(el) => {
-                      if (el) inputRefs.current[idx] = el;
-                    }}
                     placeholder="2 7"
                     value={c.input}
                     rows={1}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                      const v = e.target.value;
-                      autoResize(e.target);
+                    onInput={(e) => {
+                      const el = e.currentTarget;
+                      el.style.height = "auto";
+                      el.style.height = `${el.scrollHeight}px`;
 
+                      const v = el.value;
                       setCases((prev) =>
-                        prev.map((x, i) =>
-                          i === idx ? { ...x, input: v } : x,
+                        prev.map((x) =>
+                          x.id === c.id ? { ...x, input: v } : x,
                         ),
                       );
                     }}
                   />
                   <S.CaseTextArea
-                    ref={(el) => {
-                      if (el) outputRefs.current[idx] = el;
-                    }}
                     placeholder="5"
                     value={c.output}
                     rows={1}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                      const v = e.target.value;
-                      autoResize(e.target);
+                    onInput={(e) => {
+                      const el = e.currentTarget;
+                      el.style.height = "auto";
+                      el.style.height = `${el.scrollHeight}px`;
 
+                      const v = el.value;
                       setCases((prev) =>
-                        prev.map((x, i) =>
-                          i === idx ? { ...x, output: v } : x,
+                        prev.map((x) =>
+                          x.id === c.id ? { ...x, output: v } : x,
                         ),
                       );
                     }}
                   />
+                  <S.DeleteButton onClick={() => removeCase(c.id)}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M18 6L6 18M6 6l12 12"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </S.DeleteButton>
                 </S.TestCaseRow>
               ))}
               <S.AddRow onClick={addCase}>

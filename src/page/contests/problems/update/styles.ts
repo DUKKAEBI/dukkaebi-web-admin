@@ -115,6 +115,11 @@ export const HeadCell = styled.div<{ $right?: boolean }>`
 
 export const TestCaseRow = styled.div`
   display: flex;
+  position: relative;
+
+  &:hover > button {
+    opacity: 1;
+  }
 `;
 
 export const CaseTextArea = styled.textarea`
@@ -130,6 +135,30 @@ export const CaseTextArea = styled.textarea`
 
   &:focus {
     border-color: #4f46e5;
+  }
+`;
+
+export const DeleteButton = styled.button`
+  position: absolute;
+  right: -36px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #999;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.2s,
+    color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: #e53935;
   }
 `;
 
