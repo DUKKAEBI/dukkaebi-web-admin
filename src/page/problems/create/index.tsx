@@ -60,9 +60,6 @@ const ProblemCreatePage = () => {
   const removeCase = (id: string) =>
     setCases((prev) => prev.filter((c) => c.id !== id));
 
-  //테스트 케이스 줄 확인 함수
-  const calcRows = (value: string) => Math.max(1, value.split("\n").length);
-
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -164,18 +161,21 @@ const ProblemCreatePage = () => {
                     rows={c.rows}
                     onInput={(e) => {
                       const v = e.currentTarget.value;
-                      const newRows = calcRows(v);
 
                       setCases((prev) =>
-                        prev.map((x) =>
-                          x.id === c.id
-                            ? {
-                                ...x,
-                                input: v,
-                                rows: Math.max(newRows, x.rows),
-                              }
-                            : x,
-                        ),
+                        prev.map((x) => {
+                          if (x.id !== c.id) return x;
+
+                          const inputRows = v.split("\n").length;
+                          const outputRows = x.output.split("\n").length;
+                          const rows = Math.max(inputRows, outputRows, 1);
+
+                          return {
+                            ...x,
+                            input: v,
+                            rows,
+                          };
+                        }),
                       );
                     }}
                   />
@@ -185,18 +185,21 @@ const ProblemCreatePage = () => {
                     rows={c.rows}
                     onInput={(e) => {
                       const v = e.currentTarget.value;
-                      const newRows = calcRows(v);
 
                       setCases((prev) =>
-                        prev.map((x) =>
-                          x.id === c.id
-                            ? {
-                                ...x,
-                                output: v,
-                                rows: Math.max(newRows, x.rows),
-                              }
-                            : x,
-                        ),
+                        prev.map((x) => {
+                          if (x.id !== c.id) return x;
+
+                          const inputRows = x.input.split("\n").length;
+                          const outputRows = v.split("\n").length;
+                          const rows = Math.max(inputRows, outputRows, 1);
+
+                          return {
+                            ...x,
+                            output: v,
+                            rows,
+                          };
+                        }),
                       );
                     }}
                   />
