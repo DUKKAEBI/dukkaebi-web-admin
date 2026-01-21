@@ -11,31 +11,37 @@ interface TestCase {
   id: string;
   input: string;
   output: string;
+  rows: number;
 }
 
 const ContestProblemUpdatePage = () => {
+  const navigate = useNavigate();
+  const { contestId, problemsId } = useParams<{
+    contestId: string;
+    problemsId: string;
+  }>();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [inputCond, setInputCond] = useState("");
   const [outputCond, setOutputCond] = useState("");
   const [score, setScore] = useState<number>(0);
   const [isContestOnly, setIsContestOnly] = useState<boolean | null>(true);
-
   const [cases, setCases] = useState<TestCase[]>([
-    { id: nanoid(), input: "", output: "" },
+    { id: nanoid(), input: "", output: "", rows: 1 },
   ]);
 
   const addCase = () =>
-    setCases((prev) => [...prev, { id: nanoid(), input: "", output: "" }]);
+    setCases((prev) => [
+      ...prev,
+      { id: nanoid(), input: "", output: "", rows: 1 },
+    ]);
 
   const removeCase = (id: string) =>
     setCases((prev) => prev.filter((c) => c.id !== id));
 
-  const navigate = useNavigate();
-  const { contestId, problemsId } = useParams<{
-    contestId: string;
-    problemsId: string;
-  }>();
+  //테스트 케이스 줄 확인 함수
+  const calcRows = (value: string) => Math.max(1, value.split("\n").length);
 
   useEffect(() => {
     let mounted = true;
@@ -54,7 +60,23 @@ const ContestProblemUpdatePage = () => {
           data.score != null ? data.score : difficultyToScore(data.difficulty);
 
         setScore(resolvedScore);
-        if (Array.isArray(data.testCases)) setCases(data.testCases);
+
+        // 테스트 케이스 설정
+        if (Array.isArray(data.testCases) && data.testCases.length > 0) {
+          setCases(
+            data.testCases.map((tc: any) => {
+              const inputRows = tc.input?.split("\n").length ?? 1;
+              const outputRows = tc.output?.split("\n").length ?? 1;
+
+              return {
+                id: tc.id ?? nanoid(),
+                input: tc.input ?? "",
+                output: tc.output ?? "",
+                rows: Math.max(inputRows, outputRows, 1),
+              };
+            }),
+          );
+        }
       } catch (err) {
         console.error("Failed to load problem:", err);
       }
@@ -227,39 +249,54 @@ const ContestProblemUpdatePage = () => {
               {cases.map((c, idx) => (
                 <S.TestCaseRow key={c.id}>
                   <S.CaseTextArea
-                    placeholder="2 7"
+                    placeholder="예) 2 7"
                     value={c.input}
-                    rows={1}
+                    rows={c.rows}
                     onInput={(e) => {
-                      const el = e.currentTarget;
-                      el.style.height = "auto";
-                      el.style.height = `${el.scrollHeight}px`;
+                      const v = e.currentTarget.value;
 
-                      const v = el.value;
                       setCases((prev) =>
-                        prev.map((x) =>
-                          x.id === c.id ? { ...x, input: v } : x,
-                        ),
+                        prev.map((x) => {
+                          if (x.id !== c.id) return x;
+
+                          const inputRows = v.split("\n").length;
+                          const outputRows = x.output.split("\n").length;
+                          const rows = Math.max(inputRows, outputRows, 1);
+
+                          return {
+                            ...x,
+                            input: v,
+                            rows,
+                          };
+                        }),
                       );
                     }}
                   />
                   <S.CaseTextArea
-                    placeholder="5"
+                    placeholder="예) 5"
                     value={c.output}
-                    rows={1}
+                    rows={c.rows}
                     onInput={(e) => {
-                      const el = e.currentTarget;
-                      el.style.height = "auto";
-                      el.style.height = `${el.scrollHeight}px`;
+                      const v = e.currentTarget.value;
 
-                      const v = el.value;
                       setCases((prev) =>
-                        prev.map((x) =>
-                          x.id === c.id ? { ...x, output: v } : x,
-                        ),
+                        prev.map((x) => {
+                          if (x.id !== c.id) return x;
+
+                          const inputRows = x.input.split("\n").length;
+                          const outputRows = v.split("\n").length;
+                          const rows = Math.max(inputRows, outputRows, 1);
+
+                          return {
+                            ...x,
+                            output: v,
+                            rows,
+                          };
+                        }),
                       );
                     }}
                   />
+
                   <S.DeleteButton onClick={() => removeCase(c.id)}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                       <path
