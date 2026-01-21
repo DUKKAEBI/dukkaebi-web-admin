@@ -121,22 +121,19 @@ export const TestCaseRow = styled.div`
   }
 `;
 
-export const CaseInput = styled.input`
-  flex: 1;
-  height: 40px;
-  padding: 0 20px;
-  border: 1px solid var(--gray-3);
-  background: #fff;
-  font-family: "Pretendard", sans-serif;
-  font-weight: 500;
-  font-size: 16px;
-  color: var(--black);
-  &:first-child {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-  }
-  &:nth-child(2) {
-    border-left: 1px solid var(--gray-3);
+export const CaseTextArea = styled.textarea`
+  width: 100%;
+  min-height: 40px;
+  padding: 8px;
+  resize: none;
+  overflow: hidden;
+  font-family: monospace;
+  line-height: 1.5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+
+  &:focus {
+    border-color: #4f46e5;
   }
 `;
 
@@ -152,7 +149,9 @@ export const DeleteButton = styled.button`
   color: #999;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.2s, color 0.2s;
+  transition:
+    opacity 0.2s,
+    color 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
