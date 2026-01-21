@@ -117,24 +117,19 @@ export const TestCaseRow = styled.div`
   display: flex;
 `;
 
-export const CaseInput = styled.input`
-  flex: 1;
-  height: 40px;
-  padding: 0 20px;
-  border: 1px solid var(--gray-3);
-  background: #fff;
-  font-family: "Pretendard", sans-serif;
-  font-weight: 500;
-  font-size: 16px;
-  color: var(--black);
-  &:first-child {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-  }
-  &:last-child {
-    border-left: 1px solid var(--gray-3);
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
+export const CaseTextArea = styled.textarea`
+  width: 100%;
+  min-height: 40px;
+  padding: 8px;
+  resize: none; /* 수동 리사이즈 제거 */
+  overflow: hidden; /* 스크롤 안 보이게 */
+  font-family: monospace;
+  line-height: 1.5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+
+  &:focus {
+    border-color: #4f46e5;
   }
 `;
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../../components/header";
 import { Footer } from "../../../../components/footer";
+import { useRef } from "react";
 import * as S from "./styles";
 import problemApi from "../../../../api/problemApi";
 import contestApi from "../../../../api/contestApi";
@@ -12,6 +13,10 @@ interface TestCase {
 }
 
 const ContestProblemUpdatePage = () => {
+  //테스트 케이스 초깃값 설정 autoResize 적용 하기 위한 ref
+  const inputRefs = useRef<HTMLTextAreaElement[]>([]);
+  const outputRefs = useRef<HTMLTextAreaElement[]>([]);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [inputCond, setInputCond] = useState("");
@@ -59,6 +64,16 @@ const ContestProblemUpdatePage = () => {
       mounted = false;
     };
   }, [problemsId]);
+
+  //테스트 케이스 autoResize 변경 관련 useEffect
+  useEffect(() => {
+    inputRefs.current.forEach((el) => {
+      if (el) autoResize(el);
+    });
+    outputRefs.current.forEach((el) => {
+      if (el) autoResize(el);
+    });
+  }, [cases]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,6 +130,12 @@ const ContestProblemUpdatePage = () => {
   };
   //폼 입력 전용 여부 확인 변수
   const isScoreOnly = isContestOnly === null;
+
+  //테스트 케이스  scrollHeight로 height를 직접 맞춰주는 함수
+  const autoResize = (el: HTMLTextAreaElement) => {
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  };
 
   return (
     <S.Container>
@@ -208,11 +229,17 @@ const ContestProblemUpdatePage = () => {
               </S.TestCaseHead>
               {cases.map((c, idx) => (
                 <S.TestCaseRow key={idx}>
-                  <S.CaseInput
-                    placeholder="예) 2 7"
+                  <S.CaseTextArea
+                    ref={(el) => {
+                      if (el) inputRefs.current[idx] = el;
+                    }}
+                    placeholder="2 7"
                     value={c.input}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    rows={1}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                       const v = e.target.value;
+                      autoResize(e.target);
+
                       setCases((prev) =>
                         prev.map((x, i) =>
                           i === idx ? { ...x, input: v } : x,
@@ -220,11 +247,17 @@ const ContestProblemUpdatePage = () => {
                       );
                     }}
                   />
-                  <S.CaseInput
-                    placeholder="예) 5"
+                  <S.CaseTextArea
+                    ref={(el) => {
+                      if (el) outputRefs.current[idx] = el;
+                    }}
+                    placeholder="5"
                     value={c.output}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    rows={1}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                       const v = e.target.value;
+                      autoResize(e.target);
+
                       setCases((prev) =>
                         prev.map((x, i) =>
                           i === idx ? { ...x, output: v } : x,
