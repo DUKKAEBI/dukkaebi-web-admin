@@ -16,12 +16,12 @@ const ProblemCreate = () => {
   const [inputCond, setInputCond] = useState("");
   const [outputCond, setOutputCond] = useState("");
   const [score, setScore] = useState("");
-  const [cases, setCases] = useState<TestCase[]>([
-    { input: "", output: "" },
-  ]);
+  const [cases, setCases] = useState<TestCase[]>([{ input: "", output: "" }]);
 
-  const addCase = () => setCases((prev) => [...prev, { input: "", output: "" }]);
-  const removeCase = (idx: number) => setCases((prev) => prev.filter((_, i) => i !== idx));
+  const addCase = () =>
+    setCases((prev) => [...prev, { input: "", output: "" }]);
+  const removeCase = (idx: number) =>
+    setCases((prev) => prev.filter((_, i) => i !== idx));
 
   const navigate = useNavigate();
   const { contestsId } = useParams<{ contestsId: string }>();
@@ -49,6 +49,12 @@ const ProblemCreate = () => {
       console.error("Failed to create problem:", err);
       alert("문제 생성 중 오류가 발생했습니다.");
     }
+  };
+
+  //테스트 케이스  scrollHeight로 height를 직접 맞춰주는 함수
+  const autoResize = (el: HTMLTextAreaElement) => {
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
   };
 
   return (
@@ -128,25 +134,33 @@ const ProblemCreate = () => {
               </S.TestCaseHead>
               {cases.map((c, idx) => (
                 <S.TestCaseRow key={idx}>
-                  <S.CaseInput
+                  <S.CaseTextArea
                     placeholder="2 7"
                     value={c.input}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    rows={1}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                       const v = e.target.value;
+                      autoResize(e.target);
+
                       setCases((prev) =>
-                        prev.map((x, i) => (i === idx ? { ...x, input: v } : x))
+                        prev.map((x, i) =>
+                          i === idx ? { ...x, input: v } : x,
+                        ),
                       );
                     }}
                   />
-                  <S.CaseInput
+                  <S.CaseTextArea
                     placeholder="5"
                     value={c.output}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    rows={1}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                       const v = e.target.value;
+                      autoResize(e.target);
+
                       setCases((prev) =>
                         prev.map((x, i) =>
-                          i === idx ? { ...x, output: v } : x
-                        )
+                          i === idx ? { ...x, output: v } : x,
+                        ),
                       );
                     }}
                   />
@@ -176,7 +190,11 @@ const ProblemCreate = () => {
           </S.Field>
 
           <S.Actions>
-            <S.SecondaryButton onClick={() => navigate(`/contests/${contestsId ?? ""}`)}>문제 추가 취소하기</S.SecondaryButton>
+            <S.SecondaryButton
+              onClick={() => navigate(`/contests/${contestsId ?? ""}`)}
+            >
+              문제 추가 취소하기
+            </S.SecondaryButton>
             <S.PrimaryButton onClick={onSubmit}>문제 추가하기</S.PrimaryButton>
           </S.Actions>
         </S.Content>
@@ -188,4 +206,3 @@ const ProblemCreate = () => {
 };
 
 export default ProblemCreate;
-
