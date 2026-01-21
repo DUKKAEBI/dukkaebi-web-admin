@@ -9,10 +9,13 @@ import CopperIcon from "../../../assets/image/problems/difficulty/copper.svg";
 import IronIcon from "../../../assets/image/problems/difficulty/iron.svg";
 import JadeIcon from "../../../assets/image/problems/difficulty/jade.svg";
 import { Footer } from "../../../components/footer";
+import { nanoid } from "nanoid";
 
 interface TestCase {
+  id: string;
   input: string;
   output: string;
+  rows: number;
 }
 
 interface FormData {
@@ -25,6 +28,7 @@ interface FormData {
 }
 
 const ProblemCreatePage = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -37,28 +41,28 @@ const ProblemCreatePage = () => {
     inputRange: "",
     outputRange: "",
     difficulty: 3,
-    testCases: [{ input: "", output: "" }],
+    testCases: [{ id: nanoid(), input: "", output: "", rows: 1 }],
   });
   const [cases, setCases] = useState<TestCase[]>([
-    { input: "2 7", output: "5" },
+    { id: nanoid(), input: "", output: "", rows: 1 },
   ]);
-
   const onDifficultyChange = (difficulty: number) => {
     setForm((p) => ({ ...p, difficulty }));
     setOpenDifficultyDropdown(false);
   };
 
-  // const onChange = (
-  //   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  // ) => {
-  //   const { name, value } = e.target;
-  //   setForm((p) => ({ ...p, [name]: value }));
-  // };
-
   const addCase = () =>
-    setCases((prev) => [...prev, { input: "", output: "" }]);
+    setCases((prev) => [
+      ...prev,
+      { id: nanoid(), input: "", output: "", rows: 1 },
+    ]);
 
-  const { id } = useParams<{ id: string }>();
+  const removeCase = (id: string) =>
+    setCases((prev) => prev.filter((c) => c.id !== id));
+
+  //테스트 케이스 줄 확인 함수
+  const calcRows = (value: string) => Math.max(1, value.split("\n").length);
+
   useEffect(() => {
     let mounted = true;
     const fetch = async () => {
@@ -79,7 +83,19 @@ const ProblemCreatePage = () => {
 
         // 테스트 케이스 설정
         if (Array.isArray(data.testCases) && data.testCases.length > 0) {
-          setCases(data.testCases);
+          setCases(
+            data.testCases.map((tc: any) => {
+              const inputRows = tc.input?.split("\n").length ?? 1;
+              const outputRows = tc.output?.split("\n").length ?? 1;
+
+              return {
+                id: tc.id ?? nanoid(),
+                input: tc.input ?? "",
+                output: tc.output ?? "",
+                rows: Math.max(inputRows, outputRows, 1),
+              };
+            }),
+          );
         }
 
         // 난이도 설정 (문자열 -> 숫자로 역매핑)
@@ -199,29 +215,60 @@ const ProblemCreatePage = () => {
                 <S.HeadCell $right>출력</S.HeadCell>
               </S.TestCaseHead>
               {cases.map((c, idx) => (
-                <S.TestCaseRow key={idx}>
-                  <S.CaseInput
+                <S.TestCaseRow key={c.id}>
+                  <S.CaseTextArea
                     placeholder="예) 2 7"
                     value={c.input}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      const v = e.target.value;
+                    rows={c.rows}
+                    onInput={(e) => {
+                      const v = e.currentTarget.value;
+                      const newRows = calcRows(v);
+
                       setCases((prev) =>
-                        prev.map((x, i) => (i === idx ? { ...x, input: v } : x))
+                        prev.map((x) =>
+                          x.id === c.id
+                            ? {
+                                ...x,
+                                input: v,
+                                rows: Math.max(newRows, x.rows),
+                              }
+                            : x,
+                        ),
                       );
                     }}
                   />
-                  <S.CaseInput
+                  <S.CaseTextArea
                     placeholder="예) 5"
                     value={c.output}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      const v = e.target.value;
+                    rows={c.rows}
+                    onInput={(e) => {
+                      const v = e.currentTarget.value;
+                      const newRows = calcRows(v);
+
                       setCases((prev) =>
-                        prev.map((x, i) =>
-                          i === idx ? { ...x, output: v } : x
-                        )
+                        prev.map((x) =>
+                          x.id === c.id
+                            ? {
+                                ...x,
+                                output: v,
+                                rows: Math.max(newRows, x.rows),
+                              }
+                            : x,
+                        ),
                       );
                     }}
                   />
+
+                  <S.DeleteButton onClick={() => removeCase(c.id)}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M18 6L6 18M6 6l12 12"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </S.DeleteButton>
                 </S.TestCaseRow>
               ))}
               <S.AddRow onClick={addCase}>
