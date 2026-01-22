@@ -206,9 +206,13 @@ const ContestInfo = () => {
                   {openMenuId === String(r.problemId) && (
                     <S.Dropdown>
                       <S.DropdownItem
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
                           setOpenMenuId(null);
-                          navigate(`/contests/problems/update/${r.problemId}`);
+                          navigate(
+                            `/contests/problems/${contestsId}/update/${r.problemId}`,
+                          );
                         }}
                       >
                         문제 수정

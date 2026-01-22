@@ -10,7 +10,10 @@ export const SolveContainer = styled.div`
   padding: 0;
   background: #263238;
   color: white;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -82,7 +85,8 @@ export const PageContent = styled.div`
   width: 100%;
   position: relative;
   min-height: 0;
-  padding-right: 0; // 👈 사이드바 공간 확보는 조건부로 처리
+  /* 리액트에서 인라인 스타일로 padding-right: 250px를 동적 할당합니다 */
+  transition: padding-right 0.1s ease-out;
 `;
 
 export const LeftPanel = styled.div`
@@ -184,6 +188,7 @@ export const Divider = styled.div<{ $isResizing: boolean }>`
   cursor: col-resize;
   flex-shrink: 0;
   transition: background 0.2s;
+  z-index: 10;
 `;
 
 export const RightPanel = styled.div<{ $width: number }>`
@@ -386,6 +391,26 @@ export const SubmitWrapper = styled.div`
   align-items: center;
   gap: 12px;
 `;
+export const SaveButton = styled.button`
+  background: #00b4b7;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #00969a;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+`;
 
 export const SubmitButton = styled.button`
   background: #00b4b7;
@@ -410,7 +435,7 @@ export const SubmitButton = styled.button`
 `;
 
 export const ActionButton = styled.button`
-  background: #365D7E;
+  background: #365d7e;
   color: #ffffff;
   border: none;
   border-radius: 10px;
@@ -431,7 +456,7 @@ export const ActionButton = styled.button`
 `;
 
 export const NextButton = styled.button`
-  background: #30474F;
+  background: #30474f;
   color: #ffffff;
   border: none;
   border-radius: 10px;
@@ -452,7 +477,7 @@ export const NextButton = styled.button`
 `;
 
 export const TestButton = styled.button`
-  background: #00B8BA;
+  background: #00b8ba;
   color: #ffffff;
   border: none;
   border-radius: 10px;
