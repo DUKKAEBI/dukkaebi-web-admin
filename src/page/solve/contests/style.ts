@@ -391,6 +391,26 @@ export const SubmitWrapper = styled.div`
   align-items: center;
   gap: 12px;
 `;
+export const SaveButton = styled.button`
+  background: #00b4b7;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #00969a;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+`;
 
 export const SubmitButton = styled.button`
   background: #00b4b7;
