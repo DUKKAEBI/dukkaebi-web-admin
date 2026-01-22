@@ -160,6 +160,10 @@ export default function SolvePage() {
   const [submittedProblems, setSubmittedProblems] = useState<Set<string>>(
     new Set(),
   );
+  // 문제별 누적 시간
+  const [timeSpentByProblem, setTimeSpentByProblem] = useState<
+    Record<string, number>
+  >({});
 
   //문제별 저장 여부 확인 (사이드바 표시용도)
   const isProblemDirty = (pid: string | number) => {
@@ -511,154 +515,199 @@ export default function SolvePage() {
     return lines.join("\n");
   };
 
+  //결과 문자열 만들어주는 함수
+  const formatJudgeResult = (data: any) => {
+    const lines: string[] = [];
+
+    // 1. 상단 요약
+    lines.push("오답입니다.", "");
+    lines.push(`채점 결과: ${data.status}`);
+    lines.push(
+      `통과한 테스트: ${data.passedTestCases} / ${data.totalTestCases}`,
+    );
+    lines.push(`실행 시간: ${data.executionTime}ms`, "");
+
+    // 2. 오류 메시지
+    if (data.errorMessage) {
+      lines.push("오류 메시지:");
+      lines.push(data.errorMessage.trim(), "");
+    }
+
+    // 3. 테스트 케이스 상세
+    if (Array.isArray(data.details)) {
+      data.details.forEach((tc: any) => {
+        lines.push(
+          `테스트 케이스 ${tc.testCaseNumber} : ${tc.passed ? "성공" : "실패"}`,
+        );
+        lines.push(`입력값: ${tc.input || "X"}`);
+        lines.push(`기댓값: ${tc.expectedOutput}`);
+        lines.push(
+          `실제값: ${tc.actualOutput || data.errorMessage?.trim() || ""}`,
+        );
+        lines.push("");
+      });
+    }
+
+    return lines.join("\n");
+  };
+
   const handleSubmitCode = async () => {
-    if (!problemId) {
-      setTerminalOutput("문제 ID가 없어 제출할 수 없습니다.");
-      return;
-    }
-    const numericProblemId = Number(problemId);
-    if (Number.isNaN(numericProblemId)) {
-      setTerminalOutput("유효한 문제 ID가 아닙니다.");
-      return;
-    }
-    if (!API_BASE_URL) {
-      setTerminalOutput("서버 주소가 설정되지 않았습니다.");
-      return;
-    }
+    if (!problemId || !API_BASE_URL) return;
     if (!code.trim()) {
-      setTerminalOutput("제출할 코드를 작성해 주세요.");
+      toast.error("제출할 코드를 작성해 주세요.");
       return;
     }
 
-    setTerminalOutput("채점 중입니다...");
     setIsSubmitting(true);
+
     try {
       const accessToken = localStorage.getItem("accessToken");
-      const response = await fetch(`${API_BASE_URL}solve/grading`, {
+      const timeSpent = timeSpentByProblem[String(problemId)] ?? 0;
+
+      const res = await fetch(`${API_BASE_URL}solve/grading`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
         body: JSON.stringify({
-          problemId: numericProblemId,
+          problemId: Number(problemId),
           code,
           language,
+          timeSpentSeconds: timeSpent,
         }),
       });
 
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || "채점 요청이 실패했습니다.");
+      //코드 저장
+      await axiosInstance.post(
+        `${API_BASE_URL}solve/save`,
+        {
+          problemId: Number(problemId),
+          code,
+          language,
+        },
+        {
+          headers: accessToken
+            ? { Authorization: `Bearer ${accessToken}` }
+            : undefined,
+        },
+      );
+
+      const data = await res.json();
+
+      if (data.errorMessage || data.status !== "ACCEPTED") {
+        setTerminalOutput(formatJudgeResult(data));
+        toast.warning("제출이 완료되었습니다.");
+      } else if (data.status === "ACCEPTED") {
+        toast.success("제출이 완료되었습니다.");
       }
 
-      const data = await response.json();
-      setTerminalOutput(formatGradingResult(data));
-      setGradingDetails(Array.isArray(data?.details) ? data.details : []);
-      setGradingCacheByProblem((prev) => ({
+      setSubmittedProblems((prev) => {
+        const next = new Set(prev);
+        next.add(String(problemId));
+        localStorage.setItem(
+          getSubmittedKey(contestCode),
+          JSON.stringify([...next]),
+        );
+        return next;
+      });
+
+      // 제출 성공 시 저장도 자동으로 수행
+      setCodeStateByProblem((prev) => ({
         ...prev,
-        [String(problemId ?? "")]: Array.isArray(data?.details)
-          ? data.details
-          : [],
+        [problemId]: {
+          savedCode: code,
+          savedLanguage: language,
+          currentCode: code,
+          currentLanguage: language,
+        },
       }));
 
-      // Determine pass/fail via details[].passed
-      const passed = Array.isArray(data?.details)
-        ? data.details.some((d: { passed?: boolean }) => d?.passed === true)
-        : false;
-      if (passed) {
-        toast.success("정답입니다", { autoClose: 2500 });
-      } else {
-        toast.error("오답입니다.", { autoClose: 2500 });
+      // localStorage에서 미저장 코드 제거
+      if (contestCode) {
+        const key = getLocalCodeKey(contestCode);
+        if (key) {
+          const raw = localStorage.getItem(key);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            delete parsed[String(problemId)];
+            localStorage.setItem(key, JSON.stringify(parsed));
+          }
+        }
       }
-    } catch (error) {
-      setTerminalOutput(
-        error instanceof Error
-          ? error.message
-          : "채점 중 알 수 없는 오류가 발생했습니다.",
-      );
-      toast.error(
-        error instanceof Error ? error.message : "채점 오류가 발생했습니다.",
-        { autoClose: 3000 },
-      );
+
+      setTerminalOutput("채점이 완료되었습니다.");
+      setGradingDetails(data.details ?? []);
+
+      setGradingCacheByProblem((prev) => ({
+        ...prev,
+        [String(problemId)]: data.details ?? [],
+      }));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "제출 중 오류 발생");
     } finally {
       setIsSubmitting(false);
     }
-
-    setSubmittedProblems((prev) => {
-      const next = new Set(prev);
-      next.add(String(problemId));
-      localStorage.setItem(
-        getSubmittedKey(contestCode),
-        JSON.stringify([...next]),
-      );
-      return next;
-    });
   };
 
   const handleTestCode = async () => {
-    if (!problemId) {
-      setTerminalOutput("문제 ID가 없어 테스트할 수 없습니다.");
-      return;
-    }
-    const numericProblemId = Number(problemId);
-    if (Number.isNaN(numericProblemId)) {
-      setTerminalOutput("유효한 문제 ID가 아닙니다.");
-      return;
-    }
-    if (!API_BASE_URL) {
-      setTerminalOutput("서버 주소가 설정되지 않았습니다.");
-      return;
-    }
+    if (!problemId || !API_BASE_URL) return;
     if (!code.trim()) {
-      setTerminalOutput("테스트할 코드를 작성해 주세요.");
+      toast.error("테스트할 코드를 작성해 주세요.");
       return;
     }
-
-    setTerminalOutput("테스트 중입니다...");
     setIsTesting(true);
+
     try {
       const accessToken = localStorage.getItem("accessToken");
-      const response = await fetch(`${API_BASE_URL}solve/test`, {
+
+      const res = await fetch(`${API_BASE_URL}solve/test`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
         body: JSON.stringify({
-          problemId: numericProblemId,
+          problemId: Number(problemId),
           code,
           language,
         }),
       });
 
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || "테스트 요청이 실패했습니다.");
+      if (!res.ok) {
+        throw new Error(await res.text());
       }
 
-      const data = await response.json();
-      setTerminalOutput(formatGradingResult(data));
-      setGradingDetails(Array.isArray(data?.details) ? data.details : []);
+      const data = await res.json();
 
-      const passed = Array.isArray(data?.details)
-        ? data.details.every((d: { passed?: boolean }) => d?.passed === true)
-        : false;
-      if (passed) {
-        toast.success("테스트 통과", { autoClose: 2500 });
-      } else {
-        toast.warning("테스트 실패", { autoClose: 2500 });
+      // 에러 메시지가 있으면 실행 결과에 바로 출력
+      if (data.errorMessage) {
+        toast.error("실행에 실패하였습니다.");
+        setTerminalOutput(formatJudgeResult(data));
+        setActiveResultTab("result");
+        // 테스트 케이스 탭에도 결과 저장
+        if (data.details && Array.isArray(data.details)) {
+          setGradingDetails(data.details);
+          setGradingCacheByProblem((prev) => ({
+            ...prev,
+            [String(problemId)]: data.details,
+          }));
+        }
+        return;
       }
-    } catch (error) {
-      setTerminalOutput(
-        error instanceof Error
-          ? error.message
-          : "테스트 중 알 수 없는 오류가 발생했습니다.",
-      );
-      toast.error(
-        error instanceof Error ? error.message : "테스트 오류가 발생했습니다.",
-        { autoClose: 3000 },
-      );
+
+      // 정상일 때
+      setTerminalOutput("테스트가 완료되었습니다.");
+      setGradingDetails(data.details ?? []);
+
+      setGradingDetails(data.details ?? []);
+      setGradingCacheByProblem((prev) => ({
+        ...prev,
+        [String(problemId)]: data.details ?? [],
+      }));
+      toast.success("테스트가 완료되었습니다");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "테스트 중 오류 발생");
     } finally {
       setIsTesting(false);
     }
