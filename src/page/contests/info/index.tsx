@@ -127,6 +127,18 @@ const ContestInfo = () => {
       mounted = false;
     };
   }, [contestsId]);
+
+  const deleteProblem = async (contestId: string, problemId: number) => {
+    try {
+      contestApi.deleteContestProblem(contestId, problemId);
+
+      alert("문제가 삭제되었습니다.");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      window.location.reload();
+    }
+  };
   return (
     <S.Page onMouseDown={() => setOpenMenuId(null)}>
       <Header />
@@ -201,17 +213,41 @@ const ContestInfo = () => {
                       >
                         문제 수정
                       </S.DropdownItem>
+
+                      <S.DropdownItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          if (contestsId)
+                            deleteProblem(contestsId, r.problemId);
+                        }}
+                      >
+                        문제 삭제
+                      </S.DropdownItem>
                     </S.Dropdown>
                   )}
                 </S.MoreWrapper>
               </S.Row>
             ))}
           </S.Table>
-          <S.AddButton
-            onClick={() => navigate(`/contests/problems/create/${contestsId}`)}
-          >
-            문제 추가
-          </S.AddButton>
+          <S.AddButtonWrapper>
+            <S.AddButton
+              onClick={() =>
+                navigate(
+                  `/problems?pickerFor=contest&returnTo=/contests/${contestsId}`,
+                )
+              }
+            >
+              문제 가져오기
+            </S.AddButton>
+            <S.AddButton
+              onClick={() =>
+                navigate(`/contests/problems/create/${contestsId}`)
+              }
+            >
+              문제 추가
+            </S.AddButton>
+          </S.AddButtonWrapper>
         </S.Content>
       ) : activeTab === "participants" ? (
         <S.ParticipantsWrapper>
