@@ -358,17 +358,12 @@ export default function SolvePage() {
 
     const fetchSubmission = async () => {
       try {
-        console.log("Fetching submission for:", {
-          contestCode,
-          problemId,
-          viewUserId,
-        });
         const data = await contestApi.getUserSubmission(
           contestCode,
           problemId,
           viewUserId,
         );
-        console.log("Submission data:", data);
+
         if (data?.submittedCode) {
           setCode(data.submittedCode);
         } else if (data?.code) {
