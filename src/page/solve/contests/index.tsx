@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, type ChangeEvent } from "react";
 import type * as monacoEditor from "monaco-editor";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Editor from "@monaco-editor/react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -456,60 +456,6 @@ export default function SolvePage() {
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [sampleInput]);
 
-  const formatGradingResult = (result: {
-    status?: string;
-    passedTestCases?: number;
-    totalTestCases?: number;
-    executionTime?: number;
-    errorMessage?: string | null;
-    details?: Array<{
-      testCaseNumber?: number;
-      passed?: boolean;
-      input?: string;
-      expectedOutput?: string;
-      actualOutput?: string;
-    }>;
-  }) => {
-    if (!result) return "채점 결과를 불러오지 못했습니다.";
-
-    const statusText = (result.status ?? "").toUpperCase();
-    const isAccepted = statusText === "ACCEPTED";
-    const lines: string[] = [
-      isAccepted ? "정답입니다." : "오답입니다.",
-      "",
-      `채점 결과: ${statusText || "알 수 없음"}`,
-      `통과한 테스트: ${result.passedTestCases ?? 0} / ${
-        result.totalTestCases ?? 0
-      }`,
-      `실행 시간: ${result.executionTime ?? "-"}ms`,
-    ];
-
-    if (result.errorMessage) {
-      lines.push("", `오류 메시지: ${result.errorMessage}`);
-    }
-
-    if (result.details && result.details.length > 0) {
-      const detail = result.details[0];
-      lines.push(
-        "",
-        `테스트 케이스 ${detail.testCaseNumber ?? "?"} : ${
-          detail.passed ? "통과" : "실패"
-        }`,
-      );
-      lines.push(`입력값: ${(detail.input ?? "X").replace(/\s+$/, "") || "X"}`);
-      if (detail.expectedOutput !== undefined) {
-        lines.push(
-          `기댓값: ${(detail.expectedOutput ?? "").replace(/\s+$/, "") || "X"}`,
-        );
-      }
-      lines.push(
-        `실제값: ${(detail.actualOutput ?? "").replace(/\s+$/, "") || "X"}`,
-      );
-    }
-
-    return lines.join("\n");
-  };
-
   //결과 문자열 만들어주는 함수
   const formatJudgeResult = (data: any) => {
     const lines: string[] = [];
@@ -544,6 +490,69 @@ export default function SolvePage() {
     }
 
     return lines.join("\n");
+  };
+
+  const handleTestCode = async () => {
+    if (!problemId || !API_BASE_URL) return;
+    if (!code.trim()) {
+      toast.error("테스트할 코드를 작성해 주세요.");
+      return;
+    }
+    setIsTesting(true);
+
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+
+      const res = await fetch(`${API_BASE_URL}solve/test`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
+        body: JSON.stringify({
+          problemId: Number(problemId),
+          code,
+          language,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      const data = await res.json();
+
+      if (data.errorMessage || data.status !== "ACCEPTED") {
+        setTerminalOutput(formatJudgeResult(data));
+        toast.error("오답입니다");
+        setActiveResultTab("result");
+        // 테스트 케이스 탭에도 결과 저장
+        if (data.details && Array.isArray(data.details)) {
+          setGradingDetails(data.details);
+          setGradingCacheByProblem((prev) => ({
+            ...prev,
+            [String(problemId)]: data.details,
+          }));
+        }
+      } else if (data.status === "ACCEPTED") {
+        toast.success("정답입니다");
+      }
+
+      toast.success("테스트가 완료되었습니다");
+      setTerminalOutput("테스트가 완료되었습니다.");
+      setGradingDetails(data.details ?? []);
+
+      setGradingDetails(data.details ?? []);
+      setGradingCacheByProblem((prev) => ({
+        ...prev,
+        [String(problemId)]: data.details ?? [],
+      }));
+    } catch (err) {
+      console.log(err);
+      toast.error("테스트에 실패하였습니다");
+    } finally {
+      setIsTesting(false);
+    }
   };
 
   const handleSubmitCode = async () => {
@@ -592,9 +601,9 @@ export default function SolvePage() {
 
       if (data.errorMessage || data.status !== "ACCEPTED") {
         setTerminalOutput(formatJudgeResult(data));
-        toast.warning("제출이 완료되었습니다.");
+        toast.error("오답입니다");
       } else if (data.status === "ACCEPTED") {
-        toast.success("제출이 완료되었습니다.");
+        toast.success("정답입니다");
       }
 
       setSubmittedProblems((prev) => {
@@ -638,73 +647,12 @@ export default function SolvePage() {
         ...prev,
         [String(problemId)]: data.details ?? [],
       }));
+      toast.success("제출에 성공하였습니다");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "제출 중 오류 발생");
+      toast.error("제출에 실패하였습니다.");
+      console.log(err);
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleTestCode = async () => {
-    if (!problemId || !API_BASE_URL) return;
-    if (!code.trim()) {
-      toast.error("테스트할 코드를 작성해 주세요.");
-      return;
-    }
-    setIsTesting(true);
-
-    try {
-      const accessToken = localStorage.getItem("accessToken");
-
-      const res = await fetch(`${API_BASE_URL}solve/test`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        },
-        body: JSON.stringify({
-          problemId: Number(problemId),
-          code,
-          language,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error(await res.text());
-      }
-
-      const data = await res.json();
-
-      // 에러 메시지가 있으면 실행 결과에 바로 출력
-      if (data.errorMessage) {
-        toast.error("실행에 실패하였습니다.");
-        setTerminalOutput(formatJudgeResult(data));
-        setActiveResultTab("result");
-        // 테스트 케이스 탭에도 결과 저장
-        if (data.details && Array.isArray(data.details)) {
-          setGradingDetails(data.details);
-          setGradingCacheByProblem((prev) => ({
-            ...prev,
-            [String(problemId)]: data.details,
-          }));
-        }
-        return;
-      }
-
-      // 정상일 때
-      setTerminalOutput("테스트가 완료되었습니다.");
-      setGradingDetails(data.details ?? []);
-
-      setGradingDetails(data.details ?? []);
-      setGradingCacheByProblem((prev) => ({
-        ...prev,
-        [String(problemId)]: data.details ?? [],
-      }));
-      toast.success("테스트가 완료되었습니다");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "테스트 중 오류 발생");
-    } finally {
-      setIsTesting(false);
     }
   };
 
@@ -882,12 +830,6 @@ export default function SolvePage() {
 
   return (
     <Style.SolveContainer ref={containerRef}>
-      <ToastContainer
-        position="top-right"
-        theme="dark"
-        newestOnTop
-        closeOnClick
-      />
       <Style.Header>
         <Style.BackButton
           type="button"
