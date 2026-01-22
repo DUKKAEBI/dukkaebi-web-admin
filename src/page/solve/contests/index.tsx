@@ -358,17 +358,12 @@ export default function SolvePage() {
 
     const fetchSubmission = async () => {
       try {
-        console.log("Fetching submission for:", {
-          contestCode,
-          problemId,
-          viewUserId,
-        });
         const data = await contestApi.getUserSubmission(
           contestCode,
           problemId,
           viewUserId,
         );
-        console.log("Submission data:", data);
+
         if (data?.submittedCode) {
           setCode(data.submittedCode);
         } else if (data?.code) {
@@ -1292,66 +1287,6 @@ export default function SolvePage() {
                           <Style.SidebarItemTitle>
                             {p.name}
                           </Style.SidebarItemTitle>
-
-                          {/* 상태 표시를 오른쪽으로 이동 */}
-                          <div
-                            style={{
-                              marginLeft: "auto",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                            }}
-                          >
-                            {(() => {
-                              // 제출 완료
-                              if (isSubmitted) {
-                                return (
-                                  <span
-                                    title="제출 완료"
-                                    style={{
-                                      width: "50px",
-                                      height: "20px",
-                                      borderRadius: "10%",
-                                      backgroundColor: "#59b549",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      fontSize: "11px",
-                                      fontWeight: "bold",
-                                      color: "#ffffff",
-                                    }}
-                                  >
-                                    저장됨
-                                  </span>
-                                );
-                              }
-
-                              // 미제출
-                              if (!isSubmitted) {
-                                return (
-                                  <span
-                                    title="미제출"
-                                    style={{
-                                      width: "50px",
-                                      height: "20px",
-                                      borderRadius: "10%",
-                                      backgroundColor: "#e45d5d",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      fontSize: "11px",
-                                      fontWeight: "bold",
-                                      color: "#ffffff",
-                                    }}
-                                  >
-                                    미제출
-                                  </span>
-                                );
-                              }
-
-                              return null;
-                            })()}
-                          </div>
                         </Style.SidebarItem>
                       );
                     })}
