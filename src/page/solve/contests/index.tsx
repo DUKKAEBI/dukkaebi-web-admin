@@ -1,10 +1,4 @@
-import {
-  useState,
-  useRef,
-  useEffect,
-  type ChangeEvent,
-  type KeyboardEvent,
-} from "react";
+import { useState, useRef, useEffect, type ChangeEvent } from "react";
 import type * as monacoEditor from "monaco-editor";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -756,7 +750,9 @@ export default function SolvePage() {
 
     if (!isLastProblem && currentIndex !== -1 && contestCode) {
       const nextProblem = courseProblems[currentIndex + 1];
-      navigate(`/contests/${contestCode}/solve/${nextProblem.problemId}`);
+      navigate(
+        `/contests/${contestCode}/solve/${nextProblem.problemId}?userId=${viewUserId}`,
+      );
     }
   };
 
@@ -769,7 +765,9 @@ export default function SolvePage() {
 
     if (!isFirstProblem && currentIndex !== -1 && contestCode) {
       const prevProblem = courseProblems[currentIndex - 1];
-      navigate(`/contests/${contestCode}/solve/${prevProblem.problemId}`);
+      navigate(
+        `/contests/${contestCode}/solve/${prevProblem.problemId}?userId=${viewUserId}`,
+      );
     }
   };
 
