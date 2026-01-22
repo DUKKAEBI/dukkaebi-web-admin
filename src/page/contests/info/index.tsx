@@ -5,6 +5,7 @@ import * as S from "./styles";
 import contestApi from "../../../api/contestApi";
 import ArrowDown from "../../../assets/image/course/simple-line-icons_arrow-down.png";
 import ArrowUp from "../../../assets/image/course/simple-line-icons_arrow-up.png";
+import EditIcon from "../../../assets/image/auth/edit.png";
 
 type Tab = "problems" | "participants" | "settings";
 
@@ -16,7 +17,6 @@ type problem = {
   correctRate: number;
   solvedResult: string;
   addedAt: string;
-  score: number;
 };
 
 type Participant = {
@@ -42,7 +42,60 @@ const ContestInfo = () => {
   const { contestsId } = useParams<{
     contestsId: string;
   }>();
-  const [contest, setContest] = useState<any | null>({});
+  const [contest, setContest] = useState<any | null>({
+    title: "DGSW 프로그래밍 대회",
+    description:
+      "DGSW 프로그래밍 대회는 교육봉사 동아리 '두카미'에서 진행하는 알고리즘 대회 입니다.",
+    code: "CONTEST123",
+    participantCount: 5,
+    problems: [
+      {
+        problemId: 1,
+        name: "A+B",
+        difficulty: "EASY",
+        solvedCount: 150,
+        correctRate: 85.5,
+        solvedResult: "SOLVED",
+        addedAt: "2025-12-01",
+      },
+      {
+        problemId: 2,
+        name: "두 수 비교하기",
+        difficulty: "EASY",
+        solvedCount: 120,
+        correctRate: 75.2,
+        solvedResult: "SOLVED",
+        addedAt: "2025-12-01",
+      },
+      {
+        problemId: 3,
+        name: "별 찍기",
+        difficulty: "MEDIUM",
+        solvedCount: 90,
+        correctRate: 65.8,
+        solvedResult: "UNSOLVED",
+        addedAt: "2025-12-02",
+      },
+      {
+        problemId: 4,
+        name: "피보나치 수",
+        difficulty: "MEDIUM",
+        solvedCount: 70,
+        correctRate: 55.4,
+        solvedResult: "UNSOLVED",
+        addedAt: "2025-12-02",
+      },
+      {
+        problemId: 5,
+        name: "최단 경로",
+        difficulty: "HARD",
+        solvedCount: 45,
+        correctRate: 35.2,
+        solvedResult: "UNSOLVED",
+        addedAt: "2025-12-03",
+      },
+    ],
+  });
   const [participants, setParticipants] = useState<Participant[]>([]);
 
   useEffect(() => {
@@ -74,18 +127,6 @@ const ContestInfo = () => {
       mounted = false;
     };
   }, [contestsId]);
-
-  const deleteProblem = async (contestId: string, problemId: number) => {
-    try {
-      contestApi.deleteContestProblem(contestId, problemId);
-
-      alert("문제가 삭제되었습니다.");
-    } catch (error) {
-      console.log(error);
-    } finally {
-      window.location.reload();
-    }
-  };
   return (
     <S.Page onMouseDown={() => setOpenMenuId(null)}>
       <Header />
@@ -121,19 +162,16 @@ const ContestInfo = () => {
           <S.Table>
             <S.TableHead>
               <S.ColNo>번호</S.ColNo>
-              <S.ColNo>점수</S.ColNo>
               <S.ColTitle>제목</S.ColTitle>
             </S.TableHead>
             {contest?.problems?.map((r: problem, index: number) => (
               <S.Row
                 key={r.problemId}
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate(`/contests/${contestsId}/solve/${r.problemId}`);
-                }}
+                onClick={() =>
+                  navigate(`/contests/${contestsId}/solve/${r.problemId}`)
+                }
               >
                 <S.CellNo>{index + 1}</S.CellNo>
-                <S.CellTitle>{r.score}점</S.CellTitle>
                 <S.CellTitle>{r.name}</S.CellTitle>
                 <S.MoreWrapper onMouseDown={(e) => e.stopPropagation()}>
                   <S.MoreBtn
@@ -156,27 +194,12 @@ const ContestInfo = () => {
                   {openMenuId === String(r.problemId) && (
                     <S.Dropdown>
                       <S.DropdownItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
+                        onClick={() => {
                           setOpenMenuId(null);
-                          navigate(
-                            `/contests/problems/${contestsId}/update/${r.problemId}`,
-                          );
+                          navigate(`/contests/problems/update/${r.problemId}`);
                         }}
                       >
                         문제 수정
-                      </S.DropdownItem>
-
-                      <S.DropdownItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          if (contestsId)
-                            deleteProblem(contestsId, r.problemId);
-                        }}
-                      >
-                        문제 삭제
                       </S.DropdownItem>
                     </S.Dropdown>
                   )}
@@ -184,24 +207,11 @@ const ContestInfo = () => {
               </S.Row>
             ))}
           </S.Table>
-          <S.AddButtonWrapper>
-            <S.AddButton
-              onClick={() =>
-                navigate(
-                  `/problems?pickerFor=contest&returnTo=/contests/${contestsId}`,
-                )
-              }
-            >
-              문제 가져오기
-            </S.AddButton>
-            <S.AddButton
-              onClick={() =>
-                navigate(`/contests/problems/create/${contestsId}`)
-              }
-            >
-              문제 추가
-            </S.AddButton>
-          </S.AddButtonWrapper>
+          <S.AddButton
+            onClick={() => navigate(`/contests/problems/create/${contestsId}`)}
+          >
+            문제 추가
+          </S.AddButton>
         </S.Content>
       ) : activeTab === "participants" ? (
         <S.ParticipantsWrapper>
@@ -273,20 +283,15 @@ const ContestInfo = () => {
                       <S.ProblemsScoreRow>
                         {participant.problemScores.map((score, index) => (
                           <S.ScoreCell key={`score-${score.problemId}`}>
-                            <S.ViewCodeButton>
-                              <S.ScoreText>
-                                <strong>{score.earnedScore}</strong>/
-                                {score.maxScore}
-                              </S.ScoreText>
+                            <S.ScoreText>
+                              <strong>{score.earnedScore}</strong>/
+                              {score.maxScore}
                               <S.EditIcon
                                 onClick={async () => {
                                   const newScore = prompt(
-                                    `${index + 1}번 문제 점수 입력 (최대: ${
-                                      score.maxScore
-                                    }점)`,
+                                    `${index + 1}번 문제 점수 입력 (최대: ${score.maxScore}점)`,
                                     score.earnedScore.toString(),
                                   );
-
                                   if (newScore === null) return;
 
                                   const earnedScore = parseInt(newScore);
@@ -323,7 +328,18 @@ const ContestInfo = () => {
                                     alert("점수 수정에 실패했습니다.");
                                   }
                                 }}
-                              />
+                              >
+                                <img src={EditIcon} alt="수정" />
+                              </S.EditIcon>
+                            </S.ScoreText>
+
+                            <S.ViewCodeButton
+                              onClick={() => {
+                                navigate(
+                                  `/contests/${contestsId}/solve/${score.problemId}?userId=${participant.userId}`,
+                                );
+                              }}
+                            >
                               제출코드 보기
                             </S.ViewCodeButton>
                           </S.ScoreCell>

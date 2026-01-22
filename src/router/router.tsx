@@ -65,8 +65,14 @@ export default function AppRoutes() {
         element={<CourseSolvePage />}
       />
       <Route path="/notifications" element={<NoticesPage />} />
-      <Route path="/notifications/create" element={<NotificationCreatePage />} />
-      <Route path="/notifications/update/:notificationId" element={<NotificationUpdatePage />} />
+      <Route
+        path="/notifications/create"
+        element={<NotificationCreatePage />}
+      />
+      <Route
+        path="/notifications/update/:notificationId"
+        element={<NotificationUpdatePage />}
+      />
       <Route path="/notifications/:id" element={<NoticeInfoPage />} />
     </Routes>
   );

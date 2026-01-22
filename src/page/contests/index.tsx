@@ -65,7 +65,7 @@ const ContestsPage = () => {
   };
 
   const filteredContests = contests.filter((c) =>
-    c.title.toLowerCase().includes(query.toLowerCase())
+    c.title.toLowerCase().includes(query.toLowerCase()),
   );
 
   return (
@@ -110,7 +110,10 @@ const ContestsPage = () => {
             <S.PaginationContainer>
               <S.PaginationButton
                 onClick={() => handlePageChange(currentPage - 1)}
-                style={{ cursor: currentPage > 0 ? "pointer" : "default", opacity: currentPage > 0 ? 1 : 0.5 }}
+                style={{
+                  cursor: currentPage > 0 ? "pointer" : "default",
+                  opacity: currentPage > 0 ? 1 : 0.5,
+                }}
               >
                 <S.ArrowIcon src={ArrowLeftIcon} alt="이전" />
               </S.PaginationButton>
@@ -128,7 +131,10 @@ const ContestsPage = () => {
               </S.PaginationNumbers>
               <S.PaginationButton
                 onClick={() => handlePageChange(currentPage + 1)}
-                style={{ cursor: currentPage < totalPages - 1 ? "pointer" : "default", opacity: currentPage < totalPages - 1 ? 1 : 0.5 }}
+                style={{
+                  cursor: currentPage < totalPages - 1 ? "pointer" : "default",
+                  opacity: currentPage < totalPages - 1 ? 1 : 0.5,
+                }}
               >
                 <S.ArrowIcon src={ArrowRightIcon} alt="다음" />
               </S.PaginationButton>
