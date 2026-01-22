@@ -6,7 +6,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import type * as monacoEditor from "monaco-editor";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Editor from "@monaco-editor/react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -83,7 +83,7 @@ export default function SolvePage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>(
-    INITIAL_CHAT_MESSAGES
+    INITIAL_CHAT_MESSAGES,
   );
   const [problem, setProblem] = useState<ProblemDetail | null>(null);
   const [problemStatus, setProblemStatus] = useState<
@@ -96,7 +96,7 @@ export default function SolvePage() {
   const [courseProblems, setCourseProblems] = useState<CourseProblemItem[]>([]);
   const [courseLoading, setCourseLoading] = useState(false);
   const [activeResultTab, setActiveResultTab] = useState<"result" | "tests">(
-    "result"
+    "result",
   );
   const [gradingDetails, setGradingDetails] = useState<
     Array<{
@@ -339,8 +339,6 @@ export default function SolvePage() {
 
   return (
     <Style.SolveContainer ref={containerRef}>
-      <ToastContainer position="top-right" theme="dark" autoClose={2500} />
-
       <Style.Header>
         <Style.BackButton onClick={handleExitSolvePage}>‹</Style.BackButton>
         <Style.HeaderTitle>
