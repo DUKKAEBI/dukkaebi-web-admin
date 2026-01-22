@@ -76,23 +76,28 @@ export const Table = styled.div`
 `;
 
 export const TableHead = styled.div`
-  display: grid;
-  grid-template-columns: 80px 100px 1fr 16px;
+  display: flex;
   align-items: center;
   padding: 16px 20px;
+  background: ${COLORS.white};
+  border-bottom: 1px solid ${COLORS.gray4};
+  color: ${COLORS.gray1};
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
 `;
 
 export const ColNo = styled.span`
-  width: 90px;
+  width: 64px; /* enough for 2 digits */
 `;
 
 export const ColTitle = styled.span`
-  width: 100px;
+  flex: 1;
 `;
 
 export const Row = styled.div`
   display: grid;
-  grid-template-columns: 80px 100px 1fr 16px;
+  grid-template-columns: 84px 1fr 16px; /* number space, title, more */
   align-items: center;
   height: 60px;
   padding: 0 20px;
@@ -146,10 +151,6 @@ export const Dropdown = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 6px 0;
   z-index: 10;
-
-  :last-child {
-    color: red;
-  }
 `;
 
 export const DropdownItem = styled.button`
@@ -167,11 +168,6 @@ export const DropdownItem = styled.button`
   &:hover {
     background: ${COLORS.gray5};
   }
-`;
-
-export const AddButtonWrapper = styled.div`
-  display: flex;
-  gap: 20px;
 `;
 
 export const AddButton = styled.button`
@@ -318,6 +314,7 @@ export const ProblemNumberCell = styled.div`
   font-weight: 500;
   color: #828282;
   text-align: center;
+  padding: 10px 4px;
   padding: 12px 8px;
   border-right: 1px solid #e0e0e0;
   min-width: 60px;
@@ -332,6 +329,8 @@ export const ScoreCell = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+  padding: 10px 4px;
   gap: 4px;
   padding: 12px 8px;
   border-right: 1px solid #e0e0e0;
