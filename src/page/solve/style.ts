@@ -98,6 +98,11 @@ export const LeftPanel = styled.div`
   height: 100%;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export const LeftPanelContent = styled.div`
@@ -196,6 +201,11 @@ export const RightPanel = styled.div<{ $width: number }>`
   position: relative;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export const EditorContainer = styled.div`
@@ -281,6 +291,11 @@ export const TerminalOutput = styled.div`
   font-size: 16px;
   text-align: left;
   color: #ffffff;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export const SubmitWrapper = styled.div`
@@ -422,6 +437,11 @@ export const ChatMessages = styled.div`
   gap: 16px;
   overflow-y: auto;
   min-height: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export const ChatMessageRow = styled.div<{ $isUser?: boolean }>`

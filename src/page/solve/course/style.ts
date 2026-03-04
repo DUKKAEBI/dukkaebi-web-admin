@@ -97,6 +97,11 @@ export const LeftPanel = styled.div`
   height: 100%;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export const LeftPanelContent = styled.div`
@@ -236,6 +241,11 @@ export const SidebarList = styled.div`
   flex: 1;
   overflow-y: auto;
   padding: 8px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export const SidebarItem = styled.button<{ $active?: boolean }>`
@@ -329,6 +339,11 @@ export const TerminalOutput = styled.div`
   font-size: 15px;
   color: #ffffff;
   font-family: monospace;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export const SubmitWrapper = styled.div`

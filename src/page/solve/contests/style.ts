@@ -104,6 +104,11 @@ export const LeftPanel = styled.div`
   min-height: 0;
   overflow-y: auto;
   width: 200px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export const LeftPanelContent = styled.div`
@@ -204,6 +209,11 @@ export const RightPanel = styled.div<{ $width: number }>`
   position: relative;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 // New: header menu button (hamburger)
@@ -254,6 +264,11 @@ export const SidebarList = styled.div`
   flex: 1;
   overflow-y: auto;
   padding: 8px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export const SidebarItem = styled.button<{ $active?: boolean }>`
@@ -380,6 +395,11 @@ export const TerminalOutput = styled.div`
   font-size: 16px;
   text-align: left;
   color: #ffffff;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export const SubmitWrapper = styled.div`
@@ -604,6 +624,11 @@ export const ChatMessages = styled.div`
   gap: 16px;
   overflow-y: auto;
   min-height: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export const ChatMessageRow = styled.div<{ $isUser?: boolean }>`
