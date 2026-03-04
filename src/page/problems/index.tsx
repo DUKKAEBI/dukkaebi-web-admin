@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import courseApi from "../../api/courseApi";
 import contestApi from "../../api/contestApi";
@@ -10,17 +9,14 @@ import {
   deleteProblem,
 } from "../../api/problemApi";
 import * as S from "./style";
-import SearchIcon from "../../assets/image/problems/search.png";
-import ArrowDownIcon from "../../assets/image/problems/arrow-down.png";
-import ArrowLeftIcon from "../../assets/image/problems/arrow-left.png";
-import ArrowRightIcon from "../../assets/image/problems/arrow-right.png";
-import GoldIcon from "../../assets/image/problems/difficulty/gold.svg";
-import SilverIcon from "../../assets/image/problems/difficulty/silver.svg";
-import CopperIcon from "../../assets/image/problems/difficulty/copper.svg";
-import JadeIcon from "../../assets/image/problems/difficulty/jade.svg";
-import IronIcon from "../../assets/image/problems/difficulty/iron.svg";
 import { Header } from "../../components/header";
 import { Footer } from "../../components/footer";
+import {
+  SearchBar,
+  FilterSection,
+  ProblemsTable,
+  Pagination,
+} from "../../components/problems";
 
 interface Problem {
   id: number;
@@ -304,6 +300,61 @@ export default function Problems() {
     setOpenDropdown(null);
   };
 
+  const handleRowClick = (id: number) => {
+    if (isPicker) {
+      toggleSelect(id);
+    } else {
+      navigate(`/solve/${id}`);
+    }
+  };
+
+  const handleCreateOrSetButton = async () => {
+    if (isPicker) {
+      let entityType: "course" | "contest" | null = null;
+      let entityId: string | null = null;
+
+      if (pickerFor === "course") {
+        entityType = "course";
+        const match = returnTo.match(/\/courses?\/([^/]+)/);
+        entityId = match ? match[1] : null;
+      } else if (pickerFor === "contest") {
+        entityType = "contest";
+        const match = returnTo.match(/\/contests?\/([^/]+)/);
+        entityId = match ? match[1] : null;
+      }
+
+      if (!entityType || !entityId) {
+        alert("코스 또는 대회 ID를 찾을 수 없습니다.");
+        return;
+      }
+
+      const ids = Array.from(selectedIds);
+      if (ids.length === 0) {
+        alert("추가할 문제를 선택하세요.");
+        return;
+      }
+
+      try {
+        if (entityType === "course") {
+          await courseApi.addProblemsToCourse(entityId, {
+            problemIds: ids,
+          });
+        } else if (entityType === "contest") {
+          await contestApi.addProblemsToContest(entityId, {
+            problemIds: ids,
+          });
+        }
+
+        navigate(returnTo || "/problems");
+      } catch (err) {
+        console.error(`Failed to add problems to ${entityType}:`, err);
+        alert("문제 추가 중 오류가 발생했습니다.");
+      }
+    } else {
+      navigate(`/problems/create`);
+    }
+  };
+
   let filteredProblems = problems.filter((problem) =>
     problem.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
@@ -324,394 +375,48 @@ export default function Problems() {
     );
   }
 
-  const difficultyLabels: Record<number, string> = {
-    1: "금",
-    2: "은",
-    3: "동",
-    4: "철",
-    5: "옥",
-  };
-
-  const difficultyImages: Record<number, string> = {
-    1: GoldIcon,
-    2: SilverIcon,
-    3: CopperIcon,
-    4: IronIcon,
-    5: JadeIcon,
-  };
-
   return (
     <S.ProblemsContainer>
       <Header />
 
       <S.MainContent>
-        <S.SearchBox>
-          <S.SearchInput
-            type="text"
-            placeholder="문제 이름을 검색하세요."
-            value={searchTerm}
-            onChange={handleSearch}
-          />
-          <S.SearchIconContainer>
-            <img src={SearchIcon} alt="검색" />
-          </S.SearchIconContainer>
-        </S.SearchBox>
+        <SearchBar value={searchTerm} onChange={handleSearch} />
 
-        <S.FilterSection ref={dropdownRef}>
-          <S.FilterButtonsWrapper>
-            <S.FilterButtonGroup>
-              <S.FilterButton
-                isActive={
-                  openDropdown === "difficulty" || difficultyFilter !== null
-                }
-                onClick={() =>
-                  setOpenDropdown(
-                    openDropdown === "difficulty" ? null : "difficulty",
-                  )
-                }
-              >
-                {difficultyLabel || "난이도"}
-                <S.ArrowIcon src={ArrowDownIcon} alt="드롭다운" />
-              </S.FilterButton>
+        <FilterSection
+          openDropdown={openDropdown}
+          setOpenDropdown={setOpenDropdown}
+          difficultyFilter={difficultyFilter}
+          difficultyLabel={difficultyLabel}
+          onDifficultySelect={handleDifficultySelect}
+          sortBy={sortBy}
+          timeLabel={timeLabel}
+          onTimeSelect={handleTimeSelect}
+          successRateFilter={successRateFilter}
+          successRateLabel={successRateLabel}
+          onSuccessRateSelect={handleSuccessRateSelect}
+          dropdownRef={dropdownRef}
+        />
 
-              {openDropdown === "difficulty" && (
-                <S.DropdownMenu>
-                  <S.DropdownItem
-                    isSelected={difficultyFilter === null}
-                    onClick={() => handleDifficultySelect(null, null)}
-                  >
-                    선택 안함
-                  </S.DropdownItem>
-                  <S.DropdownItem
-                    isSelected={difficultyFilter === 1}
-                    onClick={() => handleDifficultySelect(1, "금")}
-                  >
-                    금
-                  </S.DropdownItem>
-                  <S.DropdownItem
-                    isSelected={difficultyFilter === 2}
-                    onClick={() => handleDifficultySelect(2, "은")}
-                  >
-                    은
-                  </S.DropdownItem>
-                  <S.DropdownItem
-                    isSelected={difficultyFilter === 3}
-                    onClick={() => handleDifficultySelect(3, "동")}
-                  >
-                    동
-                  </S.DropdownItem>
-                  <S.DropdownItem
-                    isSelected={difficultyFilter === 4}
-                    onClick={() => handleDifficultySelect(4, "철")}
-                  >
-                    철
-                  </S.DropdownItem>
-                  <S.DropdownItem
-                    isSelected={difficultyFilter === 5}
-                    onClick={() => handleDifficultySelect(5, "옥")}
-                  >
-                    옥
-                  </S.DropdownItem>
-                </S.DropdownMenu>
-              )}
-            </S.FilterButtonGroup>
+        <ProblemsTable
+          problems={filteredProblems}
+          isPicker={isPicker}
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelect}
+          onRowClick={handleRowClick}
+          openActionId={openActionId}
+          onActionToggle={handleActionToggle}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          buttonRefs={buttonRefs}
+        />
 
-            <S.FilterButtonGroup>
-              <S.FilterButton
-                isActive={openDropdown === "time" || sortBy !== null}
-                onClick={() =>
-                  setOpenDropdown(openDropdown === "time" ? null : "time")
-                }
-              >
-                {timeLabel || "시간"}
-                <S.ArrowIcon src={ArrowDownIcon} alt="드롭다운" />
-              </S.FilterButton>
-
-              {openDropdown === "time" && (
-                <S.DropdownMenu>
-                  <S.DropdownItem
-                    isSelected={sortBy === null}
-                    onClick={() => handleTimeSelect(null, null)}
-                  >
-                    선택 안함
-                  </S.DropdownItem>
-                  <S.DropdownItem
-                    isSelected={sortBy === "recent"}
-                    onClick={() => handleTimeSelect("recent", "최신순")}
-                  >
-                    최신순
-                  </S.DropdownItem>
-                  <S.DropdownItem
-                    isSelected={sortBy === "old"}
-                    onClick={() => handleTimeSelect("old", "오래된순")}
-                  >
-                    오래된순
-                  </S.DropdownItem>
-                </S.DropdownMenu>
-              )}
-            </S.FilterButtonGroup>
-
-            <S.FilterButtonGroup>
-              <S.FilterButton
-                isActive={
-                  openDropdown === "successRate" || successRateFilter !== null
-                }
-                onClick={() =>
-                  setOpenDropdown(
-                    openDropdown === "successRate" ? null : "successRate",
-                  )
-                }
-              >
-                {successRateLabel || "정답률"}
-                <S.ArrowIcon src={ArrowDownIcon} alt="드롭다운" />
-              </S.FilterButton>
-
-              {openDropdown === "successRate" && (
-                <S.DropdownMenu>
-                  <S.DropdownItem
-                    isSelected={successRateFilter === null}
-                    onClick={() => handleSuccessRateSelect(null, null)}
-                  >
-                    선택 안함
-                  </S.DropdownItem>
-                  <S.DropdownItem
-                    isSelected={successRateFilter === "asc"}
-                    onClick={() =>
-                      handleSuccessRateSelect("asc", "정답률 낮은 순")
-                    }
-                  >
-                    정답률 낮은 순
-                  </S.DropdownItem>
-                  <S.DropdownItem
-                    isSelected={successRateFilter === "desc"}
-                    onClick={() =>
-                      handleSuccessRateSelect("desc", "정답률 높은 순")
-                    }
-                  >
-                    정답률 높은 순
-                  </S.DropdownItem>
-                </S.DropdownMenu>
-              )}
-            </S.FilterButtonGroup>
-          </S.FilterButtonsWrapper>
-        </S.FilterSection>
-
-        <S.TableContainer>
-          <S.TableHeader $picker={isPicker}>
-            {isPicker && (
-              <S.TableHeaderCell style={{ width: 48 }}>선택</S.TableHeaderCell>
-            )}
-            <S.TableHeaderCell>제목</S.TableHeaderCell>
-            <S.TableHeaderCellCenter>난이도</S.TableHeaderCellCenter>
-            <S.TableHeaderCellRight>완료한 사람</S.TableHeaderCellRight>
-            <S.TableHeaderCellRight>정답률</S.TableHeaderCellRight>
-          </S.TableHeader>
-
-          <S.TableBody>
-            {filteredProblems.map((problem, index) => (
-              <S.TableRow
-                $picker={isPicker}
-                $selected={isPicker && selectedIds.has(problem.id)}
-                key={problem.id}
-                isLast={index === filteredProblems.length - 1}
-                onClick={() => {
-                  if (isPicker) toggleSelect(problem.id);
-                  else navigate(`/solve/${problem.id}`);
-                }}
-              >
-                {isPicker && (
-                  <S.TableCell style={{ width: 48 }}>
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.has(problem.id)}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={() => toggleSelect(problem.id)}
-                      aria-label={`문제 선택 ${problem.title}`}
-                    />
-                  </S.TableCell>
-                )}
-                <S.TableCell>{problem.title}</S.TableCell>
-                <S.TableCellCenter>
-                  <S.DifficultyImage
-                    src={difficultyImages[problem.difficulty]}
-                    alt={difficultyLabels[problem.difficulty]}
-                  />
-                </S.TableCellCenter>
-                <S.TableCellRight>{problem.completedCount}명</S.TableCellRight>
-                <S.TableCellRight>{problem.successRate}%</S.TableCellRight>
-                <S.TableCellRight>
-                  <S.ActionContainer data-action-container>
-                    <S.ActionButton
-                      ref={(el) => {
-                        buttonRefs.current[problem.id] = el;
-                      }}
-                      onClick={(e) => handleActionToggle(e, problem.id)}
-                      aria-haspopup="true"
-                      aria-expanded={openActionId === problem.id}
-                      aria-label="액션 메뉴"
-                    >
-                      ⋮
-                    </S.ActionButton>
-
-                    {openActionId === problem.id &&
-                      buttonRefs.current[problem.id] &&
-                      createPortal(
-                        <div data-portal-action-menu>
-                          <S.ActionMenu
-                            style={(() => {
-                              try {
-                                const btn = buttonRefs.current[problem.id];
-                                if (!btn) return {};
-                                const rect = btn.getBoundingClientRect();
-                                const menuWidth = 96;
-                                const computedLeft =
-                                  rect.right + window.scrollX - menuWidth - 8;
-                                const left = Math.max(
-                                  16,
-                                  Math.min(
-                                    computedLeft,
-                                    window.innerWidth - menuWidth - 16,
-                                  ),
-                                );
-                                const top =
-                                  rect.top +
-                                  window.scrollY +
-                                  rect.height / 2 +
-                                  6;
-                                return {
-                                  position: "absolute",
-                                  top: `${top}px`,
-                                  left: `${left}px`,
-                                  transform: "translateY(-50%)",
-                                  zIndex: 1000,
-                                } as React.CSSProperties;
-                              } catch (err) {
-                                return {};
-                              }
-                            })()}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <S.ActionMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEdit(e, problem.id);
-                              }}
-                            >
-                              문제 수정
-                            </S.ActionMenuItem>
-                            <S.ActionMenuItemDanger
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(e, problem.id);
-                              }}
-                            >
-                              문제 삭제
-                            </S.ActionMenuItemDanger>
-                          </S.ActionMenu>
-                        </div>,
-                        document.body,
-                      )}
-                  </S.ActionContainer>
-                </S.TableCellRight>
-              </S.TableRow>
-            ))}
-          </S.TableBody>
-        </S.TableContainer>
-
-        <S.FooterControls>
-          <S.PaginationContainer>
-            <S.PaginationButton
-              onClick={() => {
-                if (currentPage > 0) fetchProblems(currentPage - 1);
-              }}
-              disabled={currentPage === 0}
-            >
-              <S.ArrowIcon src={ArrowLeftIcon} alt="이전" />
-            </S.PaginationButton>
-            <S.PaginationNumbers>
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const startPage = Math.max(
-                  0,
-                  Math.min(currentPage - 2, totalPages - 5),
-                );
-                const pageNum = startPage + i;
-                if (pageNum >= totalPages) return null;
-                return (
-                  <S.PaginationNumber
-                    key={pageNum}
-                    isActive={pageNum === currentPage}
-                    onClick={() => fetchProblems(pageNum)}
-                  >
-                    {pageNum + 1}
-                  </S.PaginationNumber>
-                );
-              })}
-            </S.PaginationNumbers>
-            <S.PaginationButton
-              onClick={() => {
-                if (currentPage < totalPages - 1)
-                  fetchProblems(currentPage + 1);
-              }}
-              disabled={currentPage >= totalPages - 1}
-            >
-              <S.ArrowIcon src={ArrowRightIcon} alt="다음" />
-            </S.PaginationButton>
-          </S.PaginationContainer>
-          <S.CreateButton
-            onClick={async () => {
-              console.log(isPicker);
-              if (isPicker) {
-                let entityType: "course" | "contest" | null = null;
-                let entityId: string | null = null;
-
-                if (pickerFor === "course") {
-                  entityType = "course";
-                  const match = returnTo.match(/\/courses?\/([^/]+)/);
-                  entityId = match ? match[1] : null;
-                } else if (pickerFor === "contest") {
-                  entityType = "contest";
-                  const match = returnTo.match(/\/contests?\/([^/]+)/);
-                  entityId = match ? match[1] : null;
-                }
-
-                if (!entityType || !entityId) {
-                  alert("코스 또는 대회 ID를 찾을 수 없습니다.");
-                  return;
-                }
-
-                const ids = Array.from(selectedIds);
-                if (ids.length === 0) {
-                  alert("추가할 문제를 선택하세요.");
-                  return;
-                }
-
-                try {
-                  if (entityType === "course") {
-                    await courseApi.addProblemsToCourse(entityId, {
-                      problemIds: ids,
-                    });
-                  } else if (entityType === "contest") {
-                    await contestApi.addProblemsToContest(entityId, {
-                      problemIds: ids,
-                    });
-                  }
-
-                  navigate(returnTo || "/problems");
-                } catch (err) {
-                  console.error(
-                    `Failed to add problems to ${entityType}:`,
-                    err,
-                  );
-                  alert("문제 추가 중 오류가 발생했습니다.");
-                }
-              } else {
-                navigate(`/problems/create`);
-              }
-            }}
-          >
-            {isPicker ? "문제 설정" : "문제 생성"}
-          </S.CreateButton>
-        </S.FooterControls>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={fetchProblems}
+          isPicker={isPicker}
+          onButtonClick={handleCreateOrSetButton}
+        />
       </S.MainContent>
 
       <Footer />
