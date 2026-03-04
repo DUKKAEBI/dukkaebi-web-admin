@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import ErrorBoundary from "../components/ErrorBoundary";
 import Login from "../page/login";
 import Main from "../page/main";
 import ContestsPage from "../page/contests/index";
@@ -27,7 +28,7 @@ import NotificationUpdatePage from "../page/notifications/update";
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Main />} />
+      <Route path="/" element={<ErrorBoundary><Main /></ErrorBoundary>} />
       <Route path="/login" element={<Login />} />
       <Route path="/problems" element={<Problems />} />
       <Route path="/problems/create" element={<ProblemCreatePage />} />
