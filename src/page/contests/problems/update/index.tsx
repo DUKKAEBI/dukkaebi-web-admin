@@ -2,6 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../../components/header";
 import { Footer } from "../../../../components/footer";
+import {
+  TitleField,
+  DescriptionField,
+  InputCondField,
+  OutputCondField,
+  ScoreField,
+  TestCaseSection,
+  FormActions,
+} from "../../../../components/contestsproblemsupdate";
 import { nanoid } from "nanoid";
 import * as S from "./styles";
 import problemApi from "../../../../api/problemApi";
@@ -171,163 +180,57 @@ const ContestProblemUpdatePage = () => {
               </S.Label>
             )}
           </S.TitleWrapper>
-          <S.Field>
-            <S.Label>문제 제목</S.Label>
-            <S.Input
-              placeholder="학교 복도 최단거리"
-              value={title}
-              disabled={isScoreOnly}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setTitle(e.target.value)
-              }
-            />
-          </S.Field>
 
-          <S.Field>
-            <S.Label>문제 설명</S.Label>
-            <S.TextArea
-              disabled={isScoreOnly}
-              placeholder={
-                "당신은 쉬는 시간에 친구의 과자를 뺏으러 친구에게 가려고 한다.\n하지만 복도가 너무 길어서 몇 걸음 걸어야 하는지 계산해야 한다.\n\n입력으로 현재 위치 P와 친구 위치 F가 주어질 때,\n두 값의 차이의 절댓값을 출력하시오.\n(걸음 수 = 거리)"
-              }
-              value={description}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                setDescription(e.target.value)
-              }
-              rows={6}
-            />
-          </S.Field>
+          <TitleField
+            value={title}
+            disabled={isScoreOnly}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setTitle(e.target.value)
+            }
+          />
 
-          <S.Field>
-            <S.Label>입력 조건</S.Label>
-            <S.Input
-              disabled={isScoreOnly}
-              placeholder="한 줄, 두 정수 P와 F (0 ≤ P, F ≤ 10,000)"
-              value={inputCond}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setInputCond(e.target.value)
-              }
-            />
-          </S.Field>
+          <DescriptionField
+            value={description}
+            disabled={isScoreOnly}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setDescription(e.target.value)
+            }
+          />
 
-          <S.Field>
-            <S.Label>출력 조건</S.Label>
-            <S.Input
-              disabled={isScoreOnly}
-              placeholder="한 줄, 최단 거리(걸음 수)를 출력"
-              value={outputCond}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setOutputCond(e.target.value)
-              }
-              $primaryBorder
-            />
-          </S.Field>
+          <InputCondField
+            value={inputCond}
+            disabled={isScoreOnly}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setInputCond(e.target.value)
+            }
+          />
 
-          <S.Field>
-            <S.Label>점수</S.Label>
-            <S.Input
-              type="text"
-              placeholder="100"
-              value={score}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                const value = e.target.value;
-                // 숫자만 추출
-                const numericValue = value.replace(/[^0-9]/g, "");
-                setScore(numericValue ? Number(numericValue) : 0);
-              }}
-              $primaryBorder
-            />
-          </S.Field>
+          <OutputCondField
+            value={outputCond}
+            disabled={isScoreOnly}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setOutputCond(e.target.value)
+            }
+          />
 
-          <S.Field>
-            <S.Label>테스트 케이스</S.Label>
-            <S.TestCaseTable>
-              <S.TestCaseHead>
-                <S.HeadCell>입력</S.HeadCell>
-                <S.HeadCell $right>출력</S.HeadCell>
-              </S.TestCaseHead>
-              {cases.map((c, idx) => (
-                <S.TestCaseRow key={c.id}>
-                  <S.CaseTextArea
-                    placeholder="예) 2 7"
-                    value={c.input}
-                    rows={c.rows}
-                    onInput={(e) => {
-                      const v = e.currentTarget.value;
+          <ScoreField
+            value={score}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const value = e.target.value;
+              // 숫자만 추출
+              const numericValue = value.replace(/[^0-9]/g, "");
+              setScore(numericValue ? Number(numericValue) : 0);
+            }}
+          />
 
-                      setCases((prev) =>
-                        prev.map((x) => {
-                          if (x.id !== c.id) return x;
+          <TestCaseSection
+            cases={cases}
+            setCases={setCases}
+            addCase={addCase}
+            removeCase={removeCase}
+          />
 
-                          const inputRows = v.split("\n").length;
-                          const outputRows = x.output.split("\n").length;
-                          const rows = Math.max(inputRows, outputRows, 1);
-
-                          return {
-                            ...x,
-                            input: v,
-                            rows,
-                          };
-                        }),
-                      );
-                    }}
-                  />
-                  <S.CaseTextArea
-                    placeholder="예) 5"
-                    value={c.output}
-                    rows={c.rows}
-                    onInput={(e) => {
-                      const v = e.currentTarget.value;
-
-                      setCases((prev) =>
-                        prev.map((x) => {
-                          if (x.id !== c.id) return x;
-
-                          const inputRows = x.input.split("\n").length;
-                          const outputRows = v.split("\n").length;
-                          const rows = Math.max(inputRows, outputRows, 1);
-
-                          return {
-                            ...x,
-                            output: v,
-                            rows,
-                          };
-                        }),
-                      );
-                    }}
-                  />
-
-                  <S.DeleteButton onClick={() => removeCase(c.id)}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M18 6L6 18M6 6l12 12"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </S.DeleteButton>
-                </S.TestCaseRow>
-              ))}
-              <S.AddRow onClick={addCase}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M12 5v14M5 12h14"
-                    stroke="#BDBDBD"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </S.AddRow>
-            </S.TestCaseTable>
-          </S.Field>
-
-          <S.Actions>
-            <S.SecondaryButton onClick={() => navigate(-1)}>
-              문제 수정 취소하기
-            </S.SecondaryButton>
-            <S.PrimaryButton onClick={onSubmit}>문제 수정하기</S.PrimaryButton>
-          </S.Actions>
+          <FormActions onCancel={() => navigate(-1)} onSubmit={onSubmit} />
         </S.Content>
       </S.Main>
 

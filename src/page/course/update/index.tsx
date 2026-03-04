@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../components/header/index";
-import ArrowDownIcon from "../../../assets/image/course/simple-line-icons_arrow-down.png";
-import ArrowUpIcon from "../../../assets/image/course/simple-line-icons_arrow-up.png";
+import { TitleField, DescriptionField, KeywordField, DifficultyField, Actions } from "../../../components/course/update";
 import * as S from "./style";
 import courseApi from "../../../api/courseApi";
 
@@ -135,87 +134,27 @@ const CourseUpdatePage = () => {
           <S.Title>코스 수정</S.Title>
 
           <S.Form onSubmit={onSubmit}>
-            <S.Group>
-              <S.Label htmlFor="title">코스 제목</S.Label>
-              <S.Input
-                id="title"
-                name="title"
-                value={form.title}
-                onChange={onChange}
-              />
-            </S.Group>
+            <TitleField title={form.title} onChange={onChange} />
 
-            <S.Group>
-              <S.Label htmlFor="description">코스 설명</S.Label>
-              <S.TextArea
-                id="description"
-                name="description"
-                value={form.description}
-                onChange={onChange}
-              />
-            </S.Group>
+            <DescriptionField description={form.description} onChange={onChange} />
 
-            <S.Group>
-              <S.Label>키워드</S.Label>
-              <S.KeywordInputContainer>
-                <S.KeywordInput
-                  value={keywordInput}
-                  onChange={(e) => setKeywordInput(e.target.value)}
-                  onKeyPress={handleKeywordKeyPress}
-                />
-                <S.KeywordAddIcon onClick={addKeyword}>+</S.KeywordAddIcon>
-              </S.KeywordInputContainer>
-              {form.keywords.length > 0 && (
-                <S.KeywordList>
-                  {form.keywords.map((keyword) => (
-                    <S.KeywordTag key={keyword}>
-                      {keyword}
-                      <S.KeywordRemove onClick={() => removeKeyword(keyword)}>
-                        ×
-                      </S.KeywordRemove>
-                    </S.KeywordTag>
-                  ))}
-                </S.KeywordList>
-              )}
-            </S.Group>
+            <KeywordField
+              keywords={form.keywords}
+              keywordInput={keywordInput}
+              onKeywordInputChange={(e) => setKeywordInput(e.target.value)}
+              onKeywordKeyPress={handleKeywordKeyPress}
+              onAddKeyword={addKeyword}
+              onRemoveKeyword={removeKeyword}
+            />
 
-            <S.Group>
-              <S.DifficultyLabel>난이도</S.DifficultyLabel>
-              <S.DifficultyDropdownContainer>
-                <S.DifficultyDropdownButton
-                  type="button"
-                  onClick={() => setOpenDifficultyDropdown(!openDifficultyDropdown)}
-                >
-                  {form.difficulty}
-                  <S.DifficultyDropdownArrowImage
-                    src={openDifficultyDropdown ? ArrowUpIcon : ArrowDownIcon}
-                    alt="화살표"
-                  />
-                </S.DifficultyDropdownButton>
-                {openDifficultyDropdown && (
-                  <S.DifficultyDropdownMenu>
-                    {["하", "중", "상"].map((level) => (
-                      <S.DifficultyDropdownItem
-                        key={level}
-                        isSelected={form.difficulty === level}
-                        onClick={() => onDifficultyChange(level)}
-                      >
-                        <span>{level}</span>
-                      </S.DifficultyDropdownItem>
-                    ))}
-                  </S.DifficultyDropdownMenu>
-                )}
-              </S.DifficultyDropdownContainer>
-            </S.Group>
+            <DifficultyField
+              difficulty={form.difficulty}
+              openDifficultyDropdown={openDifficultyDropdown}
+              onToggleDropdown={() => setOpenDifficultyDropdown(!openDifficultyDropdown)}
+              onDifficultyChange={onDifficultyChange}
+            />
 
-            <S.Actions>
-              <S.CancelButton type="button" onClick={onCancel}>
-                코스 수정 취소하기
-              </S.CancelButton>
-              <S.SubmitButton type="submit" disabled={loading}>
-                코스 수정하기
-              </S.SubmitButton>
-            </S.Actions>
+            <Actions loading={loading} onCancel={onCancel} />
           </S.Form>
         </S.FormContainer>
       </S.Main>

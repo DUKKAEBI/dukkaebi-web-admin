@@ -2,10 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signIn } from "../../api/authApi";
 import * as S from "./style";
-import iconMessage from "../../assets/image/auth/Message.png";
-import iconChat from "../../assets/image/auth/Chat.png";
-import iconHide from "../../assets/image/auth/Hide.png";
-import iconFilled from "../../assets/image/auth/Filled.png";
+import { LoginHeader, LoginForm, SignupPrompt } from "../../components/login";
 
 // Main Component
 export default function Login() {
@@ -63,63 +60,18 @@ export default function Login() {
   return (
     <S.LoginContainer>
       <S.LeftSection>
-        <S.Title>로그인</S.Title>
-        <S.Subtitle>서비스를 시작하려면 로그인 하세요.</S.Subtitle>
+        <LoginHeader />
 
-        <form onSubmit={handleLogin}>
-          <S.FormGroup>
-            <S.InputWrapper>
-              <S.InputIcon src={iconMessage} alt="ID icon" />
-              <S.Input
-                id="id"
-                name="id"
-                type="text"
-                placeholder="ID"
-                value={formData.id}
-                onChange={handleInputChange}
-                required
-              />
-            </S.InputWrapper>
-          </S.FormGroup>
+        <LoginForm
+          formData={formData}
+          showPassword={showPassword}
+          isLoading={isLoading}
+          handleInputChange={handleInputChange}
+          handleTogglePassword={handleTogglePassword}
+          handleLogin={handleLogin}
+        />
 
-          <S.FormGroup>
-            <S.PasswordInputWrapper>
-              <S.InputIcon src={iconChat} alt="Password icon" />
-              <S.Input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-              />
-              <S.TogglePasswordBtn
-                type="button"
-                onClick={handleTogglePassword}
-                aria-label="Toggle password visibility"
-              >
-                <S.PasswordToggleIcon
-                  src={showPassword ? iconFilled : iconHide}
-                  alt="Toggle password"
-                />
-              </S.TogglePasswordBtn>
-            </S.PasswordInputWrapper>
-          </S.FormGroup>
-
-          <S.FormGroup>
-            <S.LoginButton type="submit" disabled={isLoading}>
-              {isLoading ? "로그인 중..." : "로그인"}
-            </S.LoginButton>
-          </S.FormGroup>
-        </form>
-
-        <S.SignupSection>
-          <S.SignupText>아직 계정이 없으신가요?</S.SignupText>
-          <S.SignupLink type="button" onClick={handleSignup}>
-            회원가입
-          </S.SignupLink>
-        </S.SignupSection>
+        <SignupPrompt handleSignup={handleSignup} />
       </S.LeftSection>
 
       <S.RightSection />

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../../../components/header/index";
+import { TitleField, DescriptionField, StartDate, EndDate, Actions } from "../../../components/contests/update";
 import * as S from "./styles";
 import contestApi from "../../../api/contestApi";
 
@@ -141,118 +142,27 @@ const ContestCreatePage = () => {
           <S.Title>대회 수정</S.Title>
 
           <S.Form onSubmit={onSubmit}>
-            <S.Group>
-              <S.Label htmlFor="title">대회 제목</S.Label>
-              <S.Input
-                id="title"
-                name="title"
-                placeholder=""
-                value={form.title}
-                onChange={onChange}
-              />
-            </S.Group>
+            <TitleField title={form.title} onChange={onChange} />
 
-            <S.Group>
-              <S.Label htmlFor="description">대회 설명</S.Label>
-              <S.TextArea
-                id="description"
-                name="description"
-                placeholder=""
-                value={form.description}
-                onChange={onChange}
-              />
-            </S.Group>
+            <DescriptionField description={form.description} onChange={onChange} />
 
-            <S.Group>
-              <S.Label>대회 시작 날짜</S.Label>
-              <S.RadioGroup>
-                <S.RadioLabel>
-                  <S.RadioInput
-                    type="radio"
-                    name="startDateType"
-                    checked={form.startDateType === "unlimited"}
-                    onChange={() => onRadioChange("start", "unlimited")}
-                  />
-                  제한 없음
-                </S.RadioLabel>
-                <S.RadioLabel>
-                  <S.RadioInput
-                    type="radio"
-                    name="startDateType"
-                    checked={form.startDateType === "specific"}
-                    onChange={() => onRadioChange("start", "specific")}
-                  />
-                  특정 시각
-                </S.RadioLabel>
-              </S.RadioGroup>
-              {form.startDateType === "specific" && (
-                <S.DateTimeRow>
-                  <S.DateInput
-                    name="startDate"
-                    type="date"
-                    value={form.startDate}
-                    onChange={onChange}
-                  />
-                  <S.TimeInput
-                    name="startTime"
-                    type="time"
-                    value={form.startTime}
-                    onChange={onChange}
-                    placeholder="오후 8:00"
-                  />
-                </S.DateTimeRow>
-              )}
-            </S.Group>
+            <StartDate
+              startDateType={form.startDateType}
+              startDate={form.startDate}
+              startTime={form.startTime}
+              onRadioChange={onRadioChange}
+              onChange={onChange}
+            />
 
-            <S.Group>
-              <S.Label>대회 종료 날짜</S.Label>
-              <S.RadioGroup>
-                <S.RadioLabel>
-                  <S.RadioInput
-                    type="radio"
-                    name="endDateType"
-                    checked={form.endDateType === "unlimited"}
-                    onChange={() => onRadioChange("end", "unlimited")}
-                  />
-                  제한 없음
-                </S.RadioLabel>
-                <S.RadioLabel>
-                  <S.RadioInput
-                    type="radio"
-                    name="endDateType"
-                    checked={form.endDateType === "specific"}
-                    onChange={() => onRadioChange("end", "specific")}
-                  />
-                  특정 시각
-                </S.RadioLabel>
-              </S.RadioGroup>
-              {form.endDateType === "specific" && (
-                <S.DateTimeRow>
-                  <S.DateInput
-                    name="endDate"
-                    type="date"
-                    value={form.endDate}
-                    onChange={onChange}
-                  />
-                  <S.TimeInput
-                    name="endTime"
-                    type="time"
-                    value={form.endTime}
-                    onChange={onChange}
-                    placeholder="오후 8:00"
-                  />
-                </S.DateTimeRow>
-              )}
-            </S.Group>
+            <EndDate
+              endDateType={form.endDateType}
+              endDate={form.endDate}
+              endTime={form.endTime}
+              onRadioChange={onRadioChange}
+              onChange={onChange}
+            />
 
-            <S.Actions>
-              <S.CancelButton type="button" onClick={onCancel}>
-                대회 수정 취소하기
-              </S.CancelButton>
-              <S.SubmitButton type="submit" disabled={loading}>
-                대회 수정하기
-              </S.SubmitButton>
-            </S.Actions>
+            <Actions loading={loading} onCancel={onCancel} />
           </S.Form>
         </S.FormContainer>
       </S.Main>
