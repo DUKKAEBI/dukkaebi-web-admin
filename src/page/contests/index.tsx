@@ -2,8 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "../../components/header";
 import { Footer } from "../../components/footer";
-import { SearchBar, ContestGrid, BottomBar } from "../../components/contests";
 import * as S from "./styles";
+import SearchIcon from "../../assets/image/problems/search.png";
+//왼쪽
+import ArrowLeftIcon from "../../assets/image/problems/arrow-left.png";
+//오른쪽
+import ArrowRightIcon from "../../assets/image/problems/arrow-right.png";
 
 import { contestApi } from "../../api/contestApi";
 
@@ -61,7 +65,7 @@ const ContestsPage = () => {
   };
 
   const filteredContests = contests.filter((c) =>
-    c.title.toLowerCase().includes(query.toLowerCase()),
+    c.title.toLowerCase().includes(query.toLowerCase())
   );
 
   return (
@@ -69,26 +73,71 @@ const ContestsPage = () => {
       <Header />
 
       <S.Main>
-        <SearchBar
-          query={query}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setQuery(e.target.value);
-          }}
-        />
+        <S.SearchBar>
+          <S.SearchInput
+            placeholder="대회 이름을 검색하세요..."
+            value={query}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setQuery(e.target.value);
+            }}
+          />
+          <S.SearchIcon aria-hidden>
+            <img src={SearchIcon} alt="검색" />
+          </S.SearchIcon>
+        </S.SearchBar>
 
-        <ContestGrid
-          contests={filteredContests}
-          defaultImage={DEFAULT_IMAGE}
-          onCardClick={(code) => navigate(`/contests/${code}`)}
-        />
+        <S.Grid>
+          {filteredContests.map((c) => (
+            <S.Card
+              key={c.code}
+              onClick={() => navigate(`/contests/${c.code}`)}
+            >
+              <S.CardImageWrapper>
+                <S.CardImage src={c.imageUrl || DEFAULT_IMAGE} alt={c.title} />
+              </S.CardImageWrapper>
+              <S.CardBody>
+                <S.CardTitle>{c.title}</S.CardTitle>
+                <S.CardMeta>
+                  {c.dDay} ・ {c.participantCount}명 참여중
+                </S.CardMeta>
+              </S.CardBody>
+            </S.Card>
+          ))}
+        </S.Grid>
 
-        <BottomBar
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          onCreateClick={() => navigate("/contests/create")}
-          getPageNumbers={getPageNumbers}
-        />
+        <S.BottomBar>
+          <S.Pagination>
+            <S.PaginationContainer>
+              <S.PaginationButton
+                onClick={() => handlePageChange(currentPage - 1)}
+                style={{ cursor: currentPage > 0 ? "pointer" : "default", opacity: currentPage > 0 ? 1 : 0.5 }}
+              >
+                <S.ArrowIcon src={ArrowLeftIcon} alt="이전" />
+              </S.PaginationButton>
+              <S.PaginationNumbers>
+                {getPageNumbers().map((page) => (
+                  <S.PaginationNumber
+                    key={page}
+                    data-is-active={currentPage === page}
+                    onClick={() => handlePageChange(page)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {page + 1}
+                  </S.PaginationNumber>
+                ))}
+              </S.PaginationNumbers>
+              <S.PaginationButton
+                onClick={() => handlePageChange(currentPage + 1)}
+                style={{ cursor: currentPage < totalPages - 1 ? "pointer" : "default", opacity: currentPage < totalPages - 1 ? 1 : 0.5 }}
+              >
+                <S.ArrowIcon src={ArrowRightIcon} alt="다음" />
+              </S.PaginationButton>
+            </S.PaginationContainer>
+          </S.Pagination>
+          <S.CreateButton onClick={() => navigate("/contests/create")}>
+            대회 생성
+          </S.CreateButton>
+        </S.BottomBar>
       </S.Main>
 
       <Footer />

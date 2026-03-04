@@ -5,7 +5,11 @@ export const PageWrapper = styled.div`
   width: 100vw;
   min-height: 100vh;
   background: white;
-  font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
+  font-family:
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
     sans-serif;
   color: #1d1d1d;
 `;
@@ -23,7 +27,7 @@ export const UserIconInner = styled.div`
 export const MainContent = styled.main`
   margin: 0 auto;
   padding: 26px 40px 60px;
-  min-height: 72vh;
+  min-height: 70vh;
 `;
 
 // Hero Section Styles
@@ -120,6 +124,7 @@ export const StreakInfo = styled.div`
   flex-direction: column;
   gap: 16px;
 `;
+
 export const NoticeSection = styled.div`
   width: 100%;
   padding: 20px 0;
@@ -127,6 +132,7 @@ export const NoticeSection = styled.div`
   flex-direction: column;
   gap: 16px;
 `;
+
 export const NoticeTitleGroup = styled.div`
   padding: 0 4px;
 `;
@@ -236,10 +242,10 @@ export const HeatmapCell = styled.div<{ $intensity: string }>`
     $intensity === "100"
       ? "#00B4B7"
       : $intensity === "60"
-      ? "rgba(0, 180, 183, 0.6)"
-      : $intensity === "20"
-      ? "rgba(0, 180, 183, 0.2)"
-      : "#E0E0E0"};
+        ? "rgba(0, 180, 183, 0.6)"
+        : $intensity === "20"
+          ? "rgba(0, 180, 183, 0.2)"
+          : "#E0E0E0"};
   position: relative;
   cursor: pointer;
 
@@ -257,7 +263,9 @@ export const HeatmapCell = styled.div<{ $intensity: string }>`
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.15s ease, transform 0.15s ease;
+    transition:
+      opacity 0.15s ease,
+      transform 0.15s ease;
     z-index: 5;
   }
 

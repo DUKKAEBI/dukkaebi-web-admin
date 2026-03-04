@@ -151,9 +151,6 @@ export const Dropdown = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 6px 0;
   z-index: 10;
-  :last-child {
-    color: red;
-  }
 `;
 
 export const DropdownItem = styled.button`
@@ -171,11 +168,6 @@ export const DropdownItem = styled.button`
   &:hover {
     background: ${COLORS.gray5};
   }
-`;
-
-export const AddButtonWrapper = styled.div`
-  display: flex;
-  gap: 20px;
 `;
 
 export const AddButton = styled.button`
@@ -290,14 +282,14 @@ export const ExpandIcon = styled.div<{ $expanded?: boolean }>`
 
 export const ExpandedContent = styled.div`
   padding: 24px 20px;
-  background: #ededed;
+  background: #EDEDED;
   border-top: 1px solid ${COLORS.gray4};
 `;
 
 export const ProblemsTable = styled.div`
   display: flex;
   flex-direction: column;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #E0E0E0;
   border-radius: 4px;
   overflow: hidden;
   background: ${COLORS.white};
@@ -306,8 +298,8 @@ export const ProblemsTable = styled.div`
 export const ProblemsHeaderRow = styled.div`
   display: grid;
   grid-template-columns: repeat(15, 1fr);
-  background: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
+  background: #F5F5F5;
+  border-bottom: 1px solid #E0E0E0;
 `;
 
 export const ProblemsScoreRow = styled.div`
@@ -323,9 +315,7 @@ export const ProblemNumberCell = styled.div`
   color: #828282;
   text-align: center;
   padding: 10px 4px;
-  padding: 12px 8px;
-  border-right: 1px solid #e0e0e0;
-  min-width: 60px;
+  border-right: 1px solid #E0E0E0;
 
   &:last-child {
     border-right: none;
@@ -334,15 +324,11 @@ export const ProblemNumberCell = styled.div`
 
 export const ScoreCell = styled.div`
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
   padding: 10px 4px;
-  gap: 4px;
-  padding: 12px 8px;
-  border-right: 1px solid #e0e0e0;
-  min-width: 60px;
+  border-right: 1px solid #E0E0E0;
 
   &:last-child {
     border-right: none;
@@ -350,9 +336,6 @@ export const ScoreCell = styled.div`
 `;
 
 export const ScoreText = styled.span`
-  display: flex;
-  align-items: center;
-  gap: 4px;
   font-family: "Pretendard", sans-serif;
   font-size: 12px;
   font-weight: 500;
@@ -372,23 +355,6 @@ export const EditIcon = styled.div`
     width: 12px;
     height: 12px;
     object-fit: contain;
-  }
-`;
-
-export const ViewCodeButton = styled.button`
-  background: #f5f5f5;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  padding: 4px 6px;
-  font-family: "Pretendard", sans-serif;
-  font-size: 10px;
-  color: #666;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-
-  &:hover {
-    background: #e8e8e8;
   }
 `;
 
