@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import ErrorBoundary from "../components/ErrorBoundary";
 import Login from "../page/login";
 import Main from "../page/main";
 import ContestsPage from "../page/contests/index";
@@ -13,7 +14,7 @@ import ContestCreate from "../page/contests/create/index";
 import ContestUpdate from "../page/contests/update";
 import ContestInfo from "../page/contests/info";
 import ProblemCreate from "../page/contests/problems/create";
-import ContestProblemUpdatePage from "../page/contests/problems/update";
+import ProblemUpdate from "../page/contests/problems/update";
 import ProblemCreatePage from "../page/problems/create/index";
 import ProblemUpdatePage from "../page/problems/update/index";
 import SolvePage from "../page/solve";
@@ -27,7 +28,7 @@ import NotificationUpdatePage from "../page/notifications/update";
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Main />} />
+      <Route path="/" element={<ErrorBoundary><Main /></ErrorBoundary>} />
       <Route path="/login" element={<Login />} />
       <Route path="/problems" element={<Problems />} />
       <Route path="/problems/create" element={<ProblemCreatePage />} />
@@ -47,8 +48,8 @@ export default function AppRoutes() {
         element={<ProblemCreate />}
       />
       <Route
-        path="/contests/problems/:contestId/update/:problemsId"
-        element={<ContestProblemUpdatePage />}
+        path="/contests/problems/update/:problemsId"
+        element={<ProblemUpdate />}
       />
 
       <Route
@@ -57,7 +58,7 @@ export default function AppRoutes() {
       />
       <Route
         path="/course/problems/update/:problemsId"
-        element={<ProblemUpdatePage />}
+        element={<ProblemUpdate />}
       />
       <Route path="/solve/:problemId" element={<SolvePage />} />
       <Route
@@ -65,14 +66,8 @@ export default function AppRoutes() {
         element={<CourseSolvePage />}
       />
       <Route path="/notifications" element={<NoticesPage />} />
-      <Route
-        path="/notifications/create"
-        element={<NotificationCreatePage />}
-      />
-      <Route
-        path="/notifications/update/:notificationId"
-        element={<NotificationUpdatePage />}
-      />
+      <Route path="/notifications/create" element={<NotificationCreatePage />} />
+      <Route path="/notifications/update/:notificationId" element={<NotificationUpdatePage />} />
       <Route path="/notifications/:id" element={<NoticeInfoPage />} />
     </Routes>
   );

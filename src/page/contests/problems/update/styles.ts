@@ -27,22 +27,6 @@ export const Content = styled.div`
   margin-top: 40px;
 `;
 
-export const Label = styled.label`
-  font-family: "Pretendard", sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  color: var(--gray-1);
-`;
-
-export const TitleWrapper = styled.div`
-  display: flex;
-  gap: 8px;
-  ${Label} {
-    font-size: 20px;
-    align-self: flex-end;
-  }
-`;
-
 export const PageTitle = styled.h2`
   font-family: "Pretendard", sans-serif;
   font-weight: 600;
@@ -54,6 +38,13 @@ export const Field = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+`;
+
+export const Label = styled.label`
+  font-family: "Pretendard", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--gray-1);
 `;
 
 const baseBox = css`
@@ -115,50 +106,26 @@ export const HeadCell = styled.div<{ $right?: boolean }>`
 
 export const TestCaseRow = styled.div`
   display: flex;
-  position: relative;
-
-  &:hover > button {
-    opacity: 1;
-  }
 `;
 
-export const CaseTextArea = styled.textarea`
-  width: 100%;
-  min-height: 40px;
-  padding: 8px;
-  resize: none; /* 수동 리사이즈 제거 */
-  overflow: hidden; /* 스크롤 안 보이게 */
-  font-family: monospace;
-  line-height: 1.5;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-
-  &:focus {
-    border-color: #4f46e5;
+export const CaseInput = styled.input`
+  flex: 1;
+  height: 40px;
+  padding: 0 20px;
+  border: 1px solid var(--gray-3);
+  background: #fff;
+  font-family: "Pretendard", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--black);
+  &:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
   }
-`;
-
-export const DeleteButton = styled.button`
-  position: absolute;
-  right: -36px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: transparent;
-  color: #999;
-  cursor: pointer;
-  opacity: 0;
-  transition:
-    opacity 0.2s,
-    color 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover {
-    color: #e53935;
+  &:last-child {
+    border-left: 1px solid var(--gray-3);
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
   }
 `;
 

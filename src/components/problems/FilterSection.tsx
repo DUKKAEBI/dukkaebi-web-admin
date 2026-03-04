@@ -38,7 +38,7 @@ interface FilterSectionProps {
     order: "asc" | "desc" | null,
     label: string | null
   ) => void;
-  dropdownRef: React.RefObject<HTMLDivElement>;
+  dropdownRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export const FilterSection = ({

@@ -128,9 +128,12 @@ const Main = () => {
         // 공지사항 데이터 세팅 (최대 5개)
         const noticeData =
           (noticeResponse.data as any)?.content || noticeResponse.data || [];
-        setNotices(noticeData.slice(0, 5));
+        const noticeArray = Array.isArray(noticeData) ? noticeData : [];
+        setNotices(noticeArray.slice(0, 5));
       } catch (error) {
         console.error("Failed to load home data:", error);
+        // 에러 발생 시 빈 배열로 설정
+        setNotices([]);
       }
     };
 
@@ -185,8 +188,9 @@ const Main = () => {
                   <S.StreakValue>{streak}일</S.StreakValue>
                 </S.StreakText>
               </S.StreakContent>
-              <S.Divider />
             </S.StreakInfo>
+
+            <S.Divider />
 
             <S.HeatmapSection>
               <S.DayLabels>
@@ -216,7 +220,7 @@ const Main = () => {
             </span>
           </S.NoticeTitleGroup>
           <S.NoticeList>
-            {notices.map((notice) => (
+            {Array.isArray(notices) && notices.map((notice) => (
               <NoticeCard
                 key={notice.noticeId}
                 title={notice.title}
