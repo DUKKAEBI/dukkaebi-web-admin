@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
+import type { RefObject } from "react";
 import { Header } from "../../components/header";
 import { Footer } from "../../components/footer";
 
@@ -10,6 +11,12 @@ import { useNavigate } from "react-router-dom";
 import ArrowLeftIcon from "../../assets/image/problems/arrow-left.png";
 //오른쪽
 import ArrowRightIcon from "../../assets/image/problems/arrow-right.png";
+import {
+  UsersFilterSection,
+  UsersPagination,
+  UsersSearchBox,
+  UsersTable,
+} from "../../components/users";
 
 interface UserRow {
   id: string;
@@ -196,230 +203,48 @@ const UsersPage = () => {
     setPage(1);
   };
 
+  const navigateToUser = (id: string) => {
+    navigate(`/user/${id}`);
+  };
+
   return (
     <S.Container>
       <Header />
 
       <S.Main>
-        <S.SearchBox>
-          <S.SearchInput
-            type="text"
-            placeholder="문제 이름을 검색하세요"
-            value={searchTerm}
-            onChange={handleSearch}
-          />
-          <S.SearchIconContainer>
-            <img src={SearchIcon} alt="검색" />
-          </S.SearchIconContainer>
-        </S.SearchBox>
+        <UsersSearchBox
+          searchTerm={searchTerm}
+          onSearchChange={handleSearch}
+          searchIconSrc={SearchIcon}
+        />
 
-        {/* Filter Section */}
-        <S.FilterSection ref={dropdownRef}>
-          <S.FilterButtonsWrapper>
-            <S.FilterButtonGroup>
-              <S.FilterButton
-                isActive={openDropdown === "sort" || sortBy !== "none"}
-                onClick={() =>
-                  setOpenDropdown(openDropdown === "sort" ? null : "sort")
-                }
-              >
-                {sortLabel || "정렬"}
-                <S.ArrowIcon src={ArrowDownIcon} alt="드롭다운" />
-              </S.FilterButton>
+        <UsersFilterSection
+          dropdownRef={dropdownRef as RefObject<HTMLDivElement>}
+          openDropdown={openDropdown}
+          setOpenDropdown={setOpenDropdown}
+          sortBy={sortBy}
+          sortLabel={sortLabel}
+          handleSortSelect={handleSortSelect}
+          arrowDownIconSrc={ArrowDownIcon}
+        />
 
-              {/* Dropdown Menu - Sort */}
-              {openDropdown === "sort" && (
-                <S.DropdownMenu>
-                  <S.DropdownItem
-                    isSelected={sortBy === "none"}
-                    onClick={() => handleSortSelect("none", null)}
-                  >
-                    선택 안함
-                  </S.DropdownItem>
-                  <S.DropdownItem
-                    isSelected={sortBy === "name"}
-                    onClick={() => handleSortSelect("name", "이름 순")}
-                  >
-                    이름 순
-                  </S.DropdownItem>
-                  <S.DropdownItem
-                    isSelected={sortBy === "id"}
-                    onClick={() => handleSortSelect("id", "아이디 순")}
-                  >
-                    아이디 순
-                  </S.DropdownItem>
-                  <S.DropdownItem
-                    isSelected={sortBy === "grade"}
-                    onClick={() => handleSortSelect("grade", "등급 순")}
-                  >
-                    등급 순
-                  </S.DropdownItem>
-                </S.DropdownMenu>
-              )}
-            </S.FilterButtonGroup>
-          </S.FilterButtonsWrapper>
-        </S.FilterSection>
+        <UsersTable
+          pageItems={pageItems}
+          navigateToUser={navigateToUser}
+          gradeColor={gradeColor}
+          menuOpen={menuOpen}
+          setMenuOpen={setMenuOpen}
+          menuRef={menuRef as RefObject<HTMLDivElement>}
+          setUsers={setUsers}
+        />
 
-        <S.Table>
-          <S.TableHead>
-            <S.HeadCell style={{ width: 200 }}>아이디</S.HeadCell>
-            <S.HeadCell style={{ width: 200 }}>이름</S.HeadCell>
-            <S.HeadCell
-              style={{ flex: 1, textAlign: "right", paddingRight: 52 }}
-            >
-              등급
-            </S.HeadCell>
-          </S.TableHead>
-          <S.TableBody>
-            {pageItems.map((u, i) => (
-              <S.Row
-                key={`${u.id}-${i}`}
-                onClick={(e) => {
-                  navigate(`/user/${u.id}`);
-                }}
-              >
-                <S.Cell style={{ width: 200 }}>{u.loginId}</S.Cell>
-                <S.Cell style={{ width: 100 }}>{u.name}</S.Cell>
-                <S.Cell
-                  style={{
-                    textAlign: "right",
-                    color: gradeColor(u.grade),
-                    width: 415,
-                    marginRight: 38,
-                  }}
-                >
-                  {u.grade}
-                </S.Cell>
-                <S.MoreWrapper ref={menuOpen === i ? menuRef : null}>
-                  <S.MoreButton
-                    aria-label="more"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMenuOpen(menuOpen === i ? null : i);
-                    }}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="5" r="1.5" fill="#BDBDBD" />
-                      <circle cx="12" cy="12" r="1.5" fill="#BDBDBD" />
-                      <circle cx="12" cy="19" r="1.5" fill="#BDBDBD" />
-                    </svg>
-                  </S.MoreButton>
-                  {menuOpen === i && (
-                    <S.ContextMenu
-                      role="menu"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <S.MenuItem
-                        role="menuitem"
-                        onClick={() => navigate(`/user/${u.id}`)}
-                      >
-                        유저 정보 조회
-                      </S.MenuItem>
-                      <S.MenuItem
-                        role="menuitem"
-                        $danger
-                        onClick={async () => {
-                          if (!confirm("해당 유저를 삭제하시겠습니까?")) return;
-                          try {
-                            const { default: userApi } = await import(
-                              "../../api/userApi"
-                            );
-                            await userApi.deleteUser(u.id);
-
-                            // refetch
-                            const response = await userApi.getUsers();
-                            const data = Array.isArray(response)
-                              ? response
-                              : response?.content || response?.data || [];
-
-                            const growthToGrade: Record<
-                              string,
-                              UserRow["grade"]
-                            > = {
-                              WISP: "도깨비불",
-                              COPPER: "동깨비",
-                              IRON: "철깨비",
-                              SILVER: "은깨비",
-                              GOLD: "금깨비",
-                              JADE: "옥깨비",
-                              GOD: "신깨비",
-                            };
-
-                            if (Array.isArray(data)) {
-                              const mappedUsers = data.map((it: any) => {
-                                const rawGrowth = (
-                                  it.growth ?? "COPPER"
-                                ).toUpperCase();
-                                const grade =
-                                  growthToGrade[rawGrowth] ?? "동깨비";
-
-                                return {
-                                  id: String(it.id ?? ""),
-                                  loginId: String(it.loginId ?? ""),
-                                  name:
-                                    it.nickname ??
-                                    it.name ??
-                                    it.loginId ??
-                                    "이름 없음",
-                                  grade,
-                                };
-                              });
-                              setUsers(mappedUsers);
-                              alert("유저가 삭제되었습니다.");
-                              setMenuOpen(null);
-                            }
-                          } catch (err) {
-                            console.error("User delete failed:", err);
-                            alert("유저 삭제 중 오류가 발생했습니다.");
-                          }
-                        }}
-                      >
-                        유저 삭제
-                      </S.MenuItem>
-                    </S.ContextMenu>
-                  )}
-                </S.MoreWrapper>
-              </S.Row>
-            ))}
-          </S.TableBody>
-        </S.Table>
-
-        <S.Pagination>
-          <S.PaginationContainer>
-            <S.PaginationButton
-              onClick={() => {
-                if (page > 1) setPage(page - 1);
-              }}
-              disabled={page === 1}
-            >
-              <S.ArrowIcon src={ArrowLeftIcon} alt="이전" />
-            </S.PaginationButton>
-            <S.PaginationNumbers>
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const startPage = Math.max(1, Math.min(page - 2, totalPages - 4));
-                const pageNum = startPage + i;
-                if (pageNum > totalPages) return null;
-                return (
-                  <S.PaginationNumber
-                    key={pageNum}
-                    data-is-active={pageNum === page}
-                    onClick={() => setPage(pageNum)}
-                  >
-                    {pageNum}
-                  </S.PaginationNumber>
-                );
-              })}
-            </S.PaginationNumbers>
-            <S.PaginationButton
-              onClick={() => {
-                if (page < totalPages) setPage(page + 1);
-              }}
-              disabled={page >= totalPages}
-            >
-              <S.ArrowIcon src={ArrowRightIcon} alt="다음" />
-            </S.PaginationButton>
-          </S.PaginationContainer>
-        </S.Pagination>
+        <UsersPagination
+          page={page}
+          totalPages={totalPages}
+          setPage={setPage}
+          arrowLeftIconSrc={ArrowLeftIcon}
+          arrowRightIconSrc={ArrowRightIcon}
+        />
       </S.Main>
 
       <Footer />

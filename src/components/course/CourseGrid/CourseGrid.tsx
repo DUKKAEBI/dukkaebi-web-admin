@@ -14,7 +14,7 @@ interface CourseItem {
 interface CourseGridProps {
   courses: CourseItem[];
   openMenuId: string | null;
-  menuRef: React.RefObject<HTMLDivElement>;
+  menuRef: React.RefObject<HTMLDivElement | null>;
   onCardClick: (id: number | string | undefined) => void;
   onMoreClick: (e: React.MouseEvent<HTMLButtonElement>, itemKey: string) => void;
   onEditClick: (e: React.MouseEvent<HTMLButtonElement>, id: number | string | undefined) => void;
