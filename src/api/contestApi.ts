@@ -81,7 +81,7 @@ export const contestApi = {
   },
 
   endContest: async (code: string | number) => {
-    const res = await axiosInstance.post(`/admin/contest/${code}/end`);
+    const res = await axiosInstance.patch(`/admin/contest/${code}/end`);
     return res.data;
   },
 
